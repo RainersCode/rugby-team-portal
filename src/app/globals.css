@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary-blue: #0000FF;
+  --secondary-navy: #000033;
+  --white: #FFFFFF;
+  --gray: #F5F5F5;
+  --accent-blue: #1E90FF;
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+@layer base {
+  body {
+    @apply bg-white text-black min-h-screen;
+  }
+}
+
+@layer components {
+  .container-width {
+    @apply max-w-[1440px] mx-auto px-5;
+  }
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+}
