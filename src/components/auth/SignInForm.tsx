@@ -89,7 +89,7 @@ export default function SignInForm() {
           </div>
           <div className="text-sm">
             <Link href="/auth/signup" className="text-primary-blue hover:text-accent-blue">
-              Don't have an account?
+              Don&apos;t have an account?
             </Link>
           </div>
         </div>

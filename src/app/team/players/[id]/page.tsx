@@ -124,7 +124,7 @@ export default function PlayerPage({ params }: PlayerPageProps) {
               <ul className="list-disc list-inside space-y-2 text-gray-dark">
                 <li>International debut in 2020</li>
                 <li>Player of the Match in 3 consecutive games (2023)</li>
-                <li>Team's top scorer in the 2022/23 season</li>
+                <li>Team&apos;s top scorer in the 2022/23 season</li>
                 <li>Selected for the National Team Squad in 2023</li>
               </ul>
             </div>

@@ -33,14 +33,12 @@ const articles: Article[] = [
   // Add more articles as needed
 ];
 
-interface ArticlePageProps {
-  params: {
-    slug: string;
-  };
+type Props = {
+  params: { slug: string }
 }
 
-export default function ArticlePage({ params }: ArticlePageProps) {
-  const article = articles.find((a) => a.slug === params.slug);
+export default async function ArticlePage({ params }: Props) {
+  const article = articles.find(a => a.slug === params.slug);
 
   if (!article) {
     notFound();

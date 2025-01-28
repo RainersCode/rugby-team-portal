@@ -7,11 +7,11 @@ export default function VerifyEmailPage() {
         <h2 className="text-3xl font-bold text-secondary-navy">Check Your Email</h2>
         <div className="mt-4 text-gray-600">
           <p className="mb-4">
-            We've sent you an email with a link to verify your account.
+            We&apos;ve sent you an email with a link to verify your account.
             Please check your inbox and click the link to complete your registration.
           </p>
           <p className="text-sm">
-            Didn't receive an email?{' '}
+            Didn&apos;t receive an email?{' '}
             <Link href="/auth/signin" className="text-primary-blue hover:text-accent-blue">
               Try signing in again
             </Link>
