@@ -1,6 +1,6 @@
 'use client';
 
-import { Search, LogOut, Menu, X } from 'lucide-react';
+import { Search, LogOut, Menu, X, Settings, User as UserIcon } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
@@ -16,6 +16,7 @@ import {
   SheetTrigger,
   SheetClose,
 } from '@/components/ui/sheet';
+import { UserNav } from './UserNav';
 
 const Header = () => {
   const [user, setUser] = useState<SupabaseUser | null>(null);
@@ -82,15 +83,7 @@ const Header = () => {
                 <Search className="w-5 h-5 text-content-light dark:text-content-dark" />
               </button>
               {user ? (
-                <Button
-                  variant="default"
-                  size="sm"
-                  onClick={handleSignOut}
-                  className="flex items-center gap-2"
-                >
-                  <LogOut className="h-4 w-4" />
-                  Sign Out
-                </Button>
+                <UserNav user={user} />
               ) : (
                 <Button
                   variant="default"
@@ -148,15 +141,37 @@ const Header = () => {
                         </button>
                       </div>
                       {user ? (
-                        <Button
-                          variant="default"
-                          size="sm"
-                          onClick={handleSignOut}
-                          className="w-full flex items-center justify-center gap-2"
-                        >
-                          <LogOut className="h-4 w-4" />
-                          Sign Out
-                        </Button>
+                        <div className="space-y-2">
+                          <Link href="/profile">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="w-full flex items-center justify-start gap-2"
+                            >
+                              <UserIcon className="h-4 w-4" />
+                              Profile
+                            </Button>
+                          </Link>
+                          <Link href="/profile/settings">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="w-full flex items-center justify-start gap-2"
+                            >
+                              <Settings className="h-4 w-4" />
+                              Settings
+                            </Button>
+                          </Link>
+                          <Button
+                            variant="default"
+                            size="sm"
+                            onClick={handleSignOut}
+                            className="w-full flex items-center justify-center gap-2 mt-4"
+                          >
+                            <LogOut className="h-4 w-4" />
+                            Sign Out
+                          </Button>
+                        </div>
                       ) : (
                         <Button
                           variant="default"
