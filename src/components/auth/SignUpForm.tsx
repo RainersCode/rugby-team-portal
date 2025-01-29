@@ -22,20 +22,35 @@ export default function SignUpForm() {
       return;
     }
 
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters');
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           emailRedirectTo: `${window.location.origin}/auth/callback`,
+          data: {
+            first_name: '',
+            last_name: '',
+            role: 'user'
+          }
         },
       });
 
       if (error) throw error;
 
-      // Show success message and redirect to sign in
+      if (data.user && data.user.identities && data.user.identities.length === 0) {
+        setError('This email is already registered. Please sign in instead.');
+        return;
+      }
+
+      // Show success message and redirect to verify email page
       router.push('/auth/verify-email');
     } catch (error) {
       setError(error instanceof Error ? error.message : 'An error occurred');

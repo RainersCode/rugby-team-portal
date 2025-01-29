@@ -16,7 +16,7 @@ import {
   SheetTrigger,
   SheetClose,
 } from '@/components/ui/sheet';
-import { UserNav } from './UserNav';
+import UserNav from './UserNav';
 
 const Header = () => {
   const [user, setUser] = useState<SupabaseUser | null>(null);

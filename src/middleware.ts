@@ -2,44 +2,48 @@ import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
+export const config = {
+  matcher: ['/members/:path*', '/profile/:path*', '/settings/:path*', '/admin/:path*', '/auth/:path*'],
+};
+
 export async function middleware(request: NextRequest) {
   const res = NextResponse.next();
   const supabase = createMiddlewareClient({ req: request, res });
 
-  try {
-    const { data: { session } } = await supabase.auth.getSession();
+  // Refresh session if expired
+  const { data: { session } } = await supabase.auth.getSession();
 
-    // Protected routes handling
-    const protectedRoutes = ['/members', '/profile'];
-    if (protectedRoutes.some(route => request.nextUrl.pathname.startsWith(route))) {
-      if (!session) {
-        return NextResponse.redirect(new URL('/auth/signin', request.url));
-      }
+  // Protected routes that require authentication
+  if (['/members', '/profile', '/settings', '/admin'].some(path => request.nextUrl.pathname.startsWith(path))) {
+    if (!session) {
+      const redirectUrl = request.nextUrl.pathname;
+      const encodedRedirectUrl = encodeURIComponent(redirectUrl);
+      return NextResponse.redirect(new URL(`/auth/signin?redirect=${encodedRedirectUrl}`, request.url));
     }
 
-    // Auth routes handling (signin, signup, etc)
-    if (request.nextUrl.pathname.startsWith('/auth/')) {
-      if (session) {
+    // Additional check for admin route
+    if (request.nextUrl.pathname.startsWith('/admin')) {
+      try {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', session.user.id)
+          .single();
+
+        if (!profile || profile.role !== 'admin') {
+          return NextResponse.redirect(new URL('/', request.url));
+        }
+      } catch (error) {
+        console.error('Error checking admin status:', error);
         return NextResponse.redirect(new URL('/', request.url));
       }
     }
-
-    return res;
-  } catch (error) {
-    console.error('Middleware error:', error);
-    return res;
   }
-}
 
-export const config = {
-  matcher: [
-    /*
-     * Match all request paths except:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public folder
-     */
-    '/((?!_next/static|_next/image|favicon.ico|public/).*)',
-  ],
-}; 
+  // Redirect signed-in users away from auth pages
+  if (session && request.nextUrl.pathname.startsWith('/auth/')) {
+    return NextResponse.redirect(new URL('/', request.url));
+  }
+
+  return res;
+} 

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { supabase } from '@/utils/supabase';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
 export default function SignInForm() {
@@ -11,6 +11,7 @@ export default function SignInForm() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,7 +26,9 @@ export default function SignInForm() {
 
       if (error) throw error;
 
-      router.push('/');
+      // Get the redirect URL from query params or default to home
+      const redirectTo = searchParams.get('redirectTo') || '/';
+      router.push(redirectTo);
       router.refresh();
     } catch (error) {
       setError(error instanceof Error ? error.message : 'An error occurred');
