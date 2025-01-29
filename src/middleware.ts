@@ -3,35 +3,32 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export async function middleware(request: NextRequest) {
-  const response = NextResponse.next();
-  const supabase = createMiddlewareClient({ req: request, res: response });
+  const res = NextResponse.next();
+  const supabase = createMiddlewareClient({ req: request, res });
 
-  // Refresh session if expired - required for Server Components
-  await supabase.auth.getSession();
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  // Auth routes handling
-  if (request.nextUrl.pathname.startsWith('/auth/')) {
-    if (user) {
-      // If user is signed in and tries to access auth pages, redirect to home
-      return NextResponse.redirect(new URL('/', request.url));
+    // Protected routes handling
+    const protectedRoutes = ['/members', '/profile'];
+    if (protectedRoutes.some(route => request.nextUrl.pathname.startsWith(route))) {
+      if (!session) {
+        return NextResponse.redirect(new URL('/auth/signin', request.url));
+      }
     }
-    return response;
-  }
 
-  // Protected routes handling (add your protected routes here)
-  const protectedRoutes = ['/members', '/profile'];
-  if (protectedRoutes.some(route => request.nextUrl.pathname.startsWith(route))) {
-    if (!user) {
-      // If user is not signed in and tries to access protected routes, redirect to sign in
-      return NextResponse.redirect(new URL('/auth/signin', request.url));
+    // Auth routes handling (signin, signup, etc)
+    if (request.nextUrl.pathname.startsWith('/auth/')) {
+      if (session) {
+        return NextResponse.redirect(new URL('/', request.url));
+      }
     }
-  }
 
-  return response;
+    return res;
+  } catch (error) {
+    console.error('Middleware error:', error);
+    return res;
+  }
 }
 
 export const config = {

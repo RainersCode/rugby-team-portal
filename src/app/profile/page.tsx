@@ -9,17 +9,23 @@ interface UserProfile {
   id: string;
   first_name: string | null;
   last_name: string | null;
-  phone: string | null;
+  address: string | null;
+  birth_date: string | null;
+  bio: string | null;
+  role: string;
   updated_at: string;
 }
 
 export default function ProfilePage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
+  const [email, setEmail] = useState<string>('');
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
-  const [phone, setPhone] = useState('');
+  const [address, setAddress] = useState('');
+  const [birthDate, setBirthDate] = useState('');
+  const [bio, setBio] = useState('');
 
   useEffect(() => {
     getProfile();
@@ -33,6 +39,8 @@ export default function ProfilePage() {
         router.push('/auth/signin');
         return;
       }
+
+      setEmail(user.email || '');
 
       const { data, error } = await supabase
         .from('profiles')
@@ -48,7 +56,9 @@ export default function ProfilePage() {
         setProfile(data);
         setFirstName(data.first_name || '');
         setLastName(data.last_name || '');
-        setPhone(data.phone || '');
+        setAddress(data.address || '');
+        setBirthDate(data.birth_date || '');
+        setBio(data.bio || '');
       }
     } catch (error) {
       console.log(error);
@@ -68,7 +78,9 @@ export default function ProfilePage() {
         id: user.id,
         first_name: firstName,
         last_name: lastName,
-        phone: phone,
+        address: address,
+        birth_date: birthDate,
+        bio: bio,
         updated_at: new Date().toISOString(),
       };
 
@@ -97,7 +109,7 @@ export default function ProfilePage() {
             <input
               id="email"
               type="text"
-              value={profile?.id}
+              value={email}
               disabled
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-blue focus:border-primary-blue bg-gray-100 dark:bg-gray-700"
             />
@@ -110,7 +122,7 @@ export default function ProfilePage() {
             <input
               id="firstName"
               type="text"
-              value={firstName || ''}
+              value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-blue focus:border-primary-blue"
             />
@@ -123,21 +135,47 @@ export default function ProfilePage() {
             <input
               id="lastName"
               type="text"
-              value={lastName || ''}
+              value={lastName}
               onChange={(e) => setLastName(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-blue focus:border-primary-blue"
             />
           </div>
 
           <div>
-            <label htmlFor="phone" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Phone
+            <label htmlFor="address" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Address
             </label>
             <input
-              id="phone"
-              type="tel"
-              value={phone || ''}
-              onChange={(e) => setPhone(e.target.value)}
+              id="address"
+              type="text"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-blue focus:border-primary-blue"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="birthDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Birth Date
+            </label>
+            <input
+              id="birthDate"
+              type="date"
+              value={birthDate}
+              onChange={(e) => setBirthDate(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-blue focus:border-primary-blue"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="bio" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Bio
+            </label>
+            <textarea
+              id="bio"
+              value={bio}
+              onChange={(e) => setBio(e.target.value)}
+              rows={4}
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-blue focus:border-primary-blue"
             />
           </div>
