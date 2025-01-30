@@ -86,10 +86,20 @@ async function getArticle(slug: string): Promise<Article | null> {
       .eq('id', article.author_id)
       .single();
 
-    // Convert content to blocks if not already in block format
-    const blocks = article.blocks || [
-      { type: 'paragraph', content: article.content }
-    ];
+    // Parse blocks if they're stored as a string
+    let blocks;
+    if (typeof article.blocks === 'string') {
+      try {
+        blocks = JSON.parse(article.blocks);
+      } catch (e) {
+        console.error('Error parsing blocks:', e);
+        blocks = [{ type: 'paragraph', content: article.content, styles: {} }];
+      }
+    } else if (Array.isArray(article.blocks)) {
+      blocks = article.blocks;
+    } else {
+      blocks = [{ type: 'paragraph', content: article.content, styles: {} }];
+    }
 
     return {
       ...article,
@@ -156,9 +166,15 @@ export default async function ArticlePage({ params }: Props) {
 
         {/* Article Content */}
         <div className="prose dark:prose-invert max-w-none">
-          {article.blocks.map((block, index) => (
-            <RenderBlock key={index} block={block} />
-          ))}
+          {Array.isArray(article.blocks) ? (
+            article.blocks.map((block, index) => (
+              <RenderBlock key={index} block={block} />
+            ))
+          ) : (
+            <p className="mb-4 text-content-medium leading-relaxed">
+              {article.content}
+            </p>
+          )}
         </div>
       </article>
     </div>
