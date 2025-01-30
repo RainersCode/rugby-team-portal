@@ -3,6 +3,8 @@ import { cookies } from 'next/headers';
 import Image from 'next/image';
 import { format } from 'date-fns';
 import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { CalendarDays, MapPin } from 'lucide-react';
 
 interface Match {
   id: string;
@@ -23,23 +25,28 @@ function MatchCard({ match }: { match: Match }) {
   const isLive = match.status === 'live';
   
   return (
-    <Card className="overflow-hidden">
-      <div className="p-6">
-        {/* Competition & Date */}
-        <div className="flex justify-between items-center mb-4">
-          <span className="text-sm font-semibold text-primary-blue">
-            {match.competition}
-          </span>
-          <div className="text-sm text-gray-600">
-            {format(new Date(match.match_date), 'MMM d, yyyy • HH:mm')}
-          </div>
-        </div>
+    <Card className={`overflow-hidden hover:shadow-lg transition-all duration-300 ${
+      isLive ? 'ring-2 ring-red-500 shadow-lg' : ''
+    }`}>
+      {/* Competition & Status */}
+      <div className="bg-gray-50 dark:bg-gray-800 px-4 py-2 flex justify-between items-center border-b">
+        <span className="text-sm font-medium text-primary-blue">
+          {match.competition}
+        </span>
+        <Badge 
+          variant={isLive ? "destructive" : isCompleted ? "secondary" : "default"}
+          className={isLive ? 'animate-pulse bg-red-500 text-white' : ''}
+        >
+          {isLive ? 'LIVE NOW' : match.status.charAt(0).toUpperCase() + match.status.slice(1)}
+        </Badge>
+      </div>
 
-        {/* Teams */}
-        <div className="flex items-center justify-between gap-4">
+      <div className="p-4">
+        {/* Teams & Score */}
+        <div className="flex items-center justify-between gap-4 mb-4">
           {/* Home Team */}
-          <div className="flex-1 text-center">
-            <div className="relative w-24 h-24 mx-auto mb-2">
+          <div className="flex-1 flex flex-col items-center text-center">
+            <div className="relative w-16 h-16 mb-2">
               <Image
                 src={match.home_team_image}
                 alt={match.home_team}
@@ -47,32 +54,37 @@ function MatchCard({ match }: { match: Match }) {
                 className="object-contain"
               />
             </div>
-            <h3 className="font-semibold text-secondary-navy">{match.home_team}</h3>
+            <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">{match.home_team}</h3>
+            {isLive && (
+              <div className="mt-1 text-lg font-bold text-gray-900 dark:text-gray-100">
+                {match.home_score}
+              </div>
+            )}
           </div>
 
           {/* Score/VS */}
-          <div className="flex items-center justify-center px-4">
+          <div className="flex flex-col items-center justify-center min-w-[80px]">
             {isCompleted ? (
-              <div className="text-2xl font-bold text-secondary-navy">
+              <div className="text-xl font-bold text-gray-900 dark:text-gray-100">
                 {match.home_score} - {match.away_score}
               </div>
             ) : isLive ? (
-              <div className="flex flex-col items-center">
-                <div className="text-2xl font-bold text-primary-blue mb-1">
+              <div className="flex flex-col items-center gap-1">
+                <div className="text-2xl font-bold text-red-500">
                   {match.home_score} - {match.away_score}
                 </div>
-                <span className="text-sm font-semibold text-red-500 animate-pulse">
+                <span className="text-xs font-semibold text-red-500 bg-red-100 dark:bg-red-900/30 px-2 py-0.5 rounded-full animate-pulse">
                   LIVE
                 </span>
               </div>
             ) : (
-              <div className="text-xl font-semibold text-gray-600">VS</div>
+              <div className="text-lg font-medium text-gray-500">VS</div>
             )}
           </div>
 
           {/* Away Team */}
-          <div className="flex-1 text-center">
-            <div className="relative w-24 h-24 mx-auto mb-2">
+          <div className="flex-1 flex flex-col items-center text-center">
+            <div className="relative w-16 h-16 mb-2">
               <Image
                 src={match.away_team_image}
                 alt={match.away_team}
@@ -80,23 +92,26 @@ function MatchCard({ match }: { match: Match }) {
                 className="object-contain"
               />
             </div>
-            <h3 className="font-semibold text-secondary-navy">{match.away_team}</h3>
+            <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">{match.away_team}</h3>
+            {isLive && (
+              <div className="mt-1 text-lg font-bold text-gray-900 dark:text-gray-100">
+                {match.away_score}
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Venue */}
-        <div className="mt-4 text-center text-sm text-gray-600">
-          {match.venue}
-        </div>
-
-        {/* Status Indicator */}
-        {match.status === 'upcoming' && (
-          <div className="mt-4 text-center">
-            <span className="inline-block px-3 py-1 bg-blue-100 text-primary-blue text-sm font-semibold rounded-full">
-              Upcoming
-            </span>
+        {/* Match Details */}
+        <div className="flex flex-col gap-1.5 text-sm text-gray-500 dark:text-gray-400">
+          <div className="flex items-center gap-2">
+            <CalendarDays className="w-4 h-4" />
+            <span>{format(new Date(match.match_date), 'MMM d, yyyy • HH:mm')}</span>
           </div>
-        )}
+          <div className="flex items-center gap-2">
+            <MapPin className="w-4 h-4" />
+            <span>{match.venue}</span>
+          </div>
+        </div>
       </div>
     </Card>
   );
@@ -127,28 +142,34 @@ export default async function MatchesPage() {
   ) || [];
 
   return (
-    <div className="container-width py-8">
+    <div className="container mx-auto px-4 py-8">
       {/* Upcoming Matches */}
       <section className="mb-12">
-        <h2 className="text-3xl font-bold text-secondary-navy mb-6">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">
           Upcoming Matches
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {upcomingMatches.map((match) => (
             <MatchCard key={match.id} match={match} />
           ))}
+          {upcomingMatches.length === 0 && (
+            <p className="text-gray-500 dark:text-gray-400">No upcoming matches scheduled.</p>
+          )}
         </div>
       </section>
 
       {/* Past Matches */}
       <section>
-        <h2 className="text-3xl font-bold text-secondary-navy mb-6">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">
           Past Matches
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {pastMatches.map((match) => (
             <MatchCard key={match.id} match={match} />
           ))}
+          {pastMatches.length === 0 && (
+            <p className="text-gray-500 dark:text-gray-400">No past matches available.</p>
+          )}
         </div>
       </section>
     </div>
