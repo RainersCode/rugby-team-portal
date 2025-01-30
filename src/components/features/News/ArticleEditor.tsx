@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { ImageUpload } from '@/components/ui/image-upload';
 import { ArticleBlock } from '@/types';
 import { PlusCircle, Heading, Image as ImageIcon, Type, Trash2, ArrowUp, ArrowDown, Italic } from 'lucide-react';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import {
   Select,
   SelectContent,
@@ -44,6 +45,73 @@ export default function ArticleEditor({ onSubmit, initialData, isSubmitting, aut
       { type: 'paragraph', content: initialData?.content || '', styles: {} }
     ]
   );
+  const supabase = createClientComponentClient();
+
+  const getImagePathFromUrl = (url: string): string | null => {
+    try {
+      const match = url.match(/\/article-images\/([^?]+)/);
+      if (match) {
+        return `article-images/${match[1]}`;
+      }
+      return null;
+    } catch (error) {
+      console.error('Error extracting image path:', error);
+      return null;
+    }
+  };
+
+  const deleteImageFromStorage = async (imageUrl: string) => {
+    try {
+      const imagePath = getImagePathFromUrl(imageUrl);
+      if (!imagePath) {
+        console.error('Could not extract image path from URL:', imageUrl);
+        return;
+      }
+
+      const { error: storageError } = await supabase.storage
+        .from('articles')
+        .remove([imagePath]);
+
+      if (storageError) {
+        console.error('Error deleting image from storage:', storageError);
+        throw storageError;
+      }
+
+      console.log('Successfully deleted image from storage:', imagePath);
+    } catch (error) {
+      console.error('Error in deleteImageFromStorage:', error);
+      throw error;
+    }
+  };
+
+  const handleMainImageDelete = async () => {
+    if (!mainImage) return;
+    
+    if (confirm('Are you sure you want to delete this image?')) {
+      try {
+        await deleteImageFromStorage(mainImage);
+        setMainImage('');
+      } catch (error) {
+        console.error('Failed to delete main image:', error);
+        alert('Failed to delete image. Please try again.');
+      }
+    }
+  };
+
+  const handleBlockImageDelete = async (index: number) => {
+    const block = blocks[index];
+    if (block.type !== 'image' || !block.imageUrl) return;
+
+    if (confirm('Are you sure you want to delete this image?')) {
+      try {
+        await deleteImageFromStorage(block.imageUrl);
+        removeBlock(index);
+      } catch (error) {
+        console.error('Failed to delete block image:', error);
+        alert('Failed to delete image. Please try again.');
+      }
+    }
+  };
 
   const addBlock = (type: ArticleBlock['type']) => {
     setBlocks([...blocks, {
@@ -125,12 +193,12 @@ export default function ArticleEditor({ onSubmit, initialData, isSubmitting, aut
         <div className="space-y-2">
           <Label htmlFor="author">Author</Label>
           <Select value={authorId} onValueChange={setAuthorId}>
-            <SelectTrigger>
+            <SelectTrigger className="bg-background data-[state=open]:bg-background focus:bg-background hover:bg-background">
               <SelectValue placeholder="Select author" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-popover border shadow-md">
               {authors.map((author) => (
-                <SelectItem key={author.id} value={author.id}>
+                <SelectItem key={author.id} value={author.id} className="hover:bg-accent">
                   {author.email}
                 </SelectItem>
               ))}
@@ -141,11 +209,24 @@ export default function ArticleEditor({ onSubmit, initialData, isSubmitting, aut
 
       <div className="space-y-2">
         <Label>Main Article Image</Label>
-        <ImageUpload
-          onUploadComplete={setMainImage}
-          defaultImage={mainImage}
-          id="main-image"
-        />
+        <div className="relative">
+          <ImageUpload
+            onUploadComplete={setMainImage}
+            defaultImage={mainImage}
+            id="main-image"
+          />
+          {mainImage && (
+            <Button
+              type="button"
+              variant="destructive"
+              size="sm"
+              className="absolute top-2 right-2"
+              onClick={handleMainImageDelete}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
       </div>
 
       <div className="space-y-4">
@@ -213,13 +294,13 @@ export default function ArticleEditor({ onSubmit, initialData, isSubmitting, aut
                       value={String(block.level || 2)}
                       onValueChange={(value) => updateBlock(index, { level: Number(value) as 1 | 2 | 3 })}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className="bg-background data-[state=open]:bg-background focus:bg-background hover:bg-background">
                         <SelectValue placeholder="Select heading level" />
                       </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="1">Heading 1</SelectItem>
-                        <SelectItem value="2">Heading 2</SelectItem>
-                        <SelectItem value="3">Heading 3</SelectItem>
+                      <SelectContent className="bg-popover bg-bg-light dark:bg-bg-dark border-l border-gray-200 dark:border-gray-800">
+                        <SelectItem value="1" className="hover:bg-accent">Heading 1</SelectItem>
+                        <SelectItem value="2" className="hover:bg-accent">Heading 2</SelectItem>
+                        <SelectItem value="3" className="hover:bg-accent">Heading 3</SelectItem>
                       </SelectContent>
                     </Select>
                     <Input
@@ -253,11 +334,38 @@ export default function ArticleEditor({ onSubmit, initialData, isSubmitting, aut
 
                 {block.type === 'image' && (
                   <div className="space-y-2">
-                    <ImageUpload
-                      onUploadComplete={(url) => updateBlock(index, { imageUrl: url })}
-                      defaultImage={block.imageUrl}
-                      id={`block-image-${index}`}
-                    />
+                    <div className="relative">
+                      <ImageUpload
+                        onUploadComplete={(url) => updateBlock(index, { imageUrl: url })}
+                        defaultImage={block.imageUrl}
+                        id={`block-image-${index}`}
+                      />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        className="absolute top-2 right-2"
+                        onClick={async () => {
+                          if (block.imageUrl) {
+                            // If there's an image, delete it from storage first
+                            if (confirm('Are you sure you want to delete this image?')) {
+                              try {
+                                await deleteImageFromStorage(block.imageUrl);
+                              } catch (error) {
+                                console.error('Failed to delete image:', error);
+                                alert('Failed to delete image from storage. The block will still be removed.');
+                              }
+                            } else {
+                              return; // If user cancels deletion, do nothing
+                            }
+                          }
+                          // Always remove the block
+                          removeBlock(index);
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                     <Input
                       value={block.imageAlt || ''}
                       onChange={(e) => updateBlock(index, { imageAlt: e.target.value })}
@@ -267,14 +375,17 @@ export default function ArticleEditor({ onSubmit, initialData, isSubmitting, aut
                 )}
               </div>
 
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                onClick={() => removeBlock(index)}
-              >
-                <Trash2 className="w-4 h-4" />
-              </Button>
+              {/* Only show block delete button for non-image blocks */}
+              {block.type !== 'image' && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => removeBlock(index)}
+                >
+                  <Trash2 className="w-4 w-4" />
+                </Button>
+              )}
             </div>
           ))}
         </div>
