@@ -23,6 +23,8 @@ interface Article {
   slug: string;
   created_at: string;
   updated_at: string;
+  image: string;
+  blocks?: any[];
 }
 
 export default function ArticlesPage() {
@@ -74,19 +76,131 @@ export default function ArticlesPage() {
     }
   };
 
+  const getImagePathFromUrl = (url: string): string | null => {
+    try {
+      console.log('Processing URL:', url);
+      // Extract path after article-images/
+      const match = url.match(/\/article-images\/([^?]+)/);
+      if (match) {
+        const result = match[1];
+        console.log('Extracted image path:', result);
+        return `article-images/${result}`;
+      }
+      console.log('No valid image path found in URL');
+      return null;
+    } catch (error) {
+      console.error('Error extracting image path:', error);
+      return null;
+    }
+  };
+
+  const deleteImagesFromStorage = async (article: Article) => {
+    try {
+      console.log('Starting image deletion for article:', article.id);
+      const imagesToDelete: string[] = [];
+
+      // Add main article image
+      if (article.image) {
+        console.log('Processing main article image:', article.image);
+        const mainImagePath = getImagePathFromUrl(article.image);
+        if (mainImagePath) {
+          console.log('Adding main image to deletion list:', mainImagePath);
+          imagesToDelete.push(mainImagePath);
+        }
+      }
+
+      // Add images from blocks
+      if (article.blocks) {
+        console.log('Processing article blocks');
+        let blocks = article.blocks;
+        if (typeof blocks === 'string') {
+          console.log('Parsing blocks from string');
+          blocks = JSON.parse(blocks);
+        }
+        
+        for (const block of blocks) {
+          if (block.type === 'image' && block.imageUrl) {
+            console.log('Processing block image:', block.imageUrl);
+            const blockImagePath = getImagePathFromUrl(block.imageUrl);
+            if (blockImagePath) {
+              console.log('Adding block image to deletion list:', blockImagePath);
+              imagesToDelete.push(blockImagePath);
+            }
+          }
+        }
+      }
+
+      // Delete all images in one batch if there are any
+      if (imagesToDelete.length > 0) {
+        console.log('Attempting to delete images:', imagesToDelete);
+        
+        // Delete from articles bucket
+        const { data, error: storageError } = await supabase.storage
+          .from('articles')
+          .remove(imagesToDelete);
+
+        if (storageError) {
+          console.error('Error deleting images from storage:', storageError);
+          throw storageError;
+        }
+        console.log('Storage deletion response:', data);
+      } else {
+        console.log('No images to delete');
+      }
+    } catch (error) {
+      console.error('Error in deleteImagesFromStorage:', error);
+      throw error;
+    }
+  };
+
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this article?')) return;
 
     try {
-      const { error } = await supabase
+      console.log('Starting deletion process for article:', id);
+      
+      // Get the article first to get image URLs
+      const { data: article, error: fetchError } = await supabase
+        .from('articles')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (fetchError) {
+        console.error('Error fetching article:', fetchError);
+        throw fetchError;
+      }
+      if (!article) {
+        console.error('Article not found:', id);
+        throw new Error('Article not found');
+      }
+
+      console.log('Retrieved article:', article);
+
+      // Delete images from storage
+      try {
+        await deleteImagesFromStorage(article);
+        console.log('Successfully deleted images from storage');
+      } catch (storageError) {
+        console.error('Failed to delete images:', storageError);
+        // Continue with article deletion even if image deletion fails
+      }
+
+      // Delete the article from the database
+      const { error: deleteError } = await supabase
         .from('articles')
         .delete()
         .eq('id', id);
 
-      if (error) throw error;
+      if (deleteError) {
+        console.error('Error deleting article from database:', deleteError);
+        throw deleteError;
+      }
+      
+      console.log('Successfully deleted article from database');
       setArticles(articles.filter(article => article.id !== id));
     } catch (error) {
-      console.error('Error deleting article:', error);
+      console.error('Error in handleDelete:', error);
       setError('Failed to delete article');
     }
   };
