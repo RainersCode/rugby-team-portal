@@ -2,8 +2,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
+import LatestMatches from '@/components/features/Matches/LatestMatches';
+import { Match } from '@/types';
 
 export const revalidate = 3600; // Revalidate every hour
+export const dynamic = 'force-dynamic';
 
 export default async function Home() {
   const cookieStore = cookies();
@@ -15,6 +18,22 @@ export default async function Home() {
     .select('*')
     .order('created_at', { ascending: false })
     .limit(6);
+
+  // Fetch upcoming matches (next 2)
+  const { data: upcomingMatches } = await supabase
+    .from('matches')
+    .select('*')
+    .gte('match_date', new Date().toISOString())
+    .order('match_date', { ascending: true })
+    .limit(2);
+
+  // Fetch completed matches (last 4)
+  const { data: completedMatches } = await supabase
+    .from('matches')
+    .select('*')
+    .lt('match_date', new Date().toISOString())
+    .order('match_date', { ascending: false })
+    .limit(4);
 
   return (
     <div className="space-y-12 pb-12">
@@ -46,7 +65,15 @@ export default async function Home() {
 
       {/* News Grid Section */}
       <section className="container-width">
-        <h2 className="text-3xl font-bold mb-8">Latest News</h2>
+        <div className="flex justify-between items-center mb-8">
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Latest News</h2>
+          <Link 
+            href="/news" 
+            className="text-primary-blue hover:text-primary-blue/80 font-medium transition-colors"
+          >
+            View all news →
+          </Link>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {articles?.map((article) => (
             <article key={article.id} className="bg-white rounded-lg shadow-md overflow-hidden">
@@ -71,15 +98,13 @@ export default async function Home() {
             </article>
           ))}
         </div>
-        <div className="mt-8 text-center">
-          <Link
-            href="/news"
-            className="inline-block bg-primary-blue hover:bg-accent-blue text-white px-8 py-3 rounded-full transition-colors"
-          >
-            View All News
-          </Link>
-        </div>
       </section>
+
+      {/* Latest Matches Section */}
+      <LatestMatches 
+        upcomingMatches={upcomingMatches || []} 
+        completedMatches={completedMatches || []} 
+      />
     </div>
   );
 }

@@ -44,17 +44,16 @@ export interface Player {
 }
 
 export interface Match {
-  id: number;
-  homeTeam: string;
-  awayTeam: string;
-  date: string;
-  time: string;
+  id: string;
+  home_team: string;
+  away_team: string;
+  home_team_image: string;
+  away_team_image: string;
+  match_date: string;
   venue: string;
   competition: string;
-  score?: {
-    home: number;
-    away: number;
-  };
+  home_score?: number;
+  away_score?: number;
   status: 'upcoming' | 'live' | 'completed';
 }
 
