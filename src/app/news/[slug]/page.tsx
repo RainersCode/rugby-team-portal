@@ -6,6 +6,7 @@ import { formatDate } from '@/lib/utils';
 import { Metadata } from 'next';
 import { Article, ArticleBlock } from '@/types';
 import { cn } from '@/lib/utils';
+import ShareButtons from '@/components/features/News/ShareButtons';
 
 interface Props {
   params: {
@@ -38,12 +39,22 @@ function RenderBlock({ block }: { block: ArticleBlock }) {
             fill
             className="object-cover rounded-lg"
           />
+          {block.imageAlt && (
+            <p className="text-sm text-content-medium mt-2">{block.imageAlt}</p>
+          )}
         </div>
       );
 
     case 'paragraph':
     default:
-      return <p className="mb-4 text-content-medium leading-relaxed">{block.content}</p>;
+      return (
+        <p className={cn(
+          'mb-4 text-content-medium leading-relaxed',
+          block.styles?.italic && 'italic'
+        )}>
+          {block.content}
+        </p>
+      );
   }
 }
 
@@ -120,9 +131,12 @@ export default async function ArticlePage({ params }: Props) {
       <article className="max-w-4xl mx-auto">
         {/* Article Header */}
         <header className="mb-8">
-          <h1 className="text-4xl font-bold text-secondary-navy mb-4">
-            {article.title}
-          </h1>
+          <div className="flex justify-between items-start">
+            <h1 className="text-4xl font-bold text-secondary-navy mb-4">
+              {article.title}
+            </h1>
+            <ShareButtons title={article.title} />
+          </div>
           <div className="flex items-center text-content-medium gap-4">
             <time>{formatDate(article.created_at)}</time>
             <span>By {authorEmail}</span>

@@ -2,35 +2,22 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { ImageUpload } from '@/components/ui/image-upload';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { Database } from '@/lib/database.types';
-import { slugify } from '@/lib/utils';
-
-interface Article {
-  id: string;
-  title: string;
-  slug: string;
-  content: string;
-  image: string;
-}
+import ArticleEditor from '@/components/features/News/ArticleEditor';
+import { Article } from '@/types';
 
 export default function EditArticlePage({ params }: { params: { id: string } }) {
   const [article, setArticle] = useState<Article | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [imageUrl, setImageUrl] = useState<string>('');
   const router = useRouter();
   const supabase = createClientComponentClient<Database>();
 
   useEffect(() => {
-    const checkAdminAndLoadArticle = async () => {
+    const loadArticle = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) {
@@ -59,7 +46,6 @@ export default function EditArticlePage({ params }: { params: { id: string } }) 
         if (!article) throw new Error('Article not found');
 
         setArticle(article);
-        setImageUrl(article.image);
       } catch (error) {
         console.error('Error:', error);
         setError('Failed to load article');
@@ -68,38 +54,37 @@ export default function EditArticlePage({ params }: { params: { id: string } }) 
       }
     };
 
-    checkAdminAndLoadArticle();
+    loadArticle();
   }, [params.id, router, supabase]);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleSubmit = async (formData: {
+    title: string;
+    content: string;
+    image: string;
+    blocks: any[];
+    author_id?: string;
+  }) => {
     setSaving(true);
     setError(null);
 
     try {
-      const formData = new FormData(e.currentTarget);
-      const title = formData.get('title') as string;
-      const content = formData.get('content') as string;
-
-      if (!title || !content || !imageUrl) {
-        throw new Error('Please fill in all fields and upload an image');
-      }
-
-      const slug = slugify(title);
-
       const { error: updateError } = await supabase
         .from('articles')
         .update({
-          title,
-          slug,
-          content,
-          image: imageUrl,
+          title: formData.title,
+          content: formData.content,
+          image: formData.image,
+          blocks: formData.blocks,
+          author_id: formData.author_id || article?.author_id,
+          updated_at: new Date().toISOString()
         })
         .eq('id', params.id);
 
       if (updateError) throw updateError;
 
+      // Force a cache revalidation by navigating away and back
       router.push('/admin/articles');
+      router.refresh(); // This will force Next.js to revalidate the cache
     } catch (error) {
       console.error('Error updating article:', error);
       setError(error instanceof Error ? error.message : 'Failed to update article');
@@ -113,63 +98,20 @@ export default function EditArticlePage({ params }: { params: { id: string } }) 
   if (!article) return <div>Article not found</div>;
 
   return (
-    <Card className="p-6 max-w-2xl mx-auto">
+    <Card className="p-6 max-w-4xl mx-auto">
       <div className="mb-6">
         <h1 className="text-2xl font-bold">Edit Article</h1>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="title">Title</Label>
-          <Input
-            id="title"
-            name="title"
-            defaultValue={article.title}
-            placeholder="Enter article title"
-            required
-          />
-        </div>
+      {error && (
+        <div className="text-red-500 mb-4">{error}</div>
+      )}
 
-        <div className="space-y-2">
-          <Label>Article Image</Label>
-          <ImageUpload
-            onUploadComplete={(url) => setImageUrl(url)}
-            defaultImage={article.image}
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="content">Content</Label>
-          <Textarea
-            id="content"
-            name="content"
-            defaultValue={article.content}
-            placeholder="Write your article content here..."
-            className="min-h-[200px]"
-            required
-          />
-        </div>
-
-        {error && (
-          <div className="text-red-500">{error}</div>
-        )}
-
-        <div className="flex gap-4">
-          <Button
-            type="submit"
-            disabled={saving}
-          >
-            {saving ? 'Saving...' : 'Save Changes'}
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => router.push('/admin/articles')}
-          >
-            Cancel
-          </Button>
-        </div>
-      </form>
+      <ArticleEditor
+        onSubmit={handleSubmit}
+        initialData={article}
+        isSubmitting={saving}
+      />
     </Card>
   );
 } 

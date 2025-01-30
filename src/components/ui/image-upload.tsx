@@ -9,13 +9,16 @@ import { Loader2 } from 'lucide-react';
 interface ImageUploadProps {
   onUploadComplete: (url: string) => void;
   defaultImage?: string;
+  id?: string;
 }
 
-export function ImageUpload({ onUploadComplete, defaultImage }: ImageUploadProps) {
+export function ImageUpload({ onUploadComplete, defaultImage, id = 'default' }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(defaultImage || null);
   const [error, setError] = useState<string | null>(null);
   const supabase = createClientComponentClient();
+
+  const inputId = `imageInput-${id}`;
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -39,7 +42,7 @@ export function ImageUpload({ onUploadComplete, defaultImage }: ImageUploadProps
     try {
       // Create a unique file name
       const fileExt = file.name.split('.').pop();
-      const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
       const filePath = `article-images/${fileName}`;
 
       // Upload the file to Supabase storage
@@ -62,6 +65,9 @@ export function ImageUpload({ onUploadComplete, defaultImage }: ImageUploadProps
       setError('Failed to upload image');
     } finally {
       setUploading(false);
+      // Clear the input value to allow uploading the same file again
+      const input = document.getElementById(inputId) as HTMLInputElement;
+      if (input) input.value = '';
     }
   };
 
@@ -72,7 +78,7 @@ export function ImageUpload({ onUploadComplete, defaultImage }: ImageUploadProps
           type="button"
           variant="outline"
           disabled={uploading}
-          onClick={() => document.getElementById('imageInput')?.click()}
+          onClick={() => document.getElementById(inputId)?.click()}
         >
           {uploading ? (
             <>
@@ -84,7 +90,7 @@ export function ImageUpload({ onUploadComplete, defaultImage }: ImageUploadProps
           )}
         </Button>
         <input
-          id="imageInput"
+          id={inputId}
           type="file"
           accept="image/*"
           onChange={handleFileChange}

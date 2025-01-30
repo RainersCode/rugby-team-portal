@@ -4,6 +4,10 @@ export interface ArticleBlock {
   level?: 1 | 2 | 3; // For headings
   imageUrl?: string; // For images
   imageAlt?: string; // For images
+  styles?: {
+    italic?: boolean;
+    // Add more styles as needed
+  };
 }
 
 export interface Article {
