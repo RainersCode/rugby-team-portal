@@ -1,8 +1,17 @@
+export interface ArticleBlock {
+  type: 'paragraph' | 'heading' | 'image';
+  content: string;
+  level?: 1 | 2 | 3; // For headings
+  imageUrl?: string; // For images
+  imageAlt?: string; // For images
+}
+
 export interface Article {
   id: string;
   slug: string;
   title: string;
   content: string;
+  blocks: ArticleBlock[];
   image: string;
   created_at: string;
   updated_at: string;

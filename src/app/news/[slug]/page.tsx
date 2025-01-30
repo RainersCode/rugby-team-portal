@@ -4,7 +4,8 @@ import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import { formatDate } from '@/lib/utils';
 import { Metadata } from 'next';
-import { Article } from '@/types';
+import { Article, ArticleBlock } from '@/types';
+import { cn } from '@/lib/utils';
 
 interface Props {
   params: {
@@ -15,6 +16,36 @@ interface Props {
 // Opt out of static generation
 export const dynamic = 'force-dynamic';
 export const fetchCache = 'force-no-store';
+
+function RenderBlock({ block }: { block: ArticleBlock }) {
+  switch (block.type) {
+    case 'heading':
+      const HeadingTag = `h${block.level || 2}` as keyof JSX.IntrinsicElements;
+      const headingClasses = cn(
+        'font-bold text-secondary-navy',
+        block.level === 1 && 'text-3xl mb-6',
+        block.level === 2 && 'text-2xl mb-4',
+        block.level === 3 && 'text-xl mb-3'
+      );
+      return <HeadingTag className={headingClasses}>{block.content}</HeadingTag>;
+
+    case 'image':
+      return (
+        <div className="relative h-[400px] my-8">
+          <Image
+            src={block.imageUrl || ''}
+            alt={block.imageAlt || ''}
+            fill
+            className="object-cover rounded-lg"
+          />
+        </div>
+      );
+
+    case 'paragraph':
+    default:
+      return <p className="mb-4 text-content-medium leading-relaxed">{block.content}</p>;
+  }
+}
 
 async function getArticle(slug: string): Promise<Article | null> {
   try {
@@ -44,17 +75,15 @@ async function getArticle(slug: string): Promise<Article | null> {
       .eq('id', article.author_id)
       .single();
 
-    if (userError) {
-      console.error('Error fetching user:', userError);
-      return {
-        ...article,
-        user: null
-      };
-    }
+    // Convert content to blocks if not already in block format
+    const blocks = article.blocks || [
+      { type: 'paragraph', content: article.content }
+    ];
 
     return {
       ...article,
-      user: userData
+      blocks,
+      user: userError ? null : userData
     };
   } catch (error) {
     console.error('Unexpected error:', error);
@@ -100,7 +129,7 @@ export default async function ArticlePage({ params }: Props) {
           </div>
         </header>
 
-        {/* Article Image */}
+        {/* Main Article Image */}
         <div className="relative h-[400px] mb-8">
           <Image
             src={article.image}
@@ -113,8 +142,8 @@ export default async function ArticlePage({ params }: Props) {
 
         {/* Article Content */}
         <div className="prose dark:prose-invert max-w-none">
-          {article.content.split('\n').map((paragraph, index) => (
-            <p key={index}>{paragraph}</p>
+          {article.blocks.map((block, index) => (
+            <RenderBlock key={index} block={block} />
           ))}
         </div>
       </article>

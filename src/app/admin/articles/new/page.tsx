@@ -2,132 +2,137 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { ImageUpload } from "@/components/ui/image-upload";
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { Database } from '@/lib/database.types';
 import { slugify } from '@/lib/utils';
+import ArticleEditor from '@/components/features/News/ArticleEditor';
+
+async function generateUniqueSlug(supabase: any, baseSlug: string): Promise<string> {
+  let slug = baseSlug;
+  let counter = 1;
+  let isUnique = false;
+
+  while (!isUnique) {
+    const { data, error } = await supabase
+      .from('articles')
+      .select('slug')
+      .eq('slug', slug)
+      .single();
+
+    if (error || !data) {
+      isUnique = true;
+    } else {
+      slug = `${baseSlug}-${counter}`;
+      counter++;
+    }
+  }
+
+  return slug;
+}
 
 export default function NewArticlePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [imageUrl, setImageUrl] = useState<string>('');
   const router = useRouter();
   const supabase = createClientComponentClient<Database>();
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleSubmit = async (formData: {
+    title: string;
+    content: string;
+    image: string;
+    blocks: any[];
+  }) => {
     setLoading(true);
     setError(null);
 
     try {
-      const formData = new FormData(e.currentTarget);
-      const title = formData.get('title') as string;
-      const content = formData.get('content') as string;
-
-      if (!title || !content || !imageUrl) {
-        throw new Error('Please fill in all fields and upload an image');
+      // Validate required fields
+      if (!formData.title) throw new Error('Title is required');
+      if (!formData.image) throw new Error('Main image is required');
+      if (!formData.content && (!formData.blocks || formData.blocks.length === 0)) {
+        throw new Error('Content is required');
       }
 
-      const { data: { session } } = await supabase.auth.getSession();
+      // Check authentication
+      const { data: { session }, error: authError } = await supabase.auth.getSession();
+      if (authError) throw authError;
       if (!session) {
         router.push('/login');
         return;
       }
 
-      const { data: profile } = await supabase
+      // Check admin role
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('role')
         .eq('id', session.user.id)
         .single();
 
+      if (profileError) throw profileError;
       if (profile?.role !== 'admin') {
         router.push('/');
         return;
       }
 
-      const slug = slugify(title);
+      // Generate unique slug
+      const baseSlug = slugify(formData.title);
+      const uniqueSlug = await generateUniqueSlug(supabase, baseSlug);
 
-      const { error: insertError } = await supabase
+      // Create the article
+      const { data: article, error: insertError } = await supabase
         .from('articles')
         .insert({
-          title,
-          slug,
-          content,
-          image: imageUrl,
-          author_id: session.user.id
-        });
+          title: formData.title,
+          slug: uniqueSlug,
+          content: formData.content,
+          image: formData.image,
+          author_id: session.user.id,
+          blocks: formData.blocks || []
+        })
+        .select()
+        .single();
 
-      if (insertError) throw insertError;
+      if (insertError) {
+        console.error('Insert Error Details:', {
+          message: insertError.message,
+          details: insertError.details,
+          hint: insertError.hint
+        });
+        throw new Error(insertError.message || 'Failed to create article');
+      }
+
+      if (!article) {
+        throw new Error('Failed to create article - no data returned');
+      }
 
       router.push('/admin/articles');
     } catch (error) {
-      console.error('Error creating article:', error);
-      setError(error instanceof Error ? error.message : 'Failed to create article');
+      console.error('Detailed error:', error);
+      setError(
+        error instanceof Error 
+          ? error.message 
+          : 'An unexpected error occurred while creating the article'
+      );
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Card className="p-6 max-w-2xl mx-auto">
+    <Card className="p-6 max-w-4xl mx-auto">
       <div className="mb-6">
         <h1 className="text-2xl font-bold">New Article</h1>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="title">Title</Label>
-          <Input
-            id="title"
-            name="title"
-            placeholder="Enter article title"
-            required
-          />
-        </div>
+      {error && (
+        <div className="text-red-500 mb-4">{error}</div>
+      )}
 
-        <div className="space-y-2">
-          <Label>Article Image</Label>
-          <ImageUpload
-            onUploadComplete={(url) => setImageUrl(url)}
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="content">Content</Label>
-          <Textarea
-            id="content"
-            name="content"
-            placeholder="Write your article content here..."
-            className="min-h-[200px]"
-            required
-          />
-        </div>
-
-        {error && (
-          <div className="text-red-500">{error}</div>
-        )}
-
-        <div className="flex gap-4">
-          <Button
-            type="submit"
-            disabled={loading}
-          >
-            {loading ? 'Creating...' : 'Create Article'}
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => router.push('/admin/articles')}
-          >
-            Cancel
-          </Button>
-        </div>
-      </form>
+      <ArticleEditor
+        onSubmit={handleSubmit}
+        isSubmitting={loading}
+      />
     </Card>
   );
 } 
