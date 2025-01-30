@@ -3,6 +3,7 @@ import Link from "next/link";
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import LatestMatches from '@/components/features/Matches/LatestMatches';
+import HeroCarousel from '@/components/features/Hero/HeroCarousel';
 import { Match } from '@/types';
 
 export const revalidate = 3600; // Revalidate every hour
@@ -18,6 +19,9 @@ export default async function Home() {
     .select('*')
     .order('created_at', { ascending: false })
     .limit(6);
+
+  // Get the first 3 articles for the hero carousel
+  const heroArticles = articles?.slice(0, 3) || [];
 
   // Fetch upcoming matches (next 2)
   const { data: upcomingMatches } = await supabase
@@ -37,31 +41,11 @@ export default async function Home() {
 
   return (
     <div className="space-y-12 pb-12">
-      {/* Hero Section */}
-      <section className="relative h-[600px] w-full">
-        <Image
-          src="https://picsum.photos/seed/hero/1920/1080"
-          alt="Rugby team in action"
-          fill
-          className="object-cover"
-          priority
-        />
-        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center">
-          <div className="container-width text-white">
-            <h1 className="text-5xl font-bold mb-4">Welcome to Rugby Team</h1>
-            <p className="text-xl mb-8 max-w-2xl">
-              Experience the passion, power and precision of professional rugby at its finest.
-              Join us on our journey to glory.
-            </p>
-            <Link
-              href="/tickets"
-              className="bg-primary-blue hover:bg-accent-blue text-white px-8 py-3 rounded-full transition-colors inline-block"
-            >
-              Get Tickets
-            </Link>
-          </div>
-        </div>
-      </section>
+      {/* Hero Carousel */}
+      <HeroCarousel 
+        articles={heroArticles} 
+        nextMatch={upcomingMatches?.[0]} 
+      />
 
       {/* News Grid Section */}
       <section className="container-width">
@@ -75,7 +59,7 @@ export default async function Home() {
           </Link>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {articles?.map((article) => (
+          {articles?.slice(0, 3).map((article) => (
             <article key={article.id} className="bg-white rounded-lg shadow-md overflow-hidden">
               <div className="relative h-48">
                 <Image
