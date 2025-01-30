@@ -60,7 +60,7 @@ function RenderBlock({ block }: { block: ArticleBlock }) {
 
 async function getArticle(slug: string): Promise<Article | null> {
   try {
-    const cookieStore = await cookies();
+    const cookieStore = cookies();
     const supabase = createServerComponentClient({ cookies: () => cookieStore });
     
     // First, get the article

@@ -24,7 +24,8 @@ interface Props {
 }
 
 async function getArticle(slug: string): Promise<Article | null> {
-  const supabase = createServerComponentClient({ cookies });
+  const cookieStore = cookies();
+  const supabase = createServerComponentClient({ cookies: () => cookieStore });
   
   const { data, error } = await supabase
     .from('articles')
@@ -66,7 +67,7 @@ export const dynamic = 'force-dynamic';
 export const fetchCache = 'force-no-store';
 
 export default async function NewsPage() {
-  const cookieStore = await cookies();
+  const cookieStore = cookies();
   const supabase = createServerComponentClient({ cookies: () => cookieStore });
   
   const { data: articles, error } = await supabase

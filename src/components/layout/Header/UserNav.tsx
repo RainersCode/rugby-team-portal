@@ -83,6 +83,11 @@ export default function UserNav({ user }: UserNavProps) {
                 Manage Articles
               </DropdownMenuItem>
             </Link>
+            <Link href="/admin/matches">
+              <DropdownMenuItem className="cursor-pointer">
+                Manage Matches
+              </DropdownMenuItem>
+            </Link>
           </>
         )}
         <DropdownMenuSeparator />

@@ -6,7 +6,8 @@ import { cookies } from 'next/headers';
 export const revalidate = 3600; // Revalidate every hour
 
 export default async function Home() {
-  const supabase = createServerComponentClient({ cookies });
+  const cookieStore = cookies();
+  const supabase = createServerComponentClient({ cookies: () => cookieStore });
   
   // Fetch latest articles from Supabase
   const { data: articles } = await supabase
