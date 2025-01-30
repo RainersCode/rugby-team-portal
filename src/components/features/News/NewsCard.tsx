@@ -24,23 +24,17 @@ export default function NewsCard({ article, priority = false }: NewsCardProps) {
           />
         </div>
         <div className="p-6">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-primary-blue dark:text-accent-blue font-semibold">
-              {article.category}
-            </span>
+          <div className="flex justify-end mb-2">
             <time className="text-sm text-content-medium dark:text-content-medium">
-              {formatDistanceToNow(new Date(article.publishedAt), { addSuffix: true })}
+              {formatDistanceToNow(new Date(article.created_at), { addSuffix: true })}
             </time>
           </div>
           <h3 className="text-xl font-bold mb-2 text-content-light dark:text-content-dark line-clamp-2 hover:text-primary-blue dark:hover:text-accent-blue transition-colors">
             {article.title}
           </h3>
           <p className="text-content-medium dark:text-content-medium line-clamp-3">
-            {article.excerpt}
+            {article.content.substring(0, 150)}...
           </p>
-          <div className="mt-4 flex items-center text-sm text-content-light dark:text-content-light">
-            <span>By {article.author}</span>
-          </div>
         </div>
       </Link>
     </article>

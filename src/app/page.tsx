@@ -1,52 +1,19 @@
 import Image from "next/image";
 import Link from "next/link";
+import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+import { cookies } from 'next/headers';
 
-export default function Home() {
-  // Mock data for news articles
-  const newsArticles = [
-    {
-      id: 1,
-      title: 'Team Secures Victory in Season Opener',
-      excerpt: 'An impressive performance leads to a convincing win in the first match of the season.',
-      image: 'https://picsum.photos/seed/news1/800/600',
-      category: 'Match Report',
-    },
-    {
-      id: 2,
-      title: 'New Player Signing Announcement',
-      excerpt: 'Exciting new talent joins the squad ahead of the upcoming season.',
-      image: 'https://picsum.photos/seed/news2/800/600',
-      category: 'Team News',
-    },
-    {
-      id: 3,
-      title: 'Youth Academy Success Story',
-      excerpt: 'Local talent progresses through the ranks to make first team debut.',
-      image: 'https://picsum.photos/seed/news3/800/600',
-      category: 'Academy',
-    },
-    {
-      id: 4,
-      title: 'Community Outreach Program Launch',
-      excerpt: 'Team announces new initiative to support local rugby development.',
-      image: 'https://picsum.photos/seed/news4/800/600',
-      category: 'Community',
-    },
-    {
-      id: 5,
-      title: 'Stadium Upgrades Revealed',
-      excerpt: 'Major improvements to enhance fan experience at home matches.',
-      image: 'https://picsum.photos/seed/news5/800/600',
-      category: 'Club News',
-    },
-    {
-      id: 6,
-      title: 'Season Ticket Sales Record',
-      excerpt: 'Unprecedented support as season ticket sales reach new heights.',
-      image: 'https://picsum.photos/seed/news6/800/600',
-      category: 'Club News',
-    },
-  ];
+export const revalidate = 3600; // Revalidate every hour
+
+export default async function Home() {
+  const supabase = createServerComponentClient({ cookies });
+  
+  // Fetch latest articles from Supabase
+  const { data: articles } = await supabase
+    .from('articles')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(6);
 
   return (
     <div className="space-y-12 pb-12">
@@ -80,7 +47,7 @@ export default function Home() {
       <section className="container-width">
         <h2 className="text-3xl font-bold mb-8">Latest News</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {newsArticles.map((article) => (
+          {articles?.map((article) => (
             <article key={article.id} className="bg-white rounded-lg shadow-md overflow-hidden">
               <div className="relative h-48">
                 <Image
@@ -91,13 +58,10 @@ export default function Home() {
                 />
               </div>
               <div className="p-6">
-                <span className="text-sm text-primary-blue font-semibold">
-                  {article.category}
-                </span>
                 <h3 className="text-xl font-bold mt-2 mb-3">{article.title}</h3>
-                <p className="text-gray-600 mb-4">{article.excerpt}</p>
+                <p className="text-gray-600 mb-4">{article.content.substring(0, 150)}...</p>
                 <Link
-                  href={`/news/${article.id}`}
+                  href={`/news/${article.slug}`}
                   className="text-accent-blue hover:text-primary-blue transition-colors font-semibold"
                 >
                   Read More
@@ -105,6 +69,14 @@ export default function Home() {
               </div>
             </article>
           ))}
+        </div>
+        <div className="mt-8 text-center">
+          <Link
+            href="/news"
+            className="inline-block bg-primary-blue hover:bg-accent-blue text-white px-8 py-3 rounded-full transition-colors"
+          >
+            View All News
+          </Link>
         </div>
       </section>
     </div>

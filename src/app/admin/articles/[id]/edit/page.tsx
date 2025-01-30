@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { ImageUpload } from '@/components/ui/image-upload';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { Database } from '@/lib/database.types';
 import { slugify } from '@/lib/utils';
@@ -24,6 +25,7 @@ export default function EditArticlePage({ params }: { params: { id: string } }) 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [imageUrl, setImageUrl] = useState<string>('');
   const router = useRouter();
   const supabase = createClientComponentClient<Database>();
 
@@ -57,6 +59,7 @@ export default function EditArticlePage({ params }: { params: { id: string } }) 
         if (!article) throw new Error('Article not found');
 
         setArticle(article);
+        setImageUrl(article.image);
       } catch (error) {
         console.error('Error:', error);
         setError('Failed to load article');
@@ -77,10 +80,9 @@ export default function EditArticlePage({ params }: { params: { id: string } }) 
       const formData = new FormData(e.currentTarget);
       const title = formData.get('title') as string;
       const content = formData.get('content') as string;
-      const image = formData.get('image') as string;
 
-      if (!title || !content || !image) {
-        throw new Error('Please fill in all fields');
+      if (!title || !content || !imageUrl) {
+        throw new Error('Please fill in all fields and upload an image');
       }
 
       const slug = slugify(title);
@@ -91,7 +93,7 @@ export default function EditArticlePage({ params }: { params: { id: string } }) 
           title,
           slug,
           content,
-          image,
+          image: imageUrl,
         })
         .eq('id', params.id);
 
@@ -129,13 +131,10 @@ export default function EditArticlePage({ params }: { params: { id: string } }) 
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="image">Image URL</Label>
-          <Input
-            id="image"
-            name="image"
-            defaultValue={article.image}
-            placeholder="Enter image URL"
-            required
+          <Label>Article Image</Label>
+          <ImageUpload
+            onUploadComplete={(url) => setImageUrl(url)}
+            defaultImage={article.image}
           />
         </div>
 

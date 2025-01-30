@@ -1,13 +1,15 @@
 export interface Article {
-  id: number;
-  title: string;
+  id: string;
   slug: string;
-  excerpt: string;
+  title: string;
   content: string;
   image: string;
-  category: string;
-  author: string;
-  publishedAt: string;
+  created_at: string;
+  updated_at: string;
+  author_id: string;
+  user: {
+    email: string;
+  } | null;
 }
 
 export interface Player {

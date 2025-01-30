@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { ImageUpload } from "@/components/ui/image-upload";
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { Database } from '@/lib/database.types';
 import { slugify } from '@/lib/utils';
@@ -14,6 +15,7 @@ import { slugify } from '@/lib/utils';
 export default function NewArticlePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [imageUrl, setImageUrl] = useState<string>('');
   const router = useRouter();
   const supabase = createClientComponentClient<Database>();
 
@@ -26,10 +28,9 @@ export default function NewArticlePage() {
       const formData = new FormData(e.currentTarget);
       const title = formData.get('title') as string;
       const content = formData.get('content') as string;
-      const image = formData.get('image') as string;
 
-      if (!title || !content || !image) {
-        throw new Error('Please fill in all fields');
+      if (!title || !content || !imageUrl) {
+        throw new Error('Please fill in all fields and upload an image');
       }
 
       const { data: { session } } = await supabase.auth.getSession();
@@ -57,7 +58,7 @@ export default function NewArticlePage() {
           title,
           slug,
           content,
-          image,
+          image: imageUrl,
           author_id: session.user.id
         });
 
@@ -90,12 +91,9 @@ export default function NewArticlePage() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="image">Image URL</Label>
-          <Input
-            id="image"
-            name="image"
-            placeholder="Enter image URL"
-            required
+          <Label>Article Image</Label>
+          <ImageUpload
+            onUploadComplete={(url) => setImageUrl(url)}
           />
         </div>
 
