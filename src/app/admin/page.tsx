@@ -1,233 +1,215 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { supabase } from '@/utils/supabase';
-import { Trash2 } from 'lucide-react';
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { Users, FileText, Calendar, Settings, BarChart } from "lucide-react";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
-interface Profile {
-  id: string;
-  first_name: string | null;
-  last_name: string | null;
-  role: string;
-  updated_at: string;
-}
-
-export default function AdminPage() {
-  const router = useRouter();
+export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
-  const [users, setUsers] = useState<Profile[]>([]);
-  const [error, setError] = useState<string | null>(null);
+  const [stats, setStats] = useState({
+    players: 0,
+    articles: 0,
+    matches: 0,
+    users: 0,
+  });
+
+  const router = useRouter();
+  const supabase = createClientComponentClient();
 
   useEffect(() => {
-    checkAdminAndLoadUsers();
+    checkAdmin();
+    fetchStats();
   }, []);
 
-  async function checkAdminAndLoadUsers() {
+  const checkAdmin = async () => {
     try {
-      // Get current user
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        router.push('/auth/signin');
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session) {
+        router.push("/auth/signin");
         return;
       }
 
-      // Check if user is admin
       const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
+        .from("profiles")
+        .select("role")
+        .eq("id", session.user.id)
         .single();
 
-      if (!profile || profile.role !== 'admin') {
-        router.push('/');
-        return;
+      if (profile?.role !== "admin") {
+        router.push("/");
       }
+    } catch (error) {
+      console.error("Error checking admin status:", error);
+      router.push("/");
+    }
+  };
 
-      // Get all profiles
-      const { data: profiles, error: profilesError } = await supabase
-        .from('profiles')
-        .select('id, first_name, last_name, role, updated_at')
-        .order('first_name');
+  const fetchStats = async () => {
+    try {
+      const [
+        { count: playersCount },
+        { count: articlesCount },
+        { count: matchesCount },
+        { count: usersCount },
+      ] = await Promise.all([
+        supabase.from("players").select("*", { count: "exact", head: true }),
+        supabase.from("articles").select("*", { count: "exact", head: true }),
+        supabase.from("matches").select("*", { count: "exact", head: true }),
+        supabase.from("profiles").select("*", { count: "exact", head: true }),
+      ]);
 
-      if (profilesError) throw profilesError;
-      if (!profiles) throw new Error('No profiles found');
-
-      setUsers(profiles);
-    } catch (error: any) {
-      console.error('Error:', error.message || error);
-      setError('Failed to load users');
+      setStats({
+        players: playersCount || 0,
+        articles: articlesCount || 0,
+        matches: matchesCount || 0,
+        users: usersCount || 0,
+      });
+    } catch (error) {
+      console.error("Error fetching stats:", error);
     } finally {
       setLoading(false);
     }
-  }
+  };
 
-  async function handleRoleChange(userId: string, newRole: string) {
-    try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ role: newRole })
-        .eq('id', userId);
-
-      if (error) throw error;
-
-      setUsers(users.map(user => 
-        user.id === userId ? { ...user, role: newRole } : user
-      ));
-    } catch (error: any) {
-      console.error('Error updating role:', error.message || error);
-      setError('Failed to update user role');
-    }
-  }
-
-  async function handleDeleteUser(userId: string) {
-    try {
-      const response = await fetch('/api/admin/delete-user', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ userId }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to delete user');
-      }
-
-      // Update local state
-      setUsers(users.filter(user => user.id !== userId));
-      
-      // Refresh the user list
-      checkAdminAndLoadUsers();
-    } catch (error: any) {
-      console.error('Error deleting user:', error.message || error);
-      setError('Failed to delete user');
-      // Reset error after 3 seconds
-      setTimeout(() => setError(null), 3000);
-    }
-  }
+  const adminSections = [
+    {
+      title: "Players",
+      description: "Manage team players, positions, and statistics",
+      icon: Users,
+      href: "/admin/players",
+      count: stats.players,
+      color: "text-blue-500",
+    },
+    {
+      title: "Articles",
+      description: "Publish and manage news articles",
+      icon: FileText,
+      href: "/admin/articles",
+      count: stats.articles,
+      color: "text-green-500",
+    },
+    {
+      title: "Matches",
+      description: "Schedule and manage team matches",
+      icon: Calendar,
+      href: "/admin/matches",
+      count: stats.matches,
+      color: "text-orange-500",
+    },
+    {
+      title: "Users",
+      description: "Manage user accounts and roles",
+      icon: Users,
+      href: "/admin/users",
+      count: stats.users,
+      color: "text-purple-500",
+    },
+  ];
 
   if (loading) {
-    return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
-  }
-
-  if (error) {
-    return <div className="flex justify-center items-center min-h-screen text-red-500">{error}</div>;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
   }
 
   return (
-    <div className="container mx-auto py-10">
-      <Card>
-        <CardHeader>
-          <CardTitle>User Management</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead>Last Updated</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {users.map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell>
-                    {user.first_name} {user.last_name}
-                  </TableCell>
-                  <TableCell>{user.role}</TableCell>
-                  <TableCell>
-                    {new Date(user.updated_at).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Select
-                        defaultValue={user.role}
-                        onValueChange={(value) => handleRoleChange(user.id, value)}
-                      >
-                        <SelectTrigger className="w-32 bg-background border border-input">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-                          <SelectItem value="user" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700">
-                            User
-                          </SelectItem>
-                          <SelectItem value="admin" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700">
-                            Admin
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
+    <div className="container mx-auto px-4 py-8">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold mb-2">Admin Dashboard</h1>
+        <p className="text-muted-foreground">
+          Welcome to the admin dashboard. Manage your team, content, and users
+          from here.
+        </p>
+      </div>
 
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button 
-                            variant="destructive" 
-                            size="icon"
-                            className="h-10 w-10"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent className="bg-white dark:bg-gray-800">
-                          <AlertDialogHeader>
-                            <AlertDialogTitle className="text-gray-900 dark:text-gray-100">Delete User</AlertDialogTitle>
-                            <AlertDialogDescription className="text-gray-500 dark:text-gray-400">
-                              Are you sure you want to delete this user? This action cannot be undone.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel className="bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600">
-                              Cancel
-                            </AlertDialogCancel>
-                            <AlertDialogAction
-                              onClick={() => handleDeleteUser(user.id)}
-                              className="bg-red-600 hover:bg-red-700 text-white focus:ring-red-600"
-                            >
-                              Delete
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        {adminSections.map((section) => (
+          <Link key={section.title} href={section.href}>
+            <Card className="hover:shadow-lg transition-shadow">
+              <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                <CardTitle className="text-sm font-medium">
+                  {section.title}
+                </CardTitle>
+                <section.icon className={`h-4 w-4 ${section.color}`} />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold mb-1">{section.count}</div>
+                <p className="text-xs text-muted-foreground">
+                  {section.description}
+                </p>
+              </CardContent>
+            </Card>
+          </Link>
+        ))}
+      </div>
+
+      <div className="mt-8 grid gap-6 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Recent Activity</CardTitle>
+            <CardDescription>
+              Latest updates and changes across the platform
+            </CardDescription>
+          </CardHeader>
+          <CardContent>{/* Add recent activity list here */}</CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Quick Actions</CardTitle>
+            <CardDescription>Common administrative tasks</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-4">
+              <Link href="/admin/players/new">
+                <Card className="hover:bg-accent transition-colors cursor-pointer">
+                  <CardContent className="flex flex-col items-center justify-center p-4">
+                    <Users className="h-6 w-6 mb-2" />
+                    <span className="text-sm font-medium">Add Player</span>
+                  </CardContent>
+                </Card>
+              </Link>
+              <Link href="/admin/articles/new">
+                <Card className="hover:bg-accent transition-colors cursor-pointer">
+                  <CardContent className="flex flex-col items-center justify-center p-4">
+                    <FileText className="h-6 w-6 mb-2" />
+                    <span className="text-sm font-medium">New Article</span>
+                  </CardContent>
+                </Card>
+              </Link>
+              <Link href="/admin/matches/new">
+                <Card className="hover:bg-accent transition-colors cursor-pointer">
+                  <CardContent className="flex flex-col items-center justify-center p-4">
+                    <Calendar className="h-6 w-6 mb-2" />
+                    <span className="text-sm font-medium">Schedule Match</span>
+                  </CardContent>
+                </Card>
+              </Link>
+              <Link href="/admin/settings">
+                <Card className="hover:bg-accent transition-colors cursor-pointer">
+                  <CardContent className="flex flex-col items-center justify-center p-4">
+                    <Settings className="h-6 w-6 mb-2" />
+                    <span className="text-sm font-medium">Settings</span>
+                  </CardContent>
+                </Card>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
-} 
+}

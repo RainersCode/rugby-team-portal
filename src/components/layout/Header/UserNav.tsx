@@ -1,18 +1,26 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { supabase } from '@/utils/supabase';
-import type { User } from '@supabase/supabase-js';
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/utils/supabase";
+import type { User } from "@supabase/supabase-js";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  Users,
+  Settings,
+  LayoutDashboard,
+  FileText,
+  Calendar,
+  LogOut,
+} from "lucide-react";
 
 interface UserNavProps {
   user: User;
@@ -21,7 +29,7 @@ interface UserNavProps {
 export default function UserNav({ user }: UserNavProps) {
   const router = useRouter();
   const [isAdmin, setIsAdmin] = useState(false);
-  const [initials, setInitials] = useState('');
+  const [initials, setInitials] = useState("");
 
   useEffect(() => {
     checkUserRole();
@@ -30,25 +38,25 @@ export default function UserNav({ user }: UserNavProps) {
   async function checkUserRole() {
     try {
       const { data: profile } = await supabase
-        .from('profiles')
-        .select('first_name, last_name, role')
-        .eq('id', user.id)
+        .from("profiles")
+        .select("first_name, last_name, role")
+        .eq("id", user.id)
         .single();
 
       if (profile) {
-        setIsAdmin(profile.role === 'admin');
-        const firstInitial = profile.first_name ? profile.first_name[0] : '';
-        const lastInitial = profile.last_name ? profile.last_name[0] : '';
-        setInitials((firstInitial + lastInitial).toUpperCase() || 'U');
+        setIsAdmin(profile.role === "admin");
+        const firstInitial = profile.first_name ? profile.first_name[0] : "";
+        const lastInitial = profile.last_name ? profile.last_name[0] : "";
+        setInitials((firstInitial + lastInitial).toUpperCase() || "U");
       }
     } catch (error) {
-      console.error('Error checking user role:', error);
+      console.error("Error checking user role:", error);
     }
   }
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    router.push('/auth/signin');
+    router.push("/auth/signin");
     router.refresh();
   };
 
@@ -74,30 +82,40 @@ export default function UserNav({ user }: UserNavProps) {
           <>
             <DropdownMenuSeparator />
             <Link href="/admin">
-              <DropdownMenuItem className="cursor-pointer">
+              <DropdownMenuItem className="cursor-pointer flex items-center">
+                <LayoutDashboard className="w-4 h-4 mr-2" />
                 Admin Dashboard
               </DropdownMenuItem>
             </Link>
+            <Link href="/admin/players">
+              <DropdownMenuItem className="cursor-pointer flex items-center">
+                <Users className="w-4 h-4 mr-2" />
+                Manage Players
+              </DropdownMenuItem>
+            </Link>
             <Link href="/admin/articles">
-              <DropdownMenuItem className="cursor-pointer">
+              <DropdownMenuItem className="cursor-pointer flex items-center">
+                <FileText className="w-4 h-4 mr-2" />
                 Manage Articles
               </DropdownMenuItem>
             </Link>
             <Link href="/admin/matches">
-              <DropdownMenuItem className="cursor-pointer">
+              <DropdownMenuItem className="cursor-pointer flex items-center">
+                <Calendar className="w-4 h-4 mr-2" />
                 Manage Matches
               </DropdownMenuItem>
             </Link>
           </>
         )}
         <DropdownMenuSeparator />
-        <DropdownMenuItem 
-          className="cursor-pointer text-red-600 focus:text-red-600" 
+        <DropdownMenuItem
+          className="cursor-pointer text-red-600 focus:text-red-600 flex items-center"
           onClick={handleSignOut}
         >
+          <LogOut className="w-4 h-4 mr-2" />
           Sign Out
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
-} 
+}
