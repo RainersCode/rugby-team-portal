@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { Article } from '@/types';
-import Image from 'next/image';
-import Link from 'next/link';
-import { formatDistanceToNow } from 'date-fns';
+import { Article } from "@/types";
+import Image from "next/image";
+import Link from "next/link";
+import { formatDistanceToNow } from "date-fns";
 
 interface NewsCardProps {
   article: Article;
@@ -26,7 +26,9 @@ export default function NewsCard({ article, priority = false }: NewsCardProps) {
         <div className="p-6">
           <div className="flex justify-end mb-2">
             <time className="text-sm text-content-medium dark:text-content-medium">
-              {formatDistanceToNow(new Date(article.created_at), { addSuffix: true })}
+              {formatDistanceToNow(new Date(article.created_at), {
+                addSuffix: true,
+              })}
             </time>
           </div>
           <h3 className="text-xl font-bold mb-2 text-content-light dark:text-content-dark line-clamp-2 hover:text-primary-blue dark:hover:text-accent-blue transition-colors">
@@ -39,4 +41,4 @@ export default function NewsCard({ article, priority = false }: NewsCardProps) {
       </Link>
     </article>
   );
-} 
+}
