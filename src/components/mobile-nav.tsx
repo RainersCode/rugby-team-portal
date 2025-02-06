@@ -19,6 +19,7 @@ import {
   Instagram,
   Facebook,
   ArrowRight,
+  Dumbbell,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -39,6 +40,7 @@ const mainNavItems = [
   { href: "/", label: "Home", icon: Home },
   { href: "/team", label: "Team", icon: Users },
   { href: "/matches", label: "Matches", icon: Trophy },
+  { href: "/training", label: "Training", icon: Dumbbell },
   { href: "/news", label: "News", icon: Newspaper },
   { href: "/about", label: "About", icon: Info },
   { href: "/contact", label: "Contact", icon: Mail },

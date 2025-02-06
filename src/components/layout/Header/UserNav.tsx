@@ -20,6 +20,7 @@ import {
   FileText,
   Calendar,
   LogOut,
+  Dumbbell
 } from "lucide-react";
 
 interface UserNavProps {
@@ -103,6 +104,12 @@ export default function UserNav({ user }: UserNavProps) {
               <DropdownMenuItem className="cursor-pointer flex items-center">
                 <Calendar className="w-4 h-4 mr-2" />
                 Manage Matches
+              </DropdownMenuItem>
+            </Link>
+            <Link href="/admin/training">
+              <DropdownMenuItem className="cursor-pointer flex items-center">
+                <Dumbbell className="w-4 h-4 mr-2" />
+                Manage Training
               </DropdownMenuItem>
             </Link>
           </>

@@ -93,4 +93,75 @@ export interface TeamMember {
   role: string;
   image: string;
   bio: string;
+}
+
+export type ExerciseCategory = 
+  | 'weightlifting'
+  | 'sprint'
+  | 'cardio'
+  | 'strength'
+  | 'agility'
+  | 'flexibility'
+  | 'recovery';
+
+export type DifficultyLevel = 
+  | 'beginner'
+  | 'intermediate'
+  | 'advanced'
+  | 'elite';
+
+export interface Exercise {
+  id: string;
+  name: string;
+  description: string;
+  category: ExerciseCategory;
+  difficulty: DifficultyLevel;
+  equipment: string[];
+  muscles_targeted: string[];
+  video_url?: string;
+  image_url?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TrainingProgram {
+  id: string;
+  title: string;
+  description: string;
+  difficulty: DifficultyLevel;
+  duration_weeks: number;
+  target_audience: string;
+  image_url?: string;
+  created_at: string;
+  updated_at: string;
+  author_id: string;
+  author?: {
+    email: string;
+  };
+}
+
+export interface ProgramWorkout {
+  id: string;
+  program_id: string;
+  title: string;
+  description?: string;
+  week_number: number;
+  day_number: number;
+  duration_minutes: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface WorkoutExercise {
+  id: string;
+  workout_id: string;
+  exercise_id: string;
+  exercise?: Exercise;
+  sets: number;
+  reps?: number;
+  duration_seconds?: number;
+  rest_seconds: number;
+  notes?: string;
+  order_index: number;
+  created_at: string;
 } 
