@@ -111,124 +111,123 @@ export default function AboutPageClient({ aboutData, isAdmin }: AboutPageProps) 
       </section>
 
       {/* Content Container - Adjusted spacing */}
-      <div className="container mx-auto px-4 -mt-8 relative z-10 space-y-32">
+      <div className="w-full -mt-8 relative z-10 space-y-32">
         {/* Mission Section */}
-        <motion.section 
-          className="relative pt-16" // Added top padding
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.2 }}
-        >
-          <div className="flex flex-col items-center text-center">
-            <div className="rounded-2xl p-4 bg-primary/10 dark:bg-primary/20 mb-6 rotate-3 hover:rotate-6 transition-transform duration-300 shadow-lg">
-              <Target className="h-12 w-12 text-primary dark:text-primary" />
-            </div>
-            <h2 className="text-5xl font-bold mb-16 text-foreground dark:text-foreground">Our Mission</h2>
-            <div className="relative w-full max-w-4xl">
-              <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary/5 dark:from-primary/10 dark:to-primary/5 rounded-3xl blur-3xl" />
-              <Card className="relative bg-background/90 dark:bg-background/90 backdrop-blur-xl border-primary/10 rounded-3xl overflow-hidden shadow-xl">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent" />
-                <div className="relative p-8 md:p-12">
-                  <p className="text-2xl italic text-center leading-relaxed text-foreground dark:text-foreground">
-                    "{aboutData.mission}"
-                  </p>
-                </div>
-              </Card>
+        <motion.section className="relative w-full bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5">
+          <div className="container mx-auto px-4 pt-16">
+            <div className="flex flex-col items-center text-center">
+              <div className="rounded-2xl p-4 bg-primary/10 dark:bg-primary/20 mb-6 rotate-3 hover:rotate-6 transition-transform duration-300 shadow-lg">
+                <Target className="h-12 w-12 text-primary dark:text-primary" />
+              </div>
+              <h2 className="text-5xl font-bold mb-16 text-foreground dark:text-foreground">Our Mission</h2>
+              <div className="relative w-full max-w-4xl">
+                <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary/5 dark:from-primary/10 dark:to-primary/5 rounded-3xl blur-3xl" />
+                <Card className="relative bg-background/90 dark:bg-background/90 backdrop-blur-xl border-primary/10 rounded-3xl overflow-hidden shadow-xl">
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent" />
+                  <div className="relative p-8 md:p-12">
+                    <p className="text-2xl italic text-center leading-relaxed text-foreground dark:text-foreground">
+                      "{aboutData.mission}"
+                    </p>
+                  </div>
+                </Card>
+              </div>
             </div>
           </div>
         </motion.section>
 
         {/* Values Section */}
         {values.length > 0 && (
-          <motion.section 
-            className="relative py-16"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.2 }}
-          >
-            <div className="text-center mb-16">
-              <div className="rounded-2xl p-4 bg-primary/10 dark:bg-primary/20 inline-block -rotate-3 hover:-rotate-6 transition-transform duration-300">
-                <Award className="h-12 w-12 text-primary dark:text-primary" />
-              </div>
-              <h2 className="text-5xl font-bold mt-6 text-foreground dark:text-foreground">Our Values</h2>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {values.map((value, index) => (
-                <motion.div
-                  key={value}
-                  className="group"
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.1 * index }}
-                >
-                  <div className="relative h-full">
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-transparent dark:from-primary/10 rounded-3xl blur-xl group-hover:blur-2xl transition-all duration-300" />
-                    <div className="relative bg-background/80 dark:bg-background/80 backdrop-blur-xl rounded-3xl p-8 h-full border border-primary/10 overflow-hidden group-hover:border-primary/20 transition-colors duration-300">
-                      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent" />
-                      <div className="relative">
-                        <h3 className="text-3xl font-bold text-foreground dark:text-foreground mb-4">{value}</h3>
-                        <div className="absolute bottom-0 right-0 opacity-0 transform translate-x-4 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0">
-                          <ChevronRight className="h-6 w-6 text-primary dark:text-primary" />
+          <motion.section className="relative w-full bg-gradient-to-r from-background via-muted/50 to-background">
+            <div className="container mx-auto px-4 py-16">
+              <div className="max-w-5xl mx-auto">
+                <div className="text-center mb-16">
+                  <div className="rounded-2xl p-4 bg-primary/10 dark:bg-primary/20 inline-block -rotate-3 hover:-rotate-6 transition-transform duration-300">
+                    <Award className="h-12 w-12 text-primary dark:text-primary" />
+                  </div>
+                  <h2 className="text-5xl font-bold mt-6 text-foreground dark:text-foreground">Our Values</h2>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {values.map((value, index) => (
+                    <motion.div
+                      key={value}
+                      className="group"
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: 0.1 * index }}
+                    >
+                      <div className="relative h-full">
+                        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-transparent dark:from-primary/10 rounded-3xl blur-xl group-hover:blur-2xl transition-all duration-300" />
+                        <div className="relative bg-background/80 dark:bg-background/80 backdrop-blur-xl rounded-3xl p-8 h-full border border-primary/10 overflow-hidden group-hover:border-primary/20 transition-colors duration-300">
+                          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent" />
+                          <div className="relative">
+                            <h3 className="text-3xl font-bold text-foreground dark:text-foreground mb-4">{value}</h3>
+                            <div className="absolute bottom-0 right-0 opacity-0 transform translate-x-4 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0">
+                              <ChevronRight className="h-6 w-6 text-primary dark:text-primary" />
+                            </div>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
             </div>
           </motion.section>
         )}
 
         {/* Team Highlights */}
         {aboutData.team_highlights && aboutData.team_highlights.length > 0 && (
-          <motion.section 
-            className="relative py-16"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.2 }}
-          >
-            <div className="text-center mb-16">
-              <div className="rounded-2xl p-4 bg-primary/10 dark:bg-primary/20 inline-block rotate-3 hover:rotate-6 transition-transform duration-300">
-                <Users className="h-12 w-12 text-primary dark:text-primary" />
-              </div>
-              <h2 className="text-5xl font-bold mt-6 text-foreground dark:text-foreground">Team Highlights</h2>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {aboutData.team_highlights.map((highlight, index) => (
-                <motion.div
-                  key={highlight.title}
-                  className="group"
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.1 * index }}
-                >
-                  <div className="relative h-full">
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-transparent dark:from-primary/10 rounded-3xl blur-xl group-hover:blur-2xl transition-all duration-300" />
-                    <div className="relative bg-background/80 dark:bg-background/80 backdrop-blur-xl rounded-3xl p-8 h-full border border-primary/10 group-hover:border-primary/20 transition-colors duration-300">
-                      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent" />
-                      <div className="relative">
-                        <h3 className="text-2xl font-bold text-foreground dark:text-foreground mb-4">{highlight.title}</h3>
-                        <p className="text-muted-foreground dark:text-muted-foreground leading-relaxed">{highlight.description}</p>
-                      </div>
-                    </div>
+          <motion.section className="relative w-full bg-gradient-to-r from-primary/5 via-transparent to-primary/5">
+            <div className="container mx-auto px-4 py-16">
+              <div className="max-w-5xl mx-auto">
+                <div className="text-center mb-16">
+                  <div className="rounded-2xl p-4 bg-primary/10 dark:bg-primary/20 inline-block rotate-3 hover:rotate-6 transition-transform duration-300">
+                    <Users className="h-12 w-12 text-primary dark:text-primary" />
                   </div>
-                </motion.div>
-              ))}
+                  <h2 className="text-5xl font-bold mt-6 text-foreground dark:text-foreground">Team Highlights</h2>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                  {aboutData.team_highlights.map((highlight, index) => (
+                    <motion.div
+                      key={highlight.title}
+                      className="group"
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: 0.1 * index }}
+                    >
+                      <div className="relative h-full">
+                        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-transparent dark:from-primary/10 rounded-3xl blur-xl group-hover:blur-2xl transition-all duration-300" />
+                        <div className="relative bg-background/80 dark:bg-background/80 backdrop-blur-xl rounded-3xl p-8 h-full border border-primary/10 group-hover:border-primary/20 transition-colors duration-300">
+                          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent" />
+                          <div className="relative">
+                            <h3 className="text-2xl font-bold text-foreground dark:text-foreground mb-4">{highlight.title}</h3>
+                            <p className="text-muted-foreground dark:text-muted-foreground leading-relaxed">{highlight.description}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
             </div>
           </motion.section>
         )}
 
         {/* Join Our Team Section */}
-        <section className="relative py-24">
-          {/* Background with diagonal split */}
-          <div className="absolute inset-0 transform -skew-y-3 bg-primary-blue" />
-          
-          <div className="relative container mx-auto px-4">
+        <section className="relative w-full bg-primary-blue py-24 overflow-hidden">
+          {/* Background Pattern */}
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute transform -rotate-45 -left-1/4 -top-1/4">
+              <div className="w-96 h-96 rounded-full bg-white"></div>
+            </div>
+            <div className="absolute transform -rotate-45 -right-1/4 -bottom-1/4">
+              <div className="w-96 h-96 rounded-full bg-white"></div>
+            </div>
+          </div>
+
+          <div className="container mx-auto px-4">
             <div className="max-w-6xl mx-auto">
               {/* Header with accent */}
               <div className="text-center mb-16">
@@ -291,10 +290,6 @@ export default function AboutPageClient({ aboutData, isAdmin }: AboutPageProps) 
                   ))}
                 </div>
               </div>
-
-              {/* Decorative elements */}
-              <div className="absolute top-0 left-0 w-32 h-32 bg-white/5 rounded-full blur-3xl" />
-              <div className="absolute bottom-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-3xl" />
             </div>
           </div>
         </section>
