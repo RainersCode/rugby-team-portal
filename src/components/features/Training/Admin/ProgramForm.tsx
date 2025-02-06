@@ -81,23 +81,28 @@ export default function ProgramForm({ initialData, exercises }: ProgramFormProps
       if (sessionError) throw new Error('Authentication error: ' + sessionError.message);
       if (!session?.user?.id) throw new Error('No active session');
 
-      // First, create or update the training program
       let programId: string;
       
       if (initialData) {
         // Update existing program
-        const { data: program, error: updateError } = await supabase
+        const { error: updateError } = await supabase
           .from('training_programs')
           .update({
             ...formData,
             updated_at: new Date().toISOString(),
           })
-          .eq('id', initialData.id)
-          .select()
-          .single();
+          .eq('id', initialData.id);
 
         if (updateError) throw new Error('Error updating program: ' + updateError.message);
         programId = initialData.id;
+
+        // Delete all existing workouts and their exercises (cascade delete will handle exercises)
+        const { error: deleteError } = await supabase
+          .from('program_workouts')
+          .delete()
+          .eq('program_id', programId);
+
+        if (deleteError) throw new Error('Error deleting existing workouts: ' + deleteError.message);
       } else {
         // Create new program
         const { data: program, error: insertError } = await supabase
@@ -109,17 +114,13 @@ export default function ProgramForm({ initialData, exercises }: ProgramFormProps
           .select()
           .single();
 
-        if (insertError) {
-          console.error('Program insert error:', insertError);
-          throw new Error('Error creating program: ' + insertError.message);
-        }
+        if (insertError) throw new Error('Error creating program: ' + insertError.message);
         if (!program) throw new Error('No program data returned');
         programId = program.id;
       }
 
-      // Then, handle workouts
+      // Create new workouts and exercises
       for (const workout of workouts) {
-        // Create workout
         const { data: workoutData, error: workoutError } = await supabase
           .from('program_workouts')
           .insert({
@@ -133,10 +134,7 @@ export default function ProgramForm({ initialData, exercises }: ProgramFormProps
           .select()
           .single();
 
-        if (workoutError) {
-          console.error('Workout insert error:', workoutError);
-          throw new Error('Error creating workout: ' + workoutError.message);
-        }
+        if (workoutError) throw new Error('Error creating workout: ' + workoutError.message);
         if (!workoutData) throw new Error('No workout data returned');
 
         // Create workout exercises
@@ -156,10 +154,7 @@ export default function ProgramForm({ initialData, exercises }: ProgramFormProps
             .from('workout_exercises')
             .insert(exercisesData);
 
-          if (exercisesError) {
-            console.error('Exercise insert error:', exercisesError);
-            throw new Error('Error creating workout exercises: ' + exercisesError.message);
-          }
+          if (exercisesError) throw new Error('Error creating workout exercises: ' + exercisesError.message);
         }
       }
 

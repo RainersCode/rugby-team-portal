@@ -42,15 +42,16 @@ export default async function AdminTrainingPage() {
     .order('name', { ascending: true });
 
   // Fetch training programs
-  const { data: programs } = await supabase
-    .from('training_programs')
-    .select(`
-      *,
-      author:author_id (
-        email
-      )
-    `)
+  const { data: programsData, error: programsError } = await supabase
+    .from('training_programs_with_authors')
+    .select('*')
     .order('created_at', { ascending: false });
+
+  // Transform the programs data to include the author field
+  const programs = programsData?.map(program => ({
+    ...program,
+    author: program.author_email ? { email: program.author_email } : null
+  })) || [];
 
   return (
     <div className="container-width mx-auto px-4 py-8">

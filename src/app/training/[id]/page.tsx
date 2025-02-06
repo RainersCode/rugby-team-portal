@@ -41,7 +41,11 @@ async function getProgram(id: string) {
     return null;
   }
 
-  return program as TrainingProgram;
+  // Transform the data to match the TrainingProgram type
+  return {
+    ...program,
+    author: program.author_email ? { email: program.author_email } : null
+  } as TrainingProgram;
 }
 
 async function getProgramWorkouts(programId: string) {
