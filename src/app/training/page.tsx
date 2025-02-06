@@ -8,20 +8,20 @@ import { Dumbbell, Clock, Users, ChevronRight } from 'lucide-react';
 import { TrainingProgram } from '@/types';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export default async function TrainingPage() {
   const cookieStore = cookies();
   const supabase = createServerComponentClient({ cookies: () => cookieStore });
 
-  const { data: programs } = await supabase
+  const { data: programs, error } = await supabase
     .from('training_programs')
-    .select(`
-      *,
-      author:author_id (
-        email
-      )
-    `)
+    .select('id, title, description, difficulty, duration_weeks, target_audience, image_url')
     .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching programs:', error);
+  }
 
   // Group programs by difficulty
   const groupedPrograms = (programs || []).reduce((acc, program) => {
@@ -65,7 +65,7 @@ export default async function TrainingPage() {
                       {/* Program Image */}
                       <div className="relative h-48 w-full">
                         <Image
-                          src={program.image_url || '/images/default-program.jpg'}
+                          src={program.image_url || 'https://placehold.co/600x400/1a365d/ffffff?text=Training+Program'}
                           alt={program.title}
                           fill
                           className="object-cover"

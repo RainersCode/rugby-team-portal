@@ -11,7 +11,11 @@ const nextConfig = {
         hostname: "picsum.photos",
       },
     ],
-    domains: ["www.thesportsdb.com", "thesportsdb.com"],
+    domains: [
+      "www.thesportsdb.com", 
+      "thesportsdb.com",
+      "placehold.co"
+    ],
   },
 };
 

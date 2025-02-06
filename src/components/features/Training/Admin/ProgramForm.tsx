@@ -79,7 +79,7 @@ export default function ProgramForm({ initialData, exercises }: ProgramFormProps
       // Get the current session
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       if (sessionError) throw new Error('Authentication error: ' + sessionError.message);
-      if (!session) throw new Error('No active session');
+      if (!session?.user?.id) throw new Error('No active session');
 
       // First, create or update the training program
       let programId: string;
@@ -102,16 +102,17 @@ export default function ProgramForm({ initialData, exercises }: ProgramFormProps
         // Create new program
         const { data: program, error: insertError } = await supabase
           .from('training_programs')
-          .insert([{
+          .insert({
             ...formData,
             author_id: session.user.id,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          }])
+          })
           .select()
           .single();
 
-        if (insertError) throw new Error('Error creating program: ' + insertError.message);
+        if (insertError) {
+          console.error('Program insert error:', insertError);
+          throw new Error('Error creating program: ' + insertError.message);
+        }
         if (!program) throw new Error('No program data returned');
         programId = program.id;
       }
@@ -121,33 +122,44 @@ export default function ProgramForm({ initialData, exercises }: ProgramFormProps
         // Create workout
         const { data: workoutData, error: workoutError } = await supabase
           .from('program_workouts')
-          .insert([{
+          .insert({
             program_id: programId,
             title: workout.title,
-            description: workout.description,
+            description: workout.description || '',
             week_number: workout.week_number,
             day_number: workout.day_number,
             duration_minutes: workout.duration_minutes,
-          }])
+          })
           .select()
           .single();
 
-        if (workoutError) throw new Error('Error creating workout: ' + workoutError.message);
+        if (workoutError) {
+          console.error('Workout insert error:', workoutError);
+          throw new Error('Error creating workout: ' + workoutError.message);
+        }
         if (!workoutData) throw new Error('No workout data returned');
 
         // Create workout exercises
         if (workout.exercises.length > 0) {
+          const exercisesData = workout.exercises.map(exercise => ({
+            workout_id: workoutData.id,
+            exercise_id: exercise.exercise_id,
+            sets: exercise.sets,
+            reps: exercise.reps || null,
+            duration_seconds: exercise.duration_seconds || null,
+            rest_seconds: exercise.rest_seconds,
+            notes: exercise.notes || '',
+            order_index: exercise.order_index
+          }));
+
           const { error: exercisesError } = await supabase
             .from('workout_exercises')
-            .insert(
-              workout.exercises.map(exercise => ({
-                workout_id: workoutData.id,
-                ...exercise,
-                created_at: new Date().toISOString(),
-              }))
-            );
+            .insert(exercisesData);
 
-          if (exercisesError) throw new Error('Error creating workout exercises: ' + exercisesError.message);
+          if (exercisesError) {
+            console.error('Exercise insert error:', exercisesError);
+            throw new Error('Error creating workout exercises: ' + exercisesError.message);
+          }
         }
       }
 

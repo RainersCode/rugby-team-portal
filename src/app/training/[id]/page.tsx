@@ -16,25 +16,28 @@ import {
   RotateCcw
 } from 'lucide-react';
 import { TrainingProgram, ProgramWorkout, WorkoutExercise } from '@/types';
+import { Metadata } from 'next';
 
 export const dynamic = 'force-dynamic';
 
+interface PageProps {
+  params: {
+    id: string;
+  };
+}
+
 async function getProgram(id: string) {
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const supabase = createServerComponentClient({ cookies: () => cookieStore });
   
   const { data: program, error } = await supabase
-    .from('training_programs')
-    .select(`
-      *,
-      author:author_id (
-        email
-      )
-    `)
+    .from('training_programs_with_authors')
+    .select('*')
     .eq('id', id)
     .single();
 
   if (error || !program) {
+    console.error('Error fetching program:', error);
     return null;
   }
 
@@ -42,33 +45,33 @@ async function getProgram(id: string) {
 }
 
 async function getProgramWorkouts(programId: string) {
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const supabase = createServerComponentClient({ cookies: () => cookieStore });
   
-  const { data: workouts } = await supabase
+  const { data: workouts, error } = await supabase
     .from('program_workouts')
     .select(`
       *,
       workout_exercises (
         *,
-        exercise (
-          *
-        )
+        exercise:exercise_id (*)
       )
     `)
     .eq('program_id', programId)
     .order('week_number', { ascending: true })
     .order('day_number', { ascending: true });
 
+  if (error) {
+    console.error('Error fetching workouts:', error);
+    return [];
+  }
+
   return workouts || [];
 }
 
-export default async function ProgramPage({
-  params
-}: {
-  params: { id: string }
-}) {
+export default async function ProgramPage({ params }: PageProps) {
   const program = await getProgram(params.id);
+  
   if (!program) {
     notFound();
   }
@@ -76,20 +79,20 @@ export default async function ProgramPage({
   const workouts = await getProgramWorkouts(params.id);
 
   // Group workouts by week
-  const workoutsByWeek = workouts.reduce((acc, workout) => {
+  const workoutsByWeek = workouts.reduce<Record<number, ProgramWorkout[]>>((acc, workout) => {
     if (!acc[workout.week_number]) {
       acc[workout.week_number] = [];
     }
     acc[workout.week_number].push(workout);
     return acc;
-  }, {} as Record<number, (ProgramWorkout & { workout_exercises: (WorkoutExercise & { exercise: any })[] })[]]); 
+  }, {});
 
   return (
     <div className="container-width mx-auto px-4 py-8">
       {/* Program Header */}
       <div className="relative h-64 rounded-xl overflow-hidden mb-8">
         <Image
-          src={program.image_url || '/images/default-program.jpg'}
+          src={program.image_url || 'https://placehold.co/600x400/1a365d/ffffff?text=Training+Program'}
           alt={program.title}
           fill
           className="object-cover"
@@ -143,60 +146,59 @@ export default async function ProgramPage({
           Training Schedule
         </h2>
 
-        <Tabs defaultValue="1" className="w-full">
-          <TabsList className="w-full flex flex-wrap gap-2 mb-8">
-            {Object.keys(workoutsByWeek).map((week) => (
-              <TabsTrigger 
-                key={week} 
-                value={week}
-                className="gap-2"
-              >
-                <Calendar className="w-4 h-4" />
-                Week {week}
-              </TabsTrigger>
-            ))}
-          </TabsList>
+        {Object.keys(workoutsByWeek).length > 0 ? (
+          <Tabs defaultValue={Object.keys(workoutsByWeek)[0]} className="w-full">
+            <TabsList className="w-full flex flex-wrap gap-2 mb-8">
+              {Object.keys(workoutsByWeek).map((week) => (
+                <TabsTrigger 
+                  key={week} 
+                  value={week}
+                  className="gap-2"
+                >
+                  <Calendar className="w-4 h-4" />
+                  Week {week}
+                </TabsTrigger>
+              ))}
+            </TabsList>
 
-          {Object.entries(workoutsByWeek).map(([week, workouts]) => (
-            <TabsContent key={week} value={week}>
-              <div className="space-y-6">
-                {workouts.map((workout) => (
-                  <Card key={workout.id} className="p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <div>
-                        <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-1">
-                          {workout.title}
-                        </h3>
-                        <div className="flex items-center gap-4 text-sm text-gray-500">
-                          <div className="flex items-center gap-1">
-                            <Timer className="w-4 h-4" />
-                            <span>{workout.duration_minutes} minutes</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Calendar className="w-4 h-4" />
-                            <span>Day {workout.day_number}</span>
+            {Object.entries(workoutsByWeek).map(([week, workouts]) => (
+              <TabsContent key={week} value={week}>
+                <div className="space-y-6">
+                  {workouts.map((workout) => (
+                    <Card key={workout.id} className="p-6">
+                      <div className="flex items-start justify-between mb-4">
+                        <div>
+                          <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                            {workout.title}
+                          </h3>
+                          <div className="flex items-center gap-4 text-sm text-gray-500">
+                            <div className="flex items-center gap-1">
+                              <Timer className="w-4 h-4" />
+                              <span>{workout.duration_minutes} minutes</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Calendar className="w-4 h-4" />
+                              <span>Day {workout.day_number}</span>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
 
-                    {workout.description && (
-                      <p className="text-gray-600 dark:text-gray-300 text-sm mb-6">
-                        {workout.description}
-                      </p>
-                    )}
+                      {workout.description && (
+                        <p className="text-gray-600 dark:text-gray-300 text-sm mb-6">
+                          {workout.description}
+                        </p>
+                      )}
 
-                    {/* Exercises */}
-                    <div className="space-y-4">
-                      {workout.workout_exercises
-                        .sort((a, b) => a.order_index - b.order_index)
-                        .map((workoutExercise) => (
+                      {/* Exercises */}
+                      <div className="space-y-4">
+                        {workout.workout_exercises?.map((workoutExercise) => (
                           <div 
                             key={workoutExercise.id}
                             className="flex items-center gap-4 p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50"
                           >
                             {/* Exercise Image */}
-                            {workoutExercise.exercise.image_url && (
+                            {workoutExercise.exercise?.image_url && (
                               <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
                                 <Image
                                   src={workoutExercise.exercise.image_url}
@@ -210,7 +212,7 @@ export default async function ProgramPage({
                             {/* Exercise Info */}
                             <div className="flex-1">
                               <h4 className="font-medium text-gray-900 dark:text-gray-100">
-                                {workoutExercise.exercise.name}
+                                {workoutExercise.exercise?.name}
                               </h4>
                               <div className="flex items-center gap-3 text-sm text-gray-500 mt-1">
                                 {workoutExercise.sets && (
@@ -238,7 +240,7 @@ export default async function ProgramPage({
                             </div>
 
                             {/* Video Tutorial */}
-                            {workoutExercise.exercise.video_url && (
+                            {workoutExercise.exercise?.video_url && (
                               <Link
                                 href={workoutExercise.exercise.video_url}
                                 target="_blank"
@@ -250,13 +252,18 @@ export default async function ProgramPage({
                             )}
                           </div>
                         ))}
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            </TabsContent>
-          ))}
-        </Tabs>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              </TabsContent>
+            ))}
+          </Tabs>
+        ) : (
+          <Card className="p-6 text-center text-gray-500">
+            No workouts have been added to this program yet.
+          </Card>
+        )}
       </div>
     </div>
   );

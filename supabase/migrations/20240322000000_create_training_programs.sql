@@ -46,6 +46,13 @@ CREATE TABLE public.training_programs (
   author_id UUID REFERENCES auth.users(id) ON DELETE SET NULL
 );
 
+-- Add foreign key reference to profiles
+ALTER TABLE public.training_programs
+  ADD CONSTRAINT fk_training_programs_author
+  FOREIGN KEY (author_id)
+  REFERENCES public.profiles(id)
+  ON DELETE SET NULL;
+
 -- Create program workouts table (for organizing exercises into workouts within a program)
 CREATE TABLE public.program_workouts (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
