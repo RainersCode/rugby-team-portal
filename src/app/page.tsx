@@ -206,6 +206,30 @@ export default async function Home() {
         upcomingMatches={upcomingMatches || []}
         completedMatches={completedMatches || []}
       />
+
+      {/* Sponsors Section */}
+      <section className="container-width bg-gray-50 dark:bg-gray-900 py-16">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+            Our Sponsors
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400">
+            Proud partners who support our rugby community
+          </p>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 items-center justify-items-center">
+          {[1, 2, 3, 4, 5, 6, 7].map((num) => (
+            <div key={num} className="relative w-48 h-24">
+              <Image
+                src={`/logo/${num === 1 ? 'Sponsor' : 'Sponsoru'} logo ${num}.png`}
+                alt={`Sponsor ${num}`}
+                fill
+                className="object-contain filter hover:brightness-110 transition-all duration-300"
+              />
+            </div>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }

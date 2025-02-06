@@ -73,22 +73,34 @@ export function Header() {
             </Link>
           </div>
           <nav className="flex items-center space-x-2">
-            {mainNavItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`relative px-4 py-2 text-sm font-medium transition-all duration-200 hover:scale-105 ${
-                  pathname === item.href
-                    ? "text-primary"
-                    : "text-foreground/60 hover:text-foreground"
-                }`}
-              >
-                {item.label}
-                {pathname === item.href && (
-                  <span className="absolute inset-x-1 -bottom-px h-px bg-gradient-to-r from-primary/0 via-primary to-primary/0" />
-                )}
-              </Link>
-            ))}
+            {mainNavItems.map((item) => {
+              const isActive = 
+                item.href === '/' 
+                  ? pathname === '/'
+                  : pathname.startsWith(item.href);
+              
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`relative px-4 py-2 text-sm font-medium transition-all duration-200 hover:scale-105 group ${
+                    isActive
+                      ? "text-blue-500"
+                      : "text-foreground/60 hover:text-foreground"
+                  }`}
+                >
+                  {item.label}
+                  {isActive ? (
+                    <>
+                      <span className="absolute inset-x-1 -bottom-px h-0.5 bg-gradient-to-r from-blue-600 via-blue-400 to-blue-600 animate-shimmer" />
+                      <span className="absolute -inset-1 rounded-lg bg-blue-500/10 scale-90" />
+                    </>
+                  ) : (
+                    <span className="absolute inset-x-1 -bottom-px h-0.5 bg-gradient-to-r from-blue-500 to-blue-300 scale-x-0 transition-transform duration-300 group-hover:scale-x-100" />
+                  )}
+                </Link>
+              );
+            })}
           </nav>
           <div className="flex items-center space-x-6 flex-shrink-0">
             <ThemeToggle />

@@ -111,19 +111,6 @@ export default function ContactPage() {
                 </div>
               </div>
             </div>
-
-            {/* Map Section */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-lg">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-                Find Us
-              </h2>
-              <div className="aspect-video rounded-lg overflow-hidden bg-gray-200 dark:bg-gray-700">
-                {/* Replace with your actual map implementation */}
-                <div className="w-full h-full flex items-center justify-center text-gray-500">
-                  Map will be displayed here
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* Contact Form */}
