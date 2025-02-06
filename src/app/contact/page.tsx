@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Mail, Phone, MapPin, Clock, Send } from "lucide-react";
+import { toast } from "sonner";
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -10,11 +11,42 @@ export default function ContactPage() {
     subject: "",
     message: "",
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Here you would typically handle the form submission
-    console.log("Form submitted:", formData);
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to send message");
+      }
+
+      // Clear form
+      setFormData({
+        name: "",
+        email: "",
+        subject: "",
+        message: "",
+      });
+
+      toast.success("Message sent successfully! We'll get back to you soon.");
+    } catch (error) {
+      toast.error("Failed to send message. Please try again later.");
+      console.error("Error sending message:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (
@@ -189,10 +221,17 @@ export default function ContactPage() {
               </div>
               <button
                 type="submit"
-                className="w-full flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-primary-blue rounded-lg hover:bg-primary-blue/90 transition-colors duration-300"
+                disabled={isSubmitting}
+                className="w-full flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-primary-blue rounded-lg hover:bg-primary-blue/90 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Send Message
-                <Send className="w-5 h-5 ml-2" />
+                {isSubmitting ? (
+                  "Sending..."
+                ) : (
+                  <>
+                    Send Message
+                    <Send className="w-5 h-5 ml-2" />
+                  </>
+                )}
               </button>
             </form>
           </div>
