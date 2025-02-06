@@ -44,8 +44,9 @@ export default function AboutPageClient({ aboutData, isAdmin }: AboutPageProps) 
 
   if (!aboutData) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-xl text-muted-foreground">Loading about page content...</p>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-background">
+        <Shield className="h-12 w-12 text-primary animate-pulse mb-4" />
+        <p className="text-xl text-foreground animate-pulse">Loading team information...</p>
       </div>
     )
   }

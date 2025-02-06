@@ -43,6 +43,22 @@ export interface Player {
   };
 }
 
+export interface MatchEvent {
+  type: 'try' | 'conversion' | 'penalty' | 'drop_goal';
+  team: 'home' | 'away';
+  player: string;
+  minute: number;
+  points: number;
+}
+
+export interface PlayerCard {
+  type: 'yellow' | 'red';
+  team: 'home' | 'away';
+  player: string;
+  minute: number;
+  reason: string;
+}
+
 export interface Match {
   id: string;
   home_team: string;
@@ -55,6 +71,9 @@ export interface Match {
   home_score?: number;
   away_score?: number;
   status: 'upcoming' | 'live' | 'completed';
+  description?: string;
+  match_events?: MatchEvent[];
+  player_cards?: PlayerCard[];
 }
 
 export interface Product {

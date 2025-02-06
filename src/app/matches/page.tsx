@@ -2,186 +2,64 @@ import Image from 'next/image';
 import { format } from 'date-fns';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CalendarDays, MapPin } from 'lucide-react';
-import { Match } from '@/types';
+import { CalendarDays, MapPin, ChevronDown, ChevronUp } from 'lucide-react';
+import { Match, MatchEvent, PlayerCard } from '@/types';
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import MatchCard from '@/components/features/Matches/MatchCard';
 
-function MatchCard({ match }: { match: Match }) {
-  const isCompleted = match.status === 'completed';
-  const isLive = match.status === 'live';
-  const isApiMatch = match.id.toString().length > 5; // API matches have longer IDs
-  
-  if (isApiMatch) {
-    // Compact style for API rugby matches
+function RugbyLeagueSection({ 
+  title, 
+  upcomingMatches, 
+  pastMatches 
+}: { 
+  title: string;
+  upcomingMatches: Match[];
+  pastMatches: Match[];
+}) {
     return (
-      <Card className="overflow-hidden hover:shadow-sm transition-all duration-300">
-        <div className="p-3">
-          {/* Competition & Status */}
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-xs font-medium text-primary-blue">
-              {match.competition}
-            </span>
-            <Badge 
-              variant={isLive ? "destructive" : isCompleted ? "secondary" : "default"}
-              className={`text-xs px-2 py-0.5 ${isLive ? 'animate-pulse bg-red-500 text-white' : ''}`}
-            >
-              {isLive ? 'LIVE' : match.status.charAt(0).toUpperCase() + match.status.slice(1)}
-            </Badge>
-          </div>
-
-          {/* Teams & Score */}
-          <div className="flex items-center justify-between gap-2 mb-2">
-            {/* Home Team */}
-            <div className="flex-1 flex items-center gap-2">
-              <div className="relative w-6 h-6 flex-shrink-0">
-                <Image
-                  src={match.home_team_image}
-                  alt={match.home_team}
-                  fill
-                  className="object-contain"
-                />
-              </div>
-              <span className="text-sm truncate">{match.home_team}</span>
-            </div>
-
-            {/* Score/VS */}
-            <div className="flex items-center justify-center min-w-[40px]">
-              {isCompleted ? (
-                <span className="text-sm font-medium">
-                  {match.home_score} - {match.away_score}
-                </span>
-              ) : isLive ? (
-                <span className="text-sm font-bold text-red-500">
-                  {match.home_score} - {match.away_score}
-                </span>
-              ) : (
-                <span className="text-sm text-gray-500">vs</span>
-              )}
-            </div>
-
-            {/* Away Team */}
-            <div className="flex-1 flex items-center gap-2 justify-end">
-              <span className="text-sm truncate">{match.away_team}</span>
-              <div className="relative w-6 h-6 flex-shrink-0">
-                <Image
-                  src={match.away_team_image}
-                  alt={match.away_team}
-                  fill
-                  className="object-contain"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Match Details */}
-          <div className="flex items-center justify-between text-xs text-gray-500">
-            <div className="flex items-center gap-1">
-              <CalendarDays className="w-3 h-3" />
-              <span>{format(new Date(match.match_date), 'MMM d, HH:mm')}</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <MapPin className="w-3 h-3" />
-              <span className="truncate max-w-[150px]">{match.venue}</span>
-            </div>
-          </div>
+    <>
+      {/* Upcoming Matches */}
+      <section className="mb-12">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">
+          Upcoming {title} Matches
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {upcomingMatches.map((match: Match, index: number) => (
+            <MatchCard 
+              key={`upcoming_${match.id}_${index}`} 
+              match={match} 
+              isLocalMatch={false} 
+              variant="default"
+            />
+          ))}
+          {upcomingMatches.length === 0 && (
+            <p className="text-gray-500 dark:text-gray-400">No upcoming matches scheduled.</p>
+          )}
         </div>
-      </Card>
-    );
-  }
+      </section>
 
-  // Original style for database matches
-  return (
-    <Card className={`overflow-hidden hover:shadow-lg transition-all duration-300 ${
-      isLive ? 'ring-2 ring-red-500 shadow-lg' : ''
-    }`}>
-      {/* Competition & Status */}
-      <div className="bg-gray-50 dark:bg-gray-800 px-4 py-2 flex justify-between items-center border-b">
-        <span className="text-sm font-medium text-primary-blue">
-          {match.competition}
-        </span>
-        <Badge 
-          variant={isLive ? "destructive" : isCompleted ? "secondary" : "default"}
-          className={isLive ? 'animate-pulse bg-red-500 text-white' : ''}
-        >
-          {isLive ? 'LIVE NOW' : match.status.charAt(0).toUpperCase() + match.status.slice(1)}
-        </Badge>
-      </div>
-
-      <div className="p-4">
-        {/* Teams & Score */}
-        <div className="flex items-center justify-between gap-4 mb-4">
-          {/* Home Team */}
-          <div className="flex-1 flex flex-col items-center text-center">
-            <div className="relative w-16 h-16 mb-2">
-              <Image
-                src={match.home_team_image}
-                alt={match.home_team}
-                fill
-                className="object-contain"
-              />
-            </div>
-            <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">{match.home_team}</h3>
-            {isLive && (
-              <div className="mt-1 text-lg font-bold text-gray-900 dark:text-gray-100">
-                {match.home_score}
-              </div>
-            )}
-          </div>
-
-          {/* Score/VS */}
-          <div className="flex flex-col items-center justify-center min-w-[80px]">
-            {isCompleted ? (
-              <div className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                {match.home_score} - {match.away_score}
-              </div>
-            ) : isLive ? (
-              <div className="flex flex-col items-center gap-1">
-                <div className="text-2xl font-bold text-red-500">
-                  {match.home_score} - {match.away_score}
-                </div>
-                <span className="text-xs font-semibold text-red-500 bg-red-100 dark:bg-red-900/30 px-2 py-0.5 rounded-full animate-pulse">
-                  LIVE
-                </span>
-              </div>
-            ) : (
-              <div className="text-lg font-medium text-gray-500">VS</div>
-            )}
-          </div>
-
-          {/* Away Team */}
-          <div className="flex-1 flex flex-col items-center text-center">
-            <div className="relative w-16 h-16 mb-2">
-              <Image
-                src={match.away_team_image}
-                alt={match.away_team}
-                fill
-                className="object-contain"
-              />
-            </div>
-            <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">{match.away_team}</h3>
-            {isLive && (
-              <div className="mt-1 text-lg font-bold text-gray-900 dark:text-gray-100">
-                {match.away_score}
-              </div>
-            )}
-          </div>
+      {/* Past Matches */}
+      <section>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">
+          Past {title} Matches
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {pastMatches.map((match: Match, index: number) => (
+            <MatchCard 
+              key={`past_${match.id}_${index}`} 
+              match={match} 
+              isLocalMatch={false} 
+              variant="default"
+            />
+          ))}
+          {pastMatches.length === 0 && (
+            <p className="text-gray-500 dark:text-gray-400">No past matches available.</p>
+          )}
         </div>
-
-        {/* Match Details */}
-        <div className="flex flex-col gap-1.5 text-sm text-gray-500 dark:text-gray-400">
-          <div className="flex items-center gap-2">
-            <CalendarDays className="w-4 h-4" />
-            <span>{format(new Date(match.match_date), 'MMM d, yyyy • HH:mm')}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <MapPin className="w-4 h-4" />
-            <span>{match.venue}</span>
-          </div>
-        </div>
-      </div>
-    </Card>
+      </section>
+    </>
   );
 }
 
@@ -287,7 +165,12 @@ export default async function MatchesPage() {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {upcomingDbMatches.map((match: Match, index: number) => (
-                <MatchCard key={`upcoming_local_${match.id}_${index}`} match={match} />
+                <MatchCard 
+                  key={`upcoming_local_${match.id}_${index}`} 
+                  match={match} 
+                  isLocalMatch={true} 
+                  variant="default"
+                />
               ))}
               {upcomingDbMatches.length === 0 && (
                 <p className="text-gray-500 dark:text-gray-400">No upcoming local matches scheduled.</p>
@@ -302,7 +185,12 @@ export default async function MatchesPage() {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {pastDbMatches.map((match: Match, index: number) => (
-                <MatchCard key={`past_local_${match.id}_${index}`} match={match} />
+                <MatchCard 
+                  key={`past_local_${match.id}_${index}`} 
+                  match={match} 
+                  isLocalMatch={true} 
+                  variant="default"
+                />
               ))}
               {pastDbMatches.length === 0 && (
                 <p className="text-gray-500 dark:text-gray-400">No past local matches available.</p>
@@ -380,49 +268,5 @@ export default async function MatchesPage() {
         </TabsContent>
       </Tabs>
     </div>
-  );
-}
-
-function RugbyLeagueSection({ 
-  title, 
-  upcomingMatches, 
-  pastMatches 
-}: { 
-  title: string;
-  upcomingMatches: Match[];
-  pastMatches: Match[];
-}) {
-  return (
-    <>
-      {/* Upcoming Matches */}
-      <section className="mb-12">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">
-          Upcoming {title} Matches
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {upcomingMatches.map((match: Match, index: number) => (
-            <MatchCard key={`upcoming_${match.id}_${index}`} match={match} />
-          ))}
-          {upcomingMatches.length === 0 && (
-            <p className="text-gray-500 dark:text-gray-400">No upcoming matches scheduled.</p>
-          )}
-        </div>
-      </section>
-
-      {/* Past Matches */}
-      <section>
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">
-          Past {title} Matches
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {pastMatches.map((match: Match, index: number) => (
-            <MatchCard key={`past_${match.id}_${index}`} match={match} />
-          ))}
-          {pastMatches.length === 0 && (
-            <p className="text-gray-500 dark:text-gray-400">No past matches available.</p>
-          )}
-        </div>
-      </section>
-    </>
   );
 } 

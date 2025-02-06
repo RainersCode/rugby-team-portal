@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
@@ -12,6 +13,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { ImageUpload } from '@/components/ui/image-upload';
+import { MatchEvent, PlayerCard } from '@/types';
+import { Plus, Trash2 } from 'lucide-react';
 
 interface MatchFormProps {
   initialData?: {
@@ -25,6 +28,9 @@ interface MatchFormProps {
     status: 'upcoming' | 'live' | 'completed';
     home_score?: number;
     away_score?: number;
+    description?: string;
+    match_events?: MatchEvent[];
+    player_cards?: PlayerCard[];
   };
   onSubmit: (data: any) => void;
   isSubmitting: boolean;
@@ -42,6 +48,9 @@ export default function MatchForm({ initialData, onSubmit, isSubmitting }: Match
     status: initialData?.status || 'upcoming',
     home_score: initialData?.home_score || 0,
     away_score: initialData?.away_score || 0,
+    description: initialData?.description || '',
+    match_events: initialData?.match_events || [],
+    player_cards: initialData?.player_cards || [],
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -54,8 +63,79 @@ export default function MatchForm({ initialData, onSubmit, isSubmitting }: Match
     });
   };
 
+  const addMatchEvent = () => {
+    setFormData(prev => ({
+      ...prev,
+      match_events: [...prev.match_events, {
+        type: 'try',
+        team: 'home',
+        player: '',
+        minute: 0,
+        points: 5
+      }]
+    }));
+  };
+
+  const updateMatchEvent = (index: number, field: keyof MatchEvent, value: any) => {
+    const newEvents = [...formData.match_events];
+    newEvents[index] = { ...newEvents[index], [field]: value };
+    
+    // Update points based on event type
+    if (field === 'type') {
+      switch (value) {
+        case 'try':
+          newEvents[index].points = 5;
+          break;
+        case 'conversion':
+          newEvents[index].points = 2;
+          break;
+        case 'penalty':
+          newEvents[index].points = 3;
+          break;
+        case 'drop_goal':
+          newEvents[index].points = 3;
+          break;
+      }
+    }
+    
+    setFormData(prev => ({ ...prev, match_events: newEvents }));
+  };
+
+  const removeMatchEvent = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      match_events: prev.match_events.filter((_, i) => i !== index)
+    }));
+  };
+
+  const addPlayerCard = () => {
+    setFormData(prev => ({
+      ...prev,
+      player_cards: [...prev.player_cards, {
+        type: 'yellow',
+        team: 'home',
+        player: '',
+        minute: 0,
+        reason: ''
+      }]
+    }));
+  };
+
+  const updatePlayerCard = (index: number, field: keyof PlayerCard, value: any) => {
+    const newCards = [...formData.player_cards];
+    newCards[index] = { ...newCards[index], [field]: value };
+    setFormData(prev => ({ ...prev, player_cards: newCards }));
+  };
+
+  const removePlayerCard = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      player_cards: prev.player_cards.filter((_, i) => i !== index)
+    }));
+  };
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-8">
       {/* Home Team */}
       <div className="space-y-4">
         <div>
@@ -179,6 +259,150 @@ export default function MatchForm({ initialData, onSubmit, isSubmitting }: Match
           </div>
         </div>
       )}
+
+      {/* Match Description */}
+      <div className="space-y-2">
+        <Label htmlFor="description">Match Description</Label>
+        <Textarea
+          id="description"
+          value={formData.description}
+          onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+          placeholder="Enter match description and summary..."
+          className="h-32"
+        />
+      </div>
+
+      {/* Match Events */}
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <Label>Match Events</Label>
+          <Button type="button" variant="outline" size="sm" onClick={addMatchEvent}>
+            <Plus className="w-4 h-4 mr-2" />
+            Add Event
+          </Button>
+        </div>
+        <div className="space-y-4">
+          {formData.match_events.map((event, index) => (
+            <div key={index} className="flex gap-2 items-start">
+              <Select
+                value={event.type}
+                onValueChange={(value) => updateMatchEvent(index, 'type', value)}
+              >
+                <SelectTrigger className="w-[120px]">
+                  <SelectValue placeholder="Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="try">Try</SelectItem>
+                  <SelectItem value="conversion">Conversion</SelectItem>
+                  <SelectItem value="penalty">Penalty</SelectItem>
+                  <SelectItem value="drop_goal">Drop Goal</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select
+                value={event.team}
+                onValueChange={(value) => updateMatchEvent(index, 'team', value)}
+              >
+                <SelectTrigger className="w-[120px]">
+                  <SelectValue placeholder="Team" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="home">Home</SelectItem>
+                  <SelectItem value="away">Away</SelectItem>
+                </SelectContent>
+              </Select>
+              <Input
+                placeholder="Player Name"
+                value={event.player}
+                onChange={(e) => updateMatchEvent(index, 'player', e.target.value)}
+                className="flex-1"
+              />
+              <Input
+                type="number"
+                placeholder="Minute"
+                value={event.minute}
+                onChange={(e) => updateMatchEvent(index, 'minute', parseInt(e.target.value))}
+                className="w-[100px]"
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => removeMatchEvent(index)}
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Player Cards */}
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <Label>Player Cards</Label>
+          <Button type="button" variant="outline" size="sm" onClick={addPlayerCard}>
+            <Plus className="w-4 h-4 mr-2" />
+            Add Card
+          </Button>
+        </div>
+        <div className="space-y-4">
+          {formData.player_cards.map((card, index) => (
+            <div key={index} className="flex gap-2 items-start">
+              <Select
+                value={card.type}
+                onValueChange={(value) => updatePlayerCard(index, 'type', value)}
+              >
+                <SelectTrigger className="w-[120px]">
+                  <SelectValue placeholder="Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="yellow">Yellow</SelectItem>
+                  <SelectItem value="red">Red</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select
+                value={card.team}
+                onValueChange={(value) => updatePlayerCard(index, 'team', value)}
+              >
+                <SelectTrigger className="w-[120px]">
+                  <SelectValue placeholder="Team" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="home">Home</SelectItem>
+                  <SelectItem value="away">Away</SelectItem>
+                </SelectContent>
+              </Select>
+              <Input
+                placeholder="Player Name"
+                value={card.player}
+                onChange={(e) => updatePlayerCard(index, 'player', e.target.value)}
+                className="flex-1"
+              />
+              <Input
+                type="number"
+                placeholder="Minute"
+                value={card.minute}
+                onChange={(e) => updatePlayerCard(index, 'minute', parseInt(e.target.value))}
+                className="w-[100px]"
+              />
+              <Input
+                placeholder="Reason"
+                value={card.reason}
+                onChange={(e) => updatePlayerCard(index, 'reason', e.target.value)}
+                className="flex-1"
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => removePlayerCard(index)}
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            </div>
+          ))}
+        </div>
+      </div>
 
       <Button type="submit" disabled={isSubmitting}>
         {isSubmitting ? 'Saving...' : 'Save Match'}
