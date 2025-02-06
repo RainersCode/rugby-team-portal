@@ -6,6 +6,8 @@ import LatestMatches from "@/components/features/Matches/LatestMatches";
 import HeroCarousel from "@/components/features/Hero/HeroCarousel";
 import InstagramFeed from "@/components/features/Instagram/InstagramFeed";
 import { Match } from "@/types";
+import FeaturedPrograms from '@/components/features/Training/FeaturedPrograms';
+import { TrainingProgram } from '@/types';
 
 export const revalidate = 3600; // Revalidate every hour
 export const dynamic = "force-dynamic";
@@ -39,6 +41,19 @@ export default async function Home() {
     .lt("match_date", new Date().toISOString())
     .order("match_date", { ascending: false })
     .limit(4);
+
+  // Fetch featured training programs (latest 3 programs)
+  const { data: programsData } = await supabase
+    .from('training_programs_with_authors')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(3);
+
+  // Transform the programs data to include the author field
+  const programs = programsData?.map(program => ({
+    ...program,
+    author: program.author_email ? { email: program.author_email } : null
+  })) || [];
 
   return (
     <div className="space-y-12 pb-12">
@@ -182,6 +197,9 @@ export default async function Home() {
           limit={8}
         />
       </section>
+
+      {/* Featured Training Programs */}
+      <FeaturedPrograms programs={programs as TrainingProgram[]} />
 
       {/* Latest Matches Section */}
       <LatestMatches
