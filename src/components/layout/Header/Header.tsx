@@ -63,7 +63,7 @@ export function Header() {
                 className="text-xl font-bold relative"
                 style={{
                   background:
-                    "linear-gradient(135deg, #3b82f6 0%, #60a5fa 50%, #93c5fd 100%)",
+                    "linear-gradient(135deg, #00796B 0%, #009688 50%, #4DB6AC 100%)",
                   backgroundClip: "text",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
@@ -71,7 +71,7 @@ export function Header() {
                 }}
               >
                 Rugby Club
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-500 to-blue-300 transition-all duration-300 group-hover:w-full" />
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-rugby-teal to-rugby-teal/60 transition-all duration-300 group-hover:w-full" />
               </span>
             </Link>
           </div>
@@ -88,18 +88,18 @@ export function Header() {
                   href={item.href}
                   className={`relative px-4 py-2 text-sm font-medium transition-all duration-200 hover:scale-105 group ${
                     isActive
-                      ? "text-blue-500"
+                      ? "text-rugby-teal"
                       : "text-foreground/60 hover:text-foreground"
                   }`}
                 >
                   {item.label}
                   {isActive ? (
                     <>
-                      <span className="absolute inset-x-1 -bottom-px h-0.5 bg-gradient-to-r from-blue-600 via-blue-400 to-blue-600 animate-shimmer" />
-                      <span className="absolute -inset-1 rounded-lg bg-blue-500/10 scale-90" />
+                      <span className="absolute inset-x-1 -bottom-px h-0.5 bg-gradient-to-r from-rugby-teal via-rugby-teal/80 to-rugby-teal animate-shimmer" />
+                      <span className="absolute -inset-1 rounded-lg bg-rugby-teal/10 scale-90" />
                     </>
                   ) : (
-                    <span className="absolute inset-x-1 -bottom-px h-0.5 bg-gradient-to-r from-blue-500 to-blue-300 scale-x-0 transition-transform duration-300 group-hover:scale-x-100" />
+                    <span className="absolute inset-x-1 -bottom-px h-0.5 bg-gradient-to-r from-rugby-teal to-rugby-teal/60 scale-x-0 transition-transform duration-300 group-hover:scale-x-100" />
                   )}
                 </Link>
               );
@@ -114,7 +114,7 @@ export function Header() {
                 href="/auth/signin"
                 className="group relative inline-flex h-9 items-center justify-center overflow-hidden rounded-full bg-primary px-6 py-2 text-sm font-medium text-primary-foreground transition-all hover:scale-105 duration-200 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary"
               >
-                <span className="absolute inset-0 bg-gradient-to-r from-blue-500 via-blue-400 to-blue-500 opacity-0 transition-opacity group-hover:opacity-100" />
+                <span className="absolute inset-0 bg-gradient-to-r from-rugby-teal via-rugby-teal/80 to-rugby-teal opacity-0 transition-opacity group-hover:opacity-100" />
                 <span className="relative">Sign In</span>
               </Link>
             )}
