@@ -11,7 +11,7 @@ interface PlayerCardProps {
 export default function PlayerCard({ player }: PlayerCardProps) {
   return (
     <Link href={`/team/players/${player.id}`}>
-      <div className="bg-card-bg-light dark:bg-card-bg-dark rounded-lg shadow-md overflow-hidden transition-transform hover:scale-[1.02]">
+      <div className="group relative bg-card-bg-light dark:bg-card-bg-dark rounded-lg shadow-md overflow-hidden transition-transform hover:scale-[1.02] border border-rugby-teal/20 hover:border-rugby-teal">
         <div className="relative h-64">
           <Image
             src={player.image}
@@ -23,12 +23,12 @@ export default function PlayerCard({ player }: PlayerCardProps) {
         <div className="p-4">
           <div className="flex justify-between items-start mb-2">
             <div>
-              <h3 className="text-xl font-bold text-content-light dark:text-content-dark hover:text-primary-blue dark:hover:text-accent-blue transition-colors">
+              <h3 className="text-xl font-bold text-content-light dark:text-content-dark group-hover:text-rugby-teal transition-colors">
                 {player.name}
               </h3>
               <p className="text-content-medium dark:text-content-medium">{player.position}</p>
             </div>
-            <span className="text-3xl font-bold text-primary-blue dark:text-accent-blue">
+            <span className="text-3xl font-bold text-rugby-teal">
               {player.number}
             </span>
           </div>
@@ -71,6 +71,7 @@ export default function PlayerCard({ player }: PlayerCardProps) {
             </div>
           </div>
         </div>
+        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-rugby-teal to-rugby-yellow transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
       </div>
     </Link>
   );

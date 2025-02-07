@@ -54,7 +54,7 @@ export default function HeroCarousel({ articles, nextMatch }: HeroCarouselProps)
             />
             <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center">
               <div className="container-width text-white">
-                <span className="inline-block bg-primary-blue text-white text-sm px-3 py-1 rounded-full mb-4">
+                <span className="inline-block bg-rugby-teal text-white text-sm px-3 py-1 rounded-full mb-4">
                   Latest News
                 </span>
                 <h1 className="text-4xl md:text-5xl font-bold mb-4 line-clamp-2">
@@ -65,9 +65,10 @@ export default function HeroCarousel({ articles, nextMatch }: HeroCarouselProps)
                 </p>
                 <Link
                   href={`/news/${article.slug}`}
-                  className="bg-primary-blue hover:bg-accent-blue text-white px-8 py-3 rounded-full transition-colors inline-block"
+                  className="border-2 border-white hover:bg-white hover:text-rugby-black text-white px-8 py-3 rounded-full transition-all duration-300 inline-flex items-center gap-2 group"
                 >
                   Read More
+                  <ChevronRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
                 </Link>
               </div>
             </div>
@@ -78,10 +79,10 @@ export default function HeroCarousel({ articles, nextMatch }: HeroCarouselProps)
       {/* Next Match Card */}
       {nextMatch && (
         <div className="absolute bottom-16 right-4 md:right-8 lg:right-12 w-[300px] z-10">
-          <Card className="bg-white/95 backdrop-blur-sm shadow-lg hover:scale-[1.02] transition-transform">
+          <Card className="bg-white/95 backdrop-blur-sm shadow-lg hover:scale-[1.02] transition-transform border border-rugby-teal/20">
             <div className="p-4">
               <div className="flex justify-between items-center mb-3">
-                <span className="text-xs font-medium text-primary-blue">
+                <span className="text-xs font-medium text-rugby-teal">
                   Next Match
                 </span>
                 <span className="text-xs text-gray-500">
@@ -100,15 +101,15 @@ export default function HeroCarousel({ articles, nextMatch }: HeroCarouselProps)
                       className="object-contain"
                     />
                   </div>
-                  <span className="text-sm font-medium text-gray-900 line-clamp-1">
+                  <span className="text-sm font-medium text-gray-900 dark:text-gray-100 line-clamp-1">
                     {nextMatch.home_team}
                   </span>
                 </div>
 
                 {/* Match Info */}
                 <div className="flex flex-col items-center">
-                  <span className="text-sm font-bold text-gray-500">VS</span>
-                  <span className="text-xs font-medium text-primary-blue mt-1">
+                  <span className="text-sm font-bold text-rugby-yellow">VS</span>
+                  <span className="text-xs font-medium text-rugby-teal mt-1">
                     {format(new Date(nextMatch.match_date), 'HH:mm')}
                   </span>
                 </div>
@@ -123,16 +124,16 @@ export default function HeroCarousel({ articles, nextMatch }: HeroCarouselProps)
                       className="object-contain"
                     />
                   </div>
-                  <span className="text-sm font-medium text-gray-900 line-clamp-1">
+                  <span className="text-sm font-medium text-gray-900 dark:text-gray-100 line-clamp-1">
                     {nextMatch.away_team}
                   </span>
                 </div>
               </div>
 
-              <div className="mt-3 pt-3 border-t border-gray-100">
-                <div className="flex items-center gap-1 text-xs text-gray-500">
-                  <MapPin className="w-3 h-3" />
-                  <span className="truncate">{nextMatch.venue}</span>
+              <div className="mt-3 pt-3 border-t border-rugby-teal/20">
+                <div className="flex items-center gap-1 text-xs">
+                  <MapPin className="w-3 h-3 text-rugby-red" />
+                  <span className="truncate text-gray-600 dark:text-gray-400">{nextMatch.venue}</span>
                 </div>
               </div>
             </div>
@@ -143,14 +144,14 @@ export default function HeroCarousel({ articles, nextMatch }: HeroCarouselProps)
       {/* Navigation Arrows */}
       <button
         onClick={prevSlide}
-        className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors"
+        className="absolute left-4 top-1/2 -translate-y-1/2 bg-rugby-teal/50 hover:bg-rugby-teal/70 text-white p-2 rounded-full transition-colors"
         aria-label="Previous slide"
       >
         <ChevronLeft className="w-6 h-6" />
       </button>
       <button
         onClick={nextSlide}
-        className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors"
+        className="absolute right-4 top-1/2 -translate-y-1/2 bg-rugby-teal/50 hover:bg-rugby-teal/70 text-white p-2 rounded-full transition-colors"
         aria-label="Next slide"
       >
         <ChevronRight className="w-6 h-6" />
@@ -164,8 +165,8 @@ export default function HeroCarousel({ articles, nextMatch }: HeroCarouselProps)
             onClick={() => setCurrentSlide(index)}
             className={`w-2 h-2 rounded-full transition-all ${
               currentSlide === index 
-                ? 'bg-white w-4' 
-                : 'bg-white/50 hover:bg-white/75'
+                ? 'bg-rugby-yellow w-4' 
+                : 'bg-white/50 hover:bg-rugby-yellow/75'
             }`}
             aria-label={`Go to slide ${index + 1}`}
           />

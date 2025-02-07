@@ -79,26 +79,24 @@ export default async function TrainingPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {programsInCategory.map((program) => (
                     <Link key={program.id} href={`/training/${program.id}`}>
-                      <Card className="group overflow-hidden hover:shadow-lg transition-all duration-300 border-rugby-teal/20">
+                      <Card className="group relative overflow-hidden hover:shadow-lg transition-all duration-300 border-rugby-teal/20 hover:border-rugby-teal">
                         {/* Program Image */}
                         <div className="relative h-48 w-full">
                           <Image
                             src={program.image_url || 'https://placehold.co/600x400/1a365d/ffffff?text=Training+Program'}
                             alt={program.title}
                             fill
-                            className="object-cover"
+                            className="object-cover group-hover:scale-105 transition-transform duration-300"
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                           <Badge 
-                            className="absolute top-4 right-4 capitalize"
-                            variant={
-                              difficulty === 'beginner' ? 'default' :
-                              difficulty === 'intermediate' ? 'secondary' :
-                              difficulty === 'advanced' ? 'destructive' :
-                              'outline'
-                            }
+                            className={`absolute top-4 right-4 capitalize ${
+                              program.difficulty === 'beginner' ? 'bg-rugby-teal text-white hover:bg-rugby-teal/90' :
+                              program.difficulty === 'intermediate' ? 'bg-rugby-yellow/10 text-rugby-yellow hover:bg-rugby-yellow/20' :
+                              'bg-rugby-red/10 text-rugby-red hover:bg-rugby-red/20'
+                            }`}
                           >
-                            {difficulty}
+                            {program.difficulty}
                           </Badge>
                         </div>
 
@@ -118,11 +116,7 @@ export default async function TrainingPage() {
                               <span>{program.duration_weeks} weeks</span>
                             </div>
                             <div className="flex items-center gap-1">
-                              <Dumbbell className="w-4 h-4 text-rugby-red" />
-                              <span>3-5 workouts/week</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Users className="w-4 h-4 text-rugby-yellow" />
+                              <Users className="w-4 h-4 text-rugby-red" />
                               <span>{program.target_audience}</span>
                             </div>
                           </div>
@@ -136,6 +130,7 @@ export default async function TrainingPage() {
                           </div>
                         </div>
 
+                        {/* Hover effect line */}
                         <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-rugby-teal to-rugby-yellow transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
                       </Card>
                     </Link>

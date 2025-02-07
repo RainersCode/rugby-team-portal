@@ -104,13 +104,11 @@ export default async function ProgramPage({ params }: PageProps) {
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent" />
         <div className="absolute bottom-0 left-0 right-0 p-8">
           <Badge 
-            className="mb-4 capitalize"
-            variant={
-              program.difficulty === 'beginner' ? 'default' :
-              program.difficulty === 'intermediate' ? 'secondary' :
-              program.difficulty === 'advanced' ? 'destructive' :
-              'outline'
-            }
+            className={`mb-4 capitalize ${
+              program.difficulty === 'beginner' ? 'bg-rugby-teal text-white hover:bg-rugby-teal/90' :
+              program.difficulty === 'intermediate' ? 'bg-rugby-yellow/10 text-rugby-yellow hover:bg-rugby-yellow/20' :
+              'bg-rugby-red/10 text-rugby-red hover:bg-rugby-red/20'
+            }`}
           >
             {program.difficulty}
           </Badge>

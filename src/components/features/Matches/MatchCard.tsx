@@ -165,11 +165,12 @@ export default function MatchCard({ match, isLocalMatch, variant = 'default' }: 
     return (
       <Link href={`/matches/${match.id}`} className="block">
         <Card 
-          className={`overflow-hidden hover:shadow-lg transition-all duration-300 ${
+          className={`group relative overflow-hidden hover:shadow-lg transition-all duration-300 ${
             isLive ? 'ring-2 ring-rugby-red shadow-lg' : 'border-rugby-teal/20'
           } ${variant === 'compact' ? 'p-3' : 'p-4'} hover:border-rugby-teal`}
         >
           {cardContent}
+          <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-rugby-teal to-rugby-yellow transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
         </Card>
       </Link>
     );
@@ -178,11 +179,12 @@ export default function MatchCard({ match, isLocalMatch, variant = 'default' }: 
   // Return without link for non-local matches
   return (
     <Card 
-      className={`overflow-hidden hover:shadow-sm transition-all duration-300 border-rugby-teal/20 hover:border-rugby-teal ${
+      className={`group relative overflow-hidden hover:shadow-sm transition-all duration-300 border-rugby-teal/20 hover:border-rugby-teal ${
         variant === 'compact' ? 'p-3' : 'p-4'
       }`}
     >
       {cardContent}
+      <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-rugby-teal to-rugby-yellow transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
     </Card>
   );
 } 

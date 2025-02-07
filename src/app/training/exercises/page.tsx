@@ -112,7 +112,7 @@ export default async function ExercisesPage() {
                 {(groupedExercises[category] || []).map((exercise) => (
                   <Card 
                     key={exercise.id} 
-                    className="group overflow-hidden hover:shadow-lg transition-all duration-300 border-rugby-teal/20"
+                    className="group relative overflow-hidden hover:shadow-lg transition-all duration-300 border-rugby-teal/20 hover:border-rugby-teal"
                   >
                     {/* Exercise Image */}
                     {exercise.image_url && (
@@ -121,17 +121,15 @@ export default async function ExercisesPage() {
                           src={exercise.image_url}
                           alt={exercise.name}
                           fill
-                          className="object-cover"
+                          className="object-cover group-hover:scale-105 transition-transform duration-300"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                         <Badge 
-                          className="absolute top-4 right-4 capitalize"
-                          variant={
-                            exercise.difficulty === 'beginner' ? 'default' :
-                            exercise.difficulty === 'intermediate' ? 'secondary' :
-                            exercise.difficulty === 'advanced' ? 'destructive' :
-                            'outline'
-                          }
+                          className={`absolute top-4 right-4 capitalize ${
+                            exercise.difficulty === 'beginner' ? 'bg-rugby-teal text-white hover:bg-rugby-teal/90' :
+                            exercise.difficulty === 'intermediate' ? 'bg-rugby-yellow/10 text-rugby-yellow hover:bg-rugby-yellow/20' :
+                            'bg-rugby-red/10 text-rugby-red hover:bg-rugby-red/20'
+                          }`}
                         >
                           {exercise.difficulty}
                         </Badge>
@@ -140,7 +138,7 @@ export default async function ExercisesPage() {
 
                     {/* Exercise Info */}
                     <div className="p-6">
-                      <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2 group-hover:text-rugby-teal transition-colors">
+                      <h3 className="text-xl font-semibold mb-2 group-hover:text-rugby-teal transition-colors">
                         {exercise.name}
                       </h3>
                       <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-2">
@@ -192,6 +190,7 @@ export default async function ExercisesPage() {
                       </div>
                     </div>
 
+                    {/* Hover effect line */}
                     <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-rugby-teal to-rugby-yellow transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
                   </Card>
                 ))}

@@ -68,7 +68,7 @@ export default async function Home() {
           </h2>
           <Link
             href="/news"
-            className="text-primary-blue hover:text-primary-blue/80 font-medium transition-colors"
+            className="text-rugby-teal hover:text-rugby-teal/80 font-medium transition-colors"
           >
             View all news →
           </Link>
@@ -77,42 +77,44 @@ export default async function Home() {
           {articles?.slice(0, 3).map((article) => (
             <article
               key={article.id}
-              className="bg-white rounded-lg shadow-md overflow-hidden"
+              className="group relative bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden border border-rugby-teal/20 hover:border-rugby-teal transition-all duration-300"
             >
-              <div className="relative h-48">
-                <Image
-                  src={article.image}
-                  alt={article.title}
-                  fill
-                  className="object-cover"
-                />
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-bold mt-2 mb-3">{article.title}</h3>
-                <p className="text-gray-600 mb-4">
-                  {article.content.substring(0, 150)}...
-                </p>
-                <Link
-                  href={`/news/${article.slug}`}
-                  className="text-accent-blue hover:text-primary-blue transition-colors font-semibold"
-                >
-                  Read More
-                </Link>
-              </div>
+              <Link href={`/news/${article.slug}`}>
+                <div className="relative h-48">
+                  <Image
+                    src={article.image}
+                    alt={article.title}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <div className="p-6">
+                  <h3 className="text-xl font-bold mt-2 mb-3 text-gray-900 dark:text-gray-100 group-hover:text-rugby-teal transition-colors">{article.title}</h3>
+                  <p className="text-gray-600 dark:text-gray-400 mb-4">
+                    {article.content.substring(0, 150)}...
+                  </p>
+                  <span
+                    className="text-rugby-teal hover:text-rugby-teal/80 transition-colors font-semibold"
+                  >
+                    Read More
+                  </span>
+                </div>
+              </Link>
+              <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-rugby-teal to-rugby-yellow transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
             </article>
           ))}
         </div>
       </section>
 
       {/* Call to Action Section */}
-      <section className="relative py-20 bg-primary-blue overflow-hidden">
+      <section className="relative py-24 bg-rugby-teal overflow-hidden">
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-10">
           <div className="absolute transform -rotate-45 -left-1/4 -top-1/4">
-            <div className="w-96 h-96 rounded-full bg-white"></div>
+            <div className="w-96 h-96 rounded-full bg-rugby-yellow"></div>
           </div>
           <div className="absolute transform -rotate-45 -right-1/4 -bottom-1/4">
-            <div className="w-96 h-96 rounded-full bg-white"></div>
+            <div className="w-96 h-96 rounded-full bg-rugby-yellow"></div>
           </div>
         </div>
 
@@ -126,50 +128,37 @@ export default async function Home() {
               Be part of something special. Train with the best, play with
               passion, and create lasting memories.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+            <div className="flex flex-wrap gap-4 justify-center lg:justify-start">
               <Link
-                href="/members/join"
-                className="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-primary-blue bg-white rounded-lg hover:bg-gray-100 transition-colors duration-300"
+                href="/contact"
+                className="bg-white text-rugby-teal px-8 py-3 rounded-lg hover:bg-white/90 transition-colors font-medium"
               >
-                Join Now
-                <svg
-                  className="w-5 h-5 ml-2"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M17 8l4 4m0 0l-4 4m4-4H3"
-                  />
-                </svg>
+                Get Started
               </Link>
               <Link
-                href="/team"
-                className="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white border-2 border-white rounded-lg hover:bg-white/10 transition-colors duration-300"
+                href="/training"
+                className="bg-rugby-yellow text-rugby-black px-8 py-3 rounded-lg hover:bg-rugby-yellow/90 transition-colors font-medium"
               >
-                Meet the Team
+                View Schedule
               </Link>
             </div>
           </div>
 
-          {/* Image/Stats Section */}
+          {/* Stats Grid */}
           <div className="flex-1 grid grid-cols-2 gap-4 w-full max-w-lg">
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 text-white text-center transform hover:-translate-y-1 transition-transform duration-300">
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 text-white text-center transform hover:-translate-y-1 transition-transform duration-300 border border-white/20">
               <div className="text-4xl font-bold mb-2">15+</div>
               <div className="text-sm opacity-90">Years of Excellence</div>
             </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 text-white text-center transform hover:-translate-y-1 transition-transform duration-300">
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 text-white text-center transform hover:-translate-y-1 transition-transform duration-300 border border-white/20">
               <div className="text-4xl font-bold mb-2">200+</div>
               <div className="text-sm opacity-90">Active Members</div>
             </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 text-white text-center transform hover:-translate-y-1 transition-transform duration-300">
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 text-white text-center transform hover:-translate-y-1 transition-transform duration-300 border border-white/20">
               <div className="text-4xl font-bold mb-2">50+</div>
               <div className="text-sm opacity-90">Annual Matches</div>
             </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 text-white text-center transform hover:-translate-y-1 transition-transform duration-300">
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 text-white text-center transform hover:-translate-y-1 transition-transform duration-300 border border-white/20">
               <div className="text-4xl font-bold mb-2">30+</div>
               <div className="text-sm opacity-90">Trophies Won</div>
             </div>
@@ -199,13 +188,17 @@ export default async function Home() {
       </section>
 
       {/* Featured Training Programs */}
-      <FeaturedPrograms programs={programs as TrainingProgram[]} />
+      {programs.length > 0 && (
+        <FeaturedPrograms programs={programs as TrainingProgram[]} />
+      )}
 
       {/* Latest Matches Section */}
-      <LatestMatches
-        upcomingMatches={upcomingMatches || []}
-        completedMatches={completedMatches || []}
-      />
+      {(upcomingMatches?.length > 0 || completedMatches?.length > 0) && (
+        <LatestMatches
+          upcomingMatches={upcomingMatches || []}
+          completedMatches={completedMatches || []}
+        />
+      )}
 
       {/* Sponsors Section */}
       <section className="container-width bg-gray-50 dark:bg-gray-900 py-16">
@@ -219,7 +212,10 @@ export default async function Home() {
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 items-center justify-items-center">
           {[1, 2, 3, 4, 5, 6, 7].map((num) => (
-            <div key={num} className="relative w-48 h-24">
+            <div 
+              key={num} 
+              className="relative w-48 h-24 bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm hover:shadow-md transition-all duration-300 border border-rugby-teal/20"
+            >
               <Image
                 src={`/logo/${num === 1 ? 'Sponsor' : 'Sponsoru'}${num === 3 ? '_logo' : ' logo'} ${num}.png`}
                 alt={`Sponsor ${num}`}
