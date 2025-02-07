@@ -49,9 +49,32 @@ export function Header() {
     <header className="sticky top-0 z-50">
       <div className="absolute inset-0 bg-card-bg-light/75 dark:bg-card-bg-dark/75 backdrop-blur-md border-b border-gray-200/20 dark:border-gray-800/20" />
       <div className="container-width mx-auto flex h-16 items-center px-4 relative">
-        <div className="md:hidden">
+        {/* Mobile Layout */}
+        <div className="flex w-full items-center justify-between md:hidden">
+          <div className="flex-shrink-0">
+            <Link
+              href="/"
+              className="group flex items-center hover:opacity-90 transition-all duration-200"
+            >
+              <span
+                className="text-xl font-bold relative"
+                style={{
+                  background:
+                    "linear-gradient(135deg, #00796B 0%, #009688 50%, #4DB6AC 100%)",
+                  backgroundClip: "text",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  textShadow: "0 1px 2px rgba(0,0,0,0.1)",
+                }}
+              >
+                Rugby Club
+              </span>
+            </Link>
+          </div>
           <MobileNav />
         </div>
+
+        {/* Desktop Layout */}
         <div className="hidden md:flex w-full items-center justify-between">
           <div className="flex-shrink-0">
             <Link

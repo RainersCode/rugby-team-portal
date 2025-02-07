@@ -5,7 +5,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import type { User } from "@supabase/auth-helpers-nextjs";
-import { ThemeToggle } from "@/components/shared/ThemeToggle";
 import UserNav from "@/components/layout/Header/UserNav";
 import {
   Menu,
@@ -20,12 +19,14 @@ import {
   Facebook,
   ArrowRight,
   Dumbbell,
+  Calendar,
+  Play,
+  Image,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
   SheetContent,
-  SheetHeader,
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
@@ -41,6 +42,9 @@ const mainNavItems = [
   { href: "/team", label: "Team", icon: Users },
   { href: "/matches", label: "Matches", icon: Trophy },
   { href: "/training", label: "Training", icon: Dumbbell },
+  { href: "/activities", label: "Activities", icon: Calendar },
+  { href: "/live", label: "Live", icon: Play },
+  { href: "/gallery", label: "Gallery", icon: Image },
   { href: "/news", label: "News", icon: Newspaper },
   { href: "/about", label: "About", icon: Info },
   { href: "/contact", label: "Contact", icon: Mail },
@@ -50,8 +54,11 @@ const adminNavItems = [
   { href: "/admin", label: "Dashboard" },
   { href: "/admin/players", label: "Players" },
   { href: "/admin/matches", label: "Matches" },
+  { href: "/admin/activities", label: "Activities" },
   { href: "/admin/articles", label: "Articles" },
-  { href: "/admin/users", label: "Users" },
+  { href: "/admin/live", label: "Live Streams" },
+  { href: "/admin/gallery", label: "Gallery" },
+  { href: "/admin/about", label: "About" },
 ];
 
 const socialLinks = [
@@ -130,8 +137,8 @@ export function MobileNav() {
         </Button>
       </SheetTrigger>
       <SheetContent
-        side="left"
-        className="w-[300px] bg-card-bg-light dark:bg-card-bg-dark border-r border-gray-200 dark:border-gray-800 p-0"
+        side="right"
+        className="w-[300px] bg-card-bg-light dark:bg-card-bg-dark border-l border-gray-200 dark:border-gray-800 p-0 transition-transform duration-300 ease-in-out"
       >
         <div className="h-full flex flex-col">
           <div className="p-6 border-b border-gray-200 dark:border-gray-800 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent">
@@ -140,7 +147,7 @@ export function MobileNav() {
                 className="text-2xl font-bold"
                 style={{
                   background:
-                    "linear-gradient(45deg, #2563eb, #3b82f6, #60a5fa)",
+                    "linear-gradient(135deg, #00796B 0%, #009688 50%, #4DB6AC 100%)",
                   backgroundClip: "text",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
@@ -149,14 +156,13 @@ export function MobileNav() {
               >
                 Rugby Club
               </SheetTitle>
-              <div className="flex items-center gap-2">
-                <ThemeToggle />
+              <div className="flex items-center">
                 {user ? (
                   <UserNav user={user} />
                 ) : (
                   <Link
                     href="/auth/signin"
-                    className="text-sm font-medium hover:text-primary"
+                    className="text-sm font-medium text-rugby-teal hover:text-rugby-teal/80"
                     onClick={() => setIsOpen(false)}
                   >
                     Sign In
@@ -173,14 +179,8 @@ export function MobileNav() {
             <div className="px-6 py-4">
               <Link href="/contact">
                 <Button
-                  className="w-full mb-6 relative overflow-hidden group"
-                  style={{
-                    background:
-                      "linear-gradient(45deg, #2563eb, #3b82f6, #60a5fa)",
-                    backgroundSize: "200% 200%",
-                  }}
+                  className="w-full mb-6 relative overflow-hidden group bg-rugby-teal hover:bg-rugby-teal/90"
                 >
-                  <div className="absolute inset-0 bg-white/10 group-hover:bg-white/20 transition-colors" />
                   <span className="relative flex items-center justify-center gap-2 text-white font-semibold py-1">
                     Join Us <ArrowRight className="w-4 h-4 animate-pulse" />
                   </span>
@@ -195,11 +195,11 @@ export function MobileNav() {
                     onClick={() => setIsOpen(false)}
                     className={`px-3 py-2.5 text-sm rounded-md transition-colors flex items-center gap-3 ${
                       pathname === item.href
-                        ? "bg-primary text-primary-foreground font-medium"
-                        : "text-muted-foreground hover:bg-gray-100 dark:hover:bg-gray-800"
+                        ? "bg-rugby-teal text-white font-medium"
+                        : "text-muted-foreground hover:bg-rugby-teal/10"
                     }`}
                   >
-                    <item.icon className="w-4 h-4" />
+                    <item.icon className={`w-4 h-4 ${pathname === item.href ? 'text-white' : 'text-rugby-teal'}`} />
                     {item.label}
                   </Link>
                 ))}
@@ -210,7 +210,7 @@ export function MobileNav() {
               <div className="px-6 mt-4">
                 <Accordion type="single" collapsible className="w-full">
                   <AccordionItem value="admin-nav" className="border-none">
-                    <AccordionTrigger className="py-3 text-sm font-medium hover:no-underline hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg px-3 transition-colors">
+                    <AccordionTrigger className="py-3 text-sm font-medium hover:no-underline hover:bg-rugby-teal/10 rounded-lg px-3 transition-colors text-rugby-teal">
                       Admin Panel
                     </AccordionTrigger>
                     <AccordionContent className="pt-1 pb-3">
@@ -222,8 +222,8 @@ export function MobileNav() {
                             onClick={() => setIsOpen(false)}
                             className={`px-3 py-2 text-sm rounded-md transition-colors ${
                               pathname === item.href
-                                ? "bg-primary text-primary-foreground font-medium"
-                                : "text-muted-foreground hover:bg-gray-100 dark:hover:bg-gray-800"
+                                ? "bg-rugby-teal text-white font-medium"
+                                : "text-muted-foreground hover:bg-rugby-teal/10"
                             }`}
                           >
                             {item.label}
@@ -245,7 +245,7 @@ export function MobileNav() {
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`${social.color} transition-colors`}
+                  className="text-rugby-teal hover:text-rugby-teal/80 transition-colors"
                 >
                   <social.icon className="w-5 h-5" />
                 </a>

@@ -34,17 +34,17 @@ export default function HeroCarousel({ articles, nextMatch }: HeroCarouselProps)
   };
 
   return (
-    <section className="relative h-[600px] w-full overflow-hidden">
+    <section className="relative h-[500px] md:h-[600px] w-full overflow-hidden bg-gradient-to-b from-gray-900 to-black">
       <div 
-        className="flex transition-transform duration-500 ease-in-out h-full"
+        className="absolute inset-0 flex transition-transform duration-700 ease-out"
         style={{ transform: `translateX(-${currentSlide * 100}%)` }}
       >
         {articles.map((article, index) => (
           <div 
             key={article.id}
-            className="absolute w-full h-full transition-opacity duration-500"
-            style={{ left: `${index * 100}%` }}
+            className="relative w-full h-full flex-shrink-0"
           >
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent z-10" />
             <Image
               src={article.image}
               alt={article.title}
@@ -52,23 +52,24 @@ export default function HeroCarousel({ articles, nextMatch }: HeroCarouselProps)
               className="object-cover"
               priority={index === 0}
             />
-            <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center">
-              <div className="container-width text-white">
-                <span className="inline-block bg-rugby-teal text-white text-sm px-3 py-1 rounded-full mb-4">
+            <div className="absolute inset-0 z-20 flex items-center">
+              <div className="container-width text-white px-4 md:px-0 animate-fade-in-up">
+                <span className="inline-block bg-gradient-to-r from-rugby-teal to-rugby-teal/80 text-white text-xs md:text-sm px-4 py-1.5 rounded-full mb-3 md:mb-4 shadow-lg backdrop-blur-sm">
                   Latest News
                 </span>
-                <h1 className="text-4xl md:text-5xl font-bold mb-4 line-clamp-2">
+                <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-3 md:mb-4 line-clamp-2 text-shadow-lg">
                   {article.title}
                 </h1>
-                <p className="text-lg mb-8 max-w-2xl line-clamp-2">
+                <p className="text-base md:text-lg mb-6 md:mb-8 max-w-2xl line-clamp-2 text-white/90">
                   {article.content}
                 </p>
                 <Link
                   href={`/news/${article.slug}`}
-                  className="border-2 border-white hover:bg-white hover:text-rugby-black text-white px-8 py-3 rounded-full transition-all duration-300 inline-flex items-center gap-2 group"
+                  className="group relative inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border-2 border-white/30 hover:border-white text-white px-6 md:px-8 py-2.5 md:py-3.5 rounded-full transition-all duration-300 text-sm md:text-base overflow-hidden"
                 >
-                  Read More
-                  <ChevronRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
+                  <span className="relative z-10 font-medium">Read More</span>
+                  <ChevronRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform relative z-10" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-rugby-teal to-rugby-teal/80 opacity-0 group-hover:opacity-100 transition-opacity" />
                 </Link>
               </div>
             </div>
@@ -78,61 +79,61 @@ export default function HeroCarousel({ articles, nextMatch }: HeroCarouselProps)
 
       {/* Next Match Card */}
       {nextMatch && (
-        <div className="absolute bottom-16 right-4 md:right-8 lg:right-12 w-[300px] z-10">
-          <Card className="bg-white/95 backdrop-blur-sm shadow-lg hover:scale-[1.02] transition-transform border border-rugby-teal/20">
-            <div className="p-4">
-              <div className="flex justify-between items-center mb-3">
-                <span className="text-xs font-medium text-rugby-teal">
+        <div className="absolute bottom-0 left-0 right-0 md:bottom-16 md:left-auto md:right-8 lg:right-12 w-full md:w-[300px] z-10">
+          <Card className="bg-white/95 backdrop-blur-md shadow-xl hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 border border-white/20 rounded-none md:rounded-lg">
+            <div className="p-2 md:p-4">
+              <div className="flex justify-between items-center mb-1.5 md:mb-3">
+                <span className="text-[10px] md:text-xs font-medium bg-gradient-to-r from-rugby-teal to-rugby-teal/80 text-white px-2 py-0.5 md:px-2.5 md:py-1 rounded-none md:rounded-full">
                   Next Match
                 </span>
-                <span className="text-xs text-gray-500">
+                <span className="text-[10px] md:text-xs font-medium text-rugby-teal">
                   {format(new Date(nextMatch.match_date), 'MMM d')}
                 </span>
               </div>
               
-              <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center justify-between gap-2 md:gap-4">
                 {/* Home Team */}
                 <div className="flex flex-col items-center text-center flex-1">
-                  <div className="relative w-12 h-12 mb-2">
+                  <div className="relative w-6 h-6 md:w-12 md:h-12 mb-1 md:mb-2 transform hover:scale-110 transition-transform duration-300">
                     <Image
                       src={nextMatch.home_team_image}
                       alt={nextMatch.home_team}
                       fill
-                      className="object-contain"
+                      className="object-contain drop-shadow-md"
                     />
                   </div>
-                  <span className="text-sm font-medium text-gray-900 dark:text-gray-100 line-clamp-1">
+                  <span className="text-[10px] md:text-sm font-medium text-gray-900 dark:text-gray-100 line-clamp-1">
                     {nextMatch.home_team}
                   </span>
                 </div>
 
                 {/* Match Info */}
                 <div className="flex flex-col items-center">
-                  <span className="text-sm font-bold text-rugby-yellow">VS</span>
-                  <span className="text-xs font-medium text-rugby-teal mt-1">
+                  <span className="text-[10px] md:text-sm font-bold bg-gradient-to-r from-rugby-yellow to-rugby-yellow/80 text-transparent bg-clip-text">VS</span>
+                  <span className="text-[8px] md:text-xs font-medium text-rugby-teal mt-0.5 md:mt-1">
                     {format(new Date(nextMatch.match_date), 'HH:mm')}
                   </span>
                 </div>
 
                 {/* Away Team */}
                 <div className="flex flex-col items-center text-center flex-1">
-                  <div className="relative w-12 h-12 mb-2">
+                  <div className="relative w-6 h-6 md:w-12 md:h-12 mb-1 md:mb-2 transform hover:scale-110 transition-transform duration-300">
                     <Image
                       src={nextMatch.away_team_image}
                       alt={nextMatch.away_team}
                       fill
-                      className="object-contain"
+                      className="object-contain drop-shadow-md"
                     />
                   </div>
-                  <span className="text-sm font-medium text-gray-900 dark:text-gray-100 line-clamp-1">
+                  <span className="text-[10px] md:text-sm font-medium text-gray-900 dark:text-gray-100 line-clamp-1">
                     {nextMatch.away_team}
                   </span>
                 </div>
               </div>
 
-              <div className="mt-3 pt-3 border-t border-rugby-teal/20">
-                <div className="flex items-center gap-1 text-xs">
-                  <MapPin className="w-3 h-3 text-rugby-red" />
+              <div className="mt-1.5 md:mt-3 pt-1.5 md:pt-3 border-t border-rugby-teal/10">
+                <div className="flex items-center gap-1 md:gap-1.5 text-[8px] md:text-xs">
+                  <MapPin className="w-2.5 h-2.5 md:w-3 md:h-3 text-rugby-red" />
                   <span className="truncate text-gray-600 dark:text-gray-400">{nextMatch.venue}</span>
                 </div>
               </div>
@@ -144,29 +145,29 @@ export default function HeroCarousel({ articles, nextMatch }: HeroCarouselProps)
       {/* Navigation Arrows */}
       <button
         onClick={prevSlide}
-        className="absolute left-4 top-1/2 -translate-y-1/2 bg-rugby-teal/50 hover:bg-rugby-teal/70 text-white p-2 rounded-full transition-colors"
+        className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 text-white p-2.5 md:p-3 rounded-full transition-all duration-300 backdrop-blur-sm border border-white/20 hover:border-white/40 group"
         aria-label="Previous slide"
       >
-        <ChevronLeft className="w-6 h-6" />
+        <ChevronLeft className="w-4 h-4 md:w-5 md:h-5 group-hover:-translate-x-0.5 transition-transform" />
       </button>
       <button
         onClick={nextSlide}
-        className="absolute right-4 top-1/2 -translate-y-1/2 bg-rugby-teal/50 hover:bg-rugby-teal/70 text-white p-2 rounded-full transition-colors"
+        className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 text-white p-2.5 md:p-3 rounded-full transition-all duration-300 backdrop-blur-sm border border-white/20 hover:border-white/40 group"
         aria-label="Next slide"
       >
-        <ChevronRight className="w-6 h-6" />
+        <ChevronRight className="w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-0.5 transition-transform" />
       </button>
 
       {/* Slide Indicators */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+      <div className="absolute bottom-28 md:bottom-6 left-1/2 -translate-x-1/2 flex gap-2.5">
         {articles.map((_, index) => (
           <button
             key={index}
             onClick={() => setCurrentSlide(index)}
-            className={`w-2 h-2 rounded-full transition-all ${
+            className={`transition-all duration-300 ${
               currentSlide === index 
-                ? 'bg-rugby-yellow w-4' 
-                : 'bg-white/50 hover:bg-rugby-yellow/75'
+                ? 'w-6 md:w-8 h-1.5 bg-rugby-yellow rounded-full' 
+                : 'w-1.5 h-1.5 bg-white/50 hover:bg-white/75 rounded-full'
             }`}
             aria-label={`Go to slide ${index + 1}`}
           />
