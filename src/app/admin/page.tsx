@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import { Users, FileText, Calendar, Settings, BarChart } from "lucide-react";
+import { Users, FileText, Calendar, Settings, BarChart, CalendarDays, Dumbbell } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -20,6 +20,9 @@ export default function AdminDashboard() {
     articles: 0,
     matches: 0,
     users: 0,
+    activities: 0,
+    exercises: 0,
+    training_programs: 0,
   });
 
   const router = useRouter();
@@ -62,11 +65,17 @@ export default function AdminDashboard() {
         { count: articlesCount },
         { count: matchesCount },
         { count: usersCount },
+        { count: activitiesCount },
+        { count: exercisesCount },
+        { count: trainingProgramsCount },
       ] = await Promise.all([
         supabase.from("players").select("*", { count: "exact", head: true }),
         supabase.from("articles").select("*", { count: "exact", head: true }),
         supabase.from("matches").select("*", { count: "exact", head: true }),
         supabase.from("profiles").select("*", { count: "exact", head: true }),
+        supabase.from("activities").select("*", { count: "exact", head: true }),
+        supabase.from("exercises").select("*", { count: "exact", head: true }),
+        supabase.from("training_programs").select("*", { count: "exact", head: true }),
       ]);
 
       setStats({
@@ -74,6 +83,9 @@ export default function AdminDashboard() {
         articles: articlesCount || 0,
         matches: matchesCount || 0,
         users: usersCount || 0,
+        activities: activitiesCount || 0,
+        exercises: exercisesCount || 0,
+        training_programs: trainingProgramsCount || 0,
       });
     } catch (error) {
       console.error("Error fetching stats:", error);
@@ -108,12 +120,28 @@ export default function AdminDashboard() {
       color: "text-orange-500",
     },
     {
+      title: "Activities",
+      description: "Manage team activities and events",
+      icon: CalendarDays,
+      href: "/admin/activities",
+      count: stats.activities,
+      color: "text-purple-500",
+    },
+    {
+      title: "Training",
+      description: `Manage exercises (${stats.exercises}) and programs (${stats.training_programs})`,
+      icon: Dumbbell,
+      href: "/admin/training",
+      count: stats.exercises + stats.training_programs,
+      color: "text-rose-500",
+    },
+    {
       title: "Users",
       description: "Manage user accounts and roles",
       icon: Users,
       href: "/admin/users",
       count: stats.users,
-      color: "text-purple-500",
+      color: "text-indigo-500",
     },
   ];
 
@@ -135,7 +163,7 @@ export default function AdminDashboard() {
         </p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {adminSections.map((section) => (
           <Link key={section.title} href={section.href}>
             <Card className="hover:shadow-lg transition-shadow">
@@ -156,7 +184,7 @@ export default function AdminDashboard() {
         ))}
       </div>
 
-      <div className="mt-8 grid gap-6 md:grid-cols-2">
+      <div className="grid gap-6 mt-6">
         <Card>
           <CardHeader>
             <CardTitle>Recent Activity</CardTitle>
@@ -173,7 +201,7 @@ export default function AdminDashboard() {
             <CardDescription>Common administrative tasks</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               <Link href="/admin/players/new">
                 <Card className="hover:bg-accent transition-colors cursor-pointer">
                   <CardContent className="flex flex-col items-center justify-center p-4">
@@ -198,11 +226,27 @@ export default function AdminDashboard() {
                   </CardContent>
                 </Card>
               </Link>
-              <Link href="/admin/settings">
+              <Link href="/admin/activities/new">
                 <Card className="hover:bg-accent transition-colors cursor-pointer">
                   <CardContent className="flex flex-col items-center justify-center p-4">
-                    <Settings className="h-6 w-6 mb-2" />
-                    <span className="text-sm font-medium">Settings</span>
+                    <CalendarDays className="h-6 w-6 mb-2" />
+                    <span className="text-sm font-medium">Create Activity</span>
+                  </CardContent>
+                </Card>
+              </Link>
+              <Link href="/admin/training/exercises/new">
+                <Card className="hover:bg-accent transition-colors cursor-pointer">
+                  <CardContent className="flex flex-col items-center justify-center p-4">
+                    <Dumbbell className="h-6 w-6 mb-2" />
+                    <span className="text-sm font-medium">New Exercise</span>
+                  </CardContent>
+                </Card>
+              </Link>
+              <Link href="/admin/training/programs/new">
+                <Card className="hover:bg-accent transition-colors cursor-pointer">
+                  <CardContent className="flex flex-col items-center justify-center p-4">
+                    <Dumbbell className="h-6 w-6 mb-2" />
+                    <span className="text-sm font-medium">New Program</span>
                   </CardContent>
                 </Card>
               </Link>

@@ -1,34 +1,42 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-export async function POST(request: Request) {
+const POST = async (request: NextRequest) => {
   try {
     const { name, email, subject, message } = await request.json();
 
+    // First, let's log the incoming data
+    console.log("Received form data:", { name, email, subject, message });
+    console.log("Using Resend API Key:", process.env.RESEND_API_KEY?.slice(0, 10) + "...");
+    console.log("Sending to:", process.env.CONTACT_FORM_EMAIL);
+
     const { data, error } = await resend.emails.send({
-      from: "Contact Form <onboarding@resend.dev>", // You can customize this after domain verification
-      to: process.env.CONTACT_FORM_EMAIL as string, // The email where you want to receive messages
-      subject: `New Contact Form Message: ${subject}`,
-      html: `
-        <h2>New Contact Form Submission</h2>
-        <p><strong>From:</strong> ${name} (${email})</p>
-        <p><strong>Subject:</strong> ${subject}</p>
-        <p><strong>Message:</strong></p>
-        <p>${message}</p>
+      from: "onboarding@resend.dev",
+      to: process.env.CONTACT_FORM_EMAIL as string,
+      subject: `Contact Form: ${subject}`,
+      text: `
+Name: ${name}
+Email: ${email}
+Subject: ${subject}
+Message: ${message}
       `,
     });
 
     if (error) {
+      console.error("Resend API error:", error);
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
-    return NextResponse.json({ message: "Email sent successfully", data });
+    return NextResponse.json({ success: true, data });
   } catch (error) {
+    console.error("Server error:", error);
     return NextResponse.json(
-      { error: "Error sending email" },
+      { error: "Failed to send email" },
       { status: 500 }
     );
   }
-} 
+};
+
+export { POST }; 

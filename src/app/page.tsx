@@ -221,7 +221,7 @@ export default async function Home() {
           {[1, 2, 3, 4, 5, 6, 7].map((num) => (
             <div key={num} className="relative w-48 h-24">
               <Image
-                src={`/logo/${num === 1 ? 'Sponsor' : 'Sponsoru'} logo ${num}.png`}
+                src={`/logo/${num === 1 ? 'Sponsor' : 'Sponsoru'}${num === 3 ? '_logo' : ' logo'} ${num}.png`}
                 alt={`Sponsor ${num}`}
                 fill
                 className="object-contain filter hover:brightness-110 transition-all duration-300"

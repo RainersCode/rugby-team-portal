@@ -1,0 +1,33 @@
+import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+import { cookies } from 'next/headers';
+import ActivitiesClient from './ActivitiesClient';
+
+export const dynamic = 'force-dynamic';
+
+export default async function ActivitiesPage() {
+  const cookieStore = cookies();
+  const supabase = createServerComponentClient({ cookies: () => cookieStore });
+
+  // Get current user session
+  const { data: { session } } = await supabase.auth.getSession();
+
+  // Fetch activities with participant counts and user participation status
+  const { data: activities } = await supabase
+    .from('activities')
+    .select(`
+      *,
+      participants:activity_participants(count),
+      user_participation:activity_participants(user_id)
+    `)
+    .gte('date', new Date().toISOString()) // Only show upcoming activities
+    .order('date', { ascending: true });
+
+  // Transform the data to include user participation status
+  const transformedActivities = activities?.map(activity => ({
+    ...activity,
+    participant_count: activity.participants?.[0]?.count || 0,
+    is_participating: activity.user_participation?.some(p => p.user_id === session?.user.id) || false
+  })) || [];
+
+  return <ActivitiesClient activities={transformedActivities} userId={session?.user.id} />;
+} 
