@@ -135,10 +135,10 @@ export default async function MatchesPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-bg-light to-gray-50 dark:from-bg-dark dark:to-gray-900">
       {/* Hero Section */}
-      <div className="relative py-20 bg-primary-blue overflow-hidden">
+      <div className="relative py-20 bg-rugby-teal overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute transform rotate-45 left-1/4 top-1/4">
-            <div className="w-96 h-96 rounded-full bg-white"></div>
+            <div className="w-96 h-96 rounded-full bg-rugby-yellow"></div>
           </div>
         </div>
         <div className="relative container-width mx-auto text-center">
@@ -154,7 +154,7 @@ export default async function MatchesPage() {
       {/* Content Section */}
       <div className="container-width py-12">
         {errorMessage && (
-          <div className="bg-destructive/10 border border-destructive text-destructive px-4 py-3 rounded-lg mb-6">
+          <div className="bg-rugby-red/10 border border-rugby-red text-rugby-red px-4 py-3 rounded-lg mb-6">
             {errorMessage}
           </div>
         )}
@@ -163,13 +163,13 @@ export default async function MatchesPage() {
           <TabsList className="grid w-full grid-cols-2 h-14">
             <TabsTrigger 
               value="local" 
-              className="text-base data-[state=active]:bg-primary-blue data-[state=active]:text-white"
+              className="text-base data-[state=active]:bg-rugby-teal data-[state=active]:text-white"
             >
               Local Matches
             </TabsTrigger>
             <TabsTrigger 
               value="rugby" 
-              className="text-base data-[state=active]:bg-primary-blue data-[state=active]:text-white"
+              className="text-base data-[state=active]:bg-rugby-teal data-[state=active]:text-white"
             >
               World Rugby
             </TabsTrigger>
@@ -179,7 +179,7 @@ export default async function MatchesPage() {
           <TabsContent value="local">
             {/* Upcoming Local Matches */}
             <section className="mb-12">
-              <h2 className="text-2xl font-bold mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">
                 Upcoming Local Matches
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -199,7 +199,7 @@ export default async function MatchesPage() {
 
             {/* Past Local Matches */}
             <section>
-              <h2 className="text-2xl font-bold mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">
                 Past Local Matches
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

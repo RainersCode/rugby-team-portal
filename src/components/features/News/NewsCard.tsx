@@ -12,7 +12,7 @@ interface NewsCardProps {
 
 export default function NewsCard({ article, priority = false }: NewsCardProps) {
   return (
-    <article className="bg-card-bg-light dark:bg-card-bg-dark rounded-lg shadow-md overflow-hidden transition-transform hover:scale-[1.02]">
+    <article className="bg-card-bg-light dark:bg-card-bg-dark rounded-lg shadow-md overflow-hidden transition-transform hover:scale-[1.02] border border-rugby-teal/20 hover:border-rugby-teal">
       <Link href={`/news/${article.slug}`}>
         <div className="relative h-48">
           <Image
@@ -31,7 +31,7 @@ export default function NewsCard({ article, priority = false }: NewsCardProps) {
               })}
             </time>
           </div>
-          <h3 className="text-xl font-bold mb-2 text-content-light dark:text-content-dark line-clamp-2 hover:text-primary-blue dark:hover:text-accent-blue transition-colors">
+          <h3 className="text-xl font-bold mb-2 text-content-light dark:text-content-dark line-clamp-2 hover:text-rugby-teal dark:hover:text-rugby-teal transition-colors">
             {article.title}
           </h3>
           <p className="text-content-medium dark:text-content-medium line-clamp-3">

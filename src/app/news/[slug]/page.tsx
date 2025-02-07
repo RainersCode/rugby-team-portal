@@ -142,14 +142,14 @@ export default async function ArticlePage({ params }: Props) {
         {/* Article Header */}
         <header className="mb-8">
           <div className="flex justify-between items-start">
-            <h1 className="text-4xl font-bold text-secondary-navy mb-4">
+            <h1 className="text-4xl font-bold text-rugby-teal mb-4">
               {article.title}
             </h1>
             <ShareButtons title={article.title} />
           </div>
           <div className="flex items-center text-content-medium gap-4">
-            <time>{formatDate(article.created_at)}</time>
-            <span>By {authorEmail}</span>
+            <time className="text-rugby-teal/80">{formatDate(article.created_at)}</time>
+            <span className="text-rugby-teal/80">By {authorEmail}</span>
           </div>
         </header>
 
@@ -159,13 +159,13 @@ export default async function ArticlePage({ params }: Props) {
             src={article.image}
             alt={article.title}
             fill
-            className="object-cover rounded-lg"
+            className="object-cover rounded-lg ring-1 ring-rugby-teal/20"
             priority
           />
         </div>
 
         {/* Article Content */}
-        <div className="prose dark:prose-invert max-w-none">
+        <div className="prose dark:prose-invert max-w-none prose-headings:text-rugby-teal prose-a:text-rugby-teal hover:prose-a:text-rugby-teal/80">
           {Array.isArray(article.blocks) ? (
             article.blocks.map((block, index) => (
               <RenderBlock key={index} block={block} />

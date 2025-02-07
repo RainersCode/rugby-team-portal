@@ -30,10 +30,10 @@ export default function ContactPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-bg-light to-gray-50 dark:from-bg-dark dark:to-gray-900">
       {/* Hero Section */}
-      <div className="relative py-20 bg-primary-blue overflow-hidden">
+      <div className="relative py-20 bg-rugby-teal overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute transform rotate-45 left-1/4 top-1/4">
-            <div className="w-96 h-96 rounded-full bg-white"></div>
+            <div className="w-96 h-96 rounded-full bg-rugby-yellow"></div>
           </div>
         </div>
         <div className="relative container-width mx-auto text-center">
@@ -52,17 +52,17 @@ export default function ContactPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
           {/* Contact Information */}
           <div className="space-y-8">
-            <div className="bg-card rounded-2xl p-8 shadow-lg">
-              <h2 className="text-2xl font-bold mb-6">
+            <div className="bg-card rounded-2xl p-8 shadow-lg border border-rugby-teal/20">
+              <h2 className="text-2xl font-bold mb-6 text-rugby-teal">
                 Contact Information
               </h2>
               <div className="space-y-6">
                 <div className="flex items-start space-x-4">
                   <div className="flex-shrink-0">
-                    <Phone className="w-6 h-6 text-primary-blue" />
+                    <Phone className="w-6 h-6 text-rugby-teal" />
                   </div>
                   <div>
-                    <h3 className="font-semibold">
+                    <h3 className="font-semibold text-rugby-teal/90">
                       Phone
                     </h3>
                     <p className="text-muted-foreground">
@@ -72,10 +72,10 @@ export default function ContactPage() {
                 </div>
                 <div className="flex items-start space-x-4">
                   <div className="flex-shrink-0">
-                    <Mail className="w-6 h-6 text-primary-blue" />
+                    <Mail className="w-6 h-6 text-rugby-red" />
                   </div>
                   <div>
-                    <h3 className="font-semibold">
+                    <h3 className="font-semibold text-rugby-teal/90">
                       Email
                     </h3>
                     <p className="text-muted-foreground">
@@ -85,10 +85,10 @@ export default function ContactPage() {
                 </div>
                 <div className="flex items-start space-x-4">
                   <div className="flex-shrink-0">
-                    <MapPin className="w-6 h-6 text-primary-blue" />
+                    <MapPin className="w-6 h-6 text-rugby-yellow" />
                   </div>
                   <div>
-                    <h3 className="font-semibold">
+                    <h3 className="font-semibold text-rugby-teal/90">
                       Location
                     </h3>
                     <p className="text-muted-foreground">
@@ -100,8 +100,8 @@ export default function ContactPage() {
             </div>
 
             {/* Map or Additional Info */}
-            <div className="bg-card rounded-2xl p-8 shadow-lg">
-              <h2 className="text-2xl font-bold mb-6">
+            <div className="bg-card rounded-2xl p-8 shadow-lg border border-rugby-teal/20">
+              <h2 className="text-2xl font-bold mb-6 text-rugby-teal">
                 Training Ground
               </h2>
               <p className="text-muted-foreground mb-4">
@@ -114,15 +114,15 @@ export default function ContactPage() {
           </div>
 
           {/* Contact Form */}
-          <div className="bg-card rounded-2xl p-8 shadow-lg">
-            <h2 className="text-2xl font-bold mb-6">
+          <div className="bg-card rounded-2xl p-8 shadow-lg border border-rugby-teal/20">
+            <h2 className="text-2xl font-bold mb-6 text-rugby-teal">
               Send us a Message
             </h2>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <label
                   htmlFor="name"
-                  className="block text-sm font-medium mb-2"
+                  className="block text-sm font-medium mb-2 text-rugby-teal/90"
                 >
                   Your Name
                 </label>
@@ -132,14 +132,14 @@ export default function ContactPage() {
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-lg border border-input bg-background focus:ring-2 focus:ring-primary-blue focus:border-transparent"
+                  className="w-full px-4 py-3 rounded-lg border border-rugby-teal/20 bg-background focus:ring-2 focus:ring-rugby-teal focus:border-transparent"
                   required
                 />
               </div>
               <div>
                 <label
                   htmlFor="email"
-                  className="block text-sm font-medium mb-2"
+                  className="block text-sm font-medium mb-2 text-rugby-teal/90"
                 >
                   Email Address
                 </label>
@@ -149,14 +149,14 @@ export default function ContactPage() {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-lg border border-input bg-background focus:ring-2 focus:ring-primary-blue focus:border-transparent"
+                  className="w-full px-4 py-3 rounded-lg border border-rugby-teal/20 bg-background focus:ring-2 focus:ring-rugby-teal focus:border-transparent"
                   required
                 />
               </div>
               <div>
                 <label
                   htmlFor="subject"
-                  className="block text-sm font-medium mb-2"
+                  className="block text-sm font-medium mb-2 text-rugby-teal/90"
                 >
                   Subject
                 </label>
@@ -166,14 +166,14 @@ export default function ContactPage() {
                   name="subject"
                   value={formData.subject}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-lg border border-input bg-background focus:ring-2 focus:ring-primary-blue focus:border-transparent"
+                  className="w-full px-4 py-3 rounded-lg border border-rugby-teal/20 bg-background focus:ring-2 focus:ring-rugby-teal focus:border-transparent"
                   required
                 />
               </div>
               <div>
                 <label
                   htmlFor="message"
-                  className="block text-sm font-medium mb-2"
+                  className="block text-sm font-medium mb-2 text-rugby-teal/90"
                 >
                   Message
                 </label>
@@ -183,13 +183,13 @@ export default function ContactPage() {
                   value={formData.message}
                   onChange={handleChange}
                   rows={5}
-                  className="w-full px-4 py-3 rounded-lg border border-input bg-background focus:ring-2 focus:ring-primary-blue focus:border-transparent"
+                  className="w-full px-4 py-3 rounded-lg border border-rugby-teal/20 bg-background focus:ring-2 focus:ring-rugby-teal focus:border-transparent"
                   required
                 ></textarea>
               </div>
               <button
                 type="submit"
-                className="w-full flex items-center justify-center gap-2 bg-primary-blue hover:bg-primary-blue/90 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+                className="w-full flex items-center justify-center gap-2 bg-rugby-teal hover:bg-rugby-teal/90 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
               >
                 <Send className="w-5 h-5" />
                 Send Message

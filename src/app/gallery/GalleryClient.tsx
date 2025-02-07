@@ -109,12 +109,12 @@ export default function GalleryClient() {
             transition={{ duration: 0.5, delay: index * 0.1 }}
           >
             <Card 
-              className="group cursor-pointer hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+              className="group cursor-pointer hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border-rugby-teal/20 hover:border-rugby-teal"
               onClick={() => handleGalleryClick(gallery)}
             >
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
-                  <span className="group-hover:text-primary transition-colors">
+                  <span className="group-hover:text-rugby-teal transition-colors">
                     {gallery.title}
                   </span>
                   <span className="text-sm text-muted-foreground">
@@ -172,7 +172,7 @@ export default function GalleryClient() {
           >
             <div className="absolute top-4 right-4 z-50">
               <button
-                className="text-white hover:text-blue-400 transition-colors"
+                className="text-white hover:text-rugby-teal transition-colors"
                 onClick={() => setSelectedGallery(null)}
               >
                 <X className="h-8 w-8" />
@@ -180,7 +180,7 @@ export default function GalleryClient() {
             </div>
 
             <button
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-white hover:text-blue-400 transition-colors disabled:opacity-50 disabled:hover:text-white"
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-white hover:text-rugby-teal transition-colors disabled:opacity-50 disabled:hover:text-white"
               onClick={handlePrevPhoto}
               disabled={selectedPhotoIndex === 0}
             >
@@ -188,7 +188,7 @@ export default function GalleryClient() {
             </button>
 
             <button
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:text-blue-400 transition-colors disabled:opacity-50 disabled:hover:text-white"
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:text-rugby-teal transition-colors disabled:opacity-50 disabled:hover:text-white"
               onClick={handleNextPhoto}
               disabled={selectedPhotoIndex === selectedGallery.photos.length - 1}
             >
@@ -228,8 +228,8 @@ export default function GalleryClient() {
                   key={index}
                   className={`w-2 h-2 rounded-full transition-all ${
                     index === selectedPhotoIndex
-                      ? "bg-white w-4"
-                      : "bg-white/50 hover:bg-white/80"
+                      ? "bg-rugby-teal w-4"
+                      : "bg-white/50 hover:bg-rugby-teal/80"
                   }`}
                   onClick={(e) => {
                     e.stopPropagation();

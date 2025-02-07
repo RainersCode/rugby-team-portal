@@ -10,20 +10,15 @@ import { formatDate } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ActivityCalendar from '@/components/features/Calendar/ActivityCalendar';
+import { Activity as BaseActivity } from '@/types';
 
-interface Activity {
-  id: string;
-  title: string;
-  description: string;
-  date: string;
-  location: string;
-  max_participants: number | null;
+interface ActivityWithParticipation extends BaseActivity {
   participant_count: number;
   is_participating: boolean;
 }
 
 interface Props {
-  activities: Activity[];
+  activities: ActivityWithParticipation[];
   userId?: string;
   isAdmin?: boolean;
 }
@@ -75,14 +70,14 @@ export default function ActivitiesClient({ activities: initialActivities, userId
     }
   };
 
-  const isActivityFull = (activity: Activity) => {
+  const isActivityFull = (activity: ActivityWithParticipation) => {
     return activity.max_participants !== null && activity.participant_count >= activity.max_participants;
   };
 
-  const getParticipationStatus = (activity: Activity) => {
+  const getParticipationStatus = (activity: ActivityWithParticipation) => {
     if (activity.is_participating) {
       return {
-        badge: <Badge className="bg-green-500/10 text-green-500 hover:bg-green-500/20 transition-colors">You're In!</Badge>,
+        badge: <Badge className="bg-rugby-teal/10 text-rugby-teal hover:bg-rugby-teal/20 transition-colors">You're In!</Badge>,
         button: {
           variant: "destructive" as const,
           text: "Cancel Participation",
@@ -100,7 +95,7 @@ export default function ActivitiesClient({ activities: initialActivities, userId
       };
     }
     return {
-      badge: <Badge variant="secondary">Spots Available</Badge>,
+      badge: <Badge className="bg-rugby-yellow/10 text-rugby-yellow hover:bg-rugby-yellow/20 transition-colors">Spots Available</Badge>,
       button: {
         variant: "default" as const,
         text: "Join Activity",
@@ -110,115 +105,146 @@ export default function ActivitiesClient({ activities: initialActivities, userId
 
   if (activities.length === 0) {
     return (
-      <div className="container-width mx-auto px-4 py-16">
-        <Card className="text-center p-8">
-          <CardContent>
-            <Calendar className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-            <h3 className="text-lg font-semibold mb-2">No Upcoming Activities</h3>
-            <p className="text-muted-foreground">
-              Check back later for new activities or contact the team for more information.
+      <div className="min-h-screen bg-gradient-to-b from-bg-light to-gray-50 dark:from-bg-dark dark:to-gray-900">
+        {/* Hero Section */}
+        <div className="relative py-20 bg-rugby-teal overflow-hidden">
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute transform rotate-45 left-1/4 top-1/4">
+              <div className="w-96 h-96 rounded-full bg-rugby-yellow"></div>
+            </div>
+          </div>
+          <div className="relative container-width text-center">
+            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+              Team Activities
+            </h1>
+            <p className="text-xl text-white/90 max-w-2xl mx-auto">
+              Join our team activities and events. Stay active and connected with the community.
             </p>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="container-width py-12">
+          <Card className="text-center p-8 border-rugby-teal/20">
+            <CardContent>
+              <Calendar className="w-12 h-12 mx-auto mb-4 text-rugby-teal" />
+              <h3 className="text-lg font-semibold mb-2">No Upcoming Activities</h3>
+              <p className="text-muted-foreground">
+                Check back later for new activities or contact the team for more information.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="container-width mx-auto px-4 py-16">
-      <div className="max-w-2xl mx-auto mb-12 text-center">
-        <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
-          Upcoming Activities
-        </h1>
-        <p className="text-muted-foreground text-lg">
-          Join our team activities and events. Stay active and connected with the community.
-        </p>
+    <div className="min-h-screen bg-gradient-to-b from-bg-light to-gray-50 dark:from-bg-dark dark:to-gray-900">
+      {/* Hero Section */}
+      <div className="relative py-20 bg-rugby-teal overflow-hidden">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute transform rotate-45 left-1/4 top-1/4">
+            <div className="w-96 h-96 rounded-full bg-rugby-yellow"></div>
+          </div>
+        </div>
+        <div className="relative container-width text-center">
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+            Team Activities
+          </h1>
+          <p className="text-xl text-white/90 max-w-2xl mx-auto">
+            Join our team activities and events. Stay active and connected with the community.
+          </p>
+        </div>
       </div>
 
-      <Tabs defaultValue="grid" className="space-y-8">
-        <div className="flex justify-center">
-          <TabsList className="grid grid-cols-2 w-[400px]">
-            <TabsTrigger value="grid" className="flex items-center gap-2">
-              <Users className="w-4 h-4" />
-              Card View
-            </TabsTrigger>
-            <TabsTrigger value="calendar" className="flex items-center gap-2">
-              <Calendar className="w-4 h-4" />
-              Calendar View
-            </TabsTrigger>
-          </TabsList>
-        </div>
-
-        <TabsContent value="grid">
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {activities.map((activity) => {
-              const status = getParticipationStatus(activity);
-              const activityDate = new Date(activity.date);
-              const isUpcoming = activityDate > new Date();
-
-              return (
-                <Card 
-                  key={activity.id} 
-                  className={`group relative overflow-hidden transition-all duration-300 hover:shadow-lg
-                    ${isUpcoming ? 'border-blue-500/20' : 'border-gray-500/20'}
-                  `}
-                >
-                  <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background/10 pointer-events-none" />
-                  
-                  <CardHeader>
-                    <div className="flex items-center justify-between mb-2">
-                      {status.badge}
-                      <span className="text-sm text-muted-foreground">
-                        {activity.participant_count} {activity.max_participants ? `/ ${activity.max_participants}` : ''} participants
-                      </span>
-                    </div>
-                    <CardTitle className="text-xl mb-2 group-hover:text-blue-500 transition-colors">
-                      {activity.title}
-                    </CardTitle>
-                    <CardDescription className="line-clamp-2">
-                      {activity.description}
-                    </CardDescription>
-                  </CardHeader>
-
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="flex items-center text-sm">
-                        <Calendar className="mr-2 h-4 w-4 text-blue-500" />
-                        <time dateTime={activity.date} className="text-muted-foreground">
-                          {formatDate(activity.date)}
-                        </time>
-                      </div>
-                      
-                      <div className="flex items-center text-sm">
-                        <MapPin className="mr-2 h-4 w-4 text-rose-500" />
-                        <span className="text-muted-foreground">{activity.location}</span>
-                      </div>
-
-                      <div className="pt-4">
-                        <Button
-                          className="w-full group relative"
-                          variant={status.button.variant}
-                          disabled={status.button.disabled}
-                          onClick={() => handleParticipation(activity.id, activity.is_participating)}
-                        >
-                          {status.button.text}
-                          <ChevronRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-
-                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-blue-300 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
-                </Card>
-              );
-            })}
+      {/* Content */}
+      <div className="container-width py-12">
+        <Tabs defaultValue="grid" className="space-y-8">
+          <div className="flex justify-center">
+            <TabsList className="grid grid-cols-2 w-[400px]">
+              <TabsTrigger value="grid" className="flex items-center gap-2 data-[state=active]:bg-rugby-teal data-[state=active]:text-white">
+                <Users className="w-4 h-4" />
+                Card View
+              </TabsTrigger>
+              <TabsTrigger value="calendar" className="flex items-center gap-2 data-[state=active]:bg-rugby-teal data-[state=active]:text-white">
+                <Calendar className="w-4 h-4" />
+                Calendar View
+              </TabsTrigger>
+            </TabsList>
           </div>
-        </TabsContent>
 
-        <TabsContent value="calendar">
-          <ActivityCalendar activities={activities} isAdmin={isAdmin} />
-        </TabsContent>
-      </Tabs>
+          <TabsContent value="grid">
+            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+              {activities.map((activity) => {
+                const status = getParticipationStatus(activity);
+                const activityDate = new Date(activity.date);
+                const isUpcoming = activityDate > new Date();
+
+                return (
+                  <Card 
+                    key={activity.id} 
+                    className={`group relative overflow-hidden transition-all duration-300 hover:shadow-lg border-rugby-teal/20
+                      ${isUpcoming ? 'bg-white dark:bg-gray-900' : 'bg-gray-50/50 dark:bg-gray-900/50'}
+                    `}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background/10 pointer-events-none" />
+                    
+                    <CardHeader>
+                      <div className="flex items-center justify-between mb-2">
+                        {status.badge}
+                        <span className="text-sm text-muted-foreground">
+                          {activity.participant_count} {activity.max_participants ? `/ ${activity.max_participants}` : ''} participants
+                        </span>
+                      </div>
+                      <CardTitle className="text-xl mb-2 group-hover:text-rugby-teal transition-colors">
+                        {activity.title}
+                      </CardTitle>
+                      <CardDescription className="line-clamp-2">
+                        {activity.description}
+                      </CardDescription>
+                    </CardHeader>
+
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="flex items-center text-sm">
+                          <Calendar className="mr-2 h-4 w-4 text-rugby-teal" />
+                          <time dateTime={activity.date} className="text-muted-foreground">
+                            {formatDate(activity.date)}
+                          </time>
+                        </div>
+                        
+                        <div className="flex items-center text-sm">
+                          <MapPin className="mr-2 h-4 w-4 text-rugby-red" />
+                          <span className="text-muted-foreground">{activity.location}</span>
+                        </div>
+
+                        <div className="pt-4">
+                          <Button
+                            className="w-full group relative bg-rugby-teal hover:bg-rugby-teal/90"
+                            variant={status.button.variant}
+                            disabled={status.button.disabled}
+                            onClick={() => handleParticipation(activity.id, activity.is_participating)}
+                          >
+                            {status.button.text}
+                            <ChevronRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+
+                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-rugby-teal to-rugby-yellow transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
+                  </Card>
+                );
+              })}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="calendar">
+            <ActivityCalendar activities={activities} isAdmin={isAdmin} />
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 } 

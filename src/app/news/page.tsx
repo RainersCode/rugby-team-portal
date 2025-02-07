@@ -92,10 +92,10 @@ export default async function NewsPage() {
     return (
       <div className="min-h-screen bg-gradient-to-b from-bg-light to-gray-50 dark:from-bg-dark dark:to-gray-900">
         {/* Hero Section */}
-        <div className="relative py-20 bg-primary-blue overflow-hidden">
+        <div className="relative py-20 bg-rugby-teal overflow-hidden">
           <div className="absolute inset-0 opacity-10">
             <div className="absolute transform rotate-45 left-1/4 top-1/4">
-              <div className="w-96 h-96 rounded-full bg-white"></div>
+              <div className="w-96 h-96 rounded-full bg-rugby-yellow"></div>
             </div>
           </div>
           <div className="relative container-width mx-auto text-center">
@@ -127,10 +127,10 @@ export default async function NewsPage() {
     return (
       <div className="min-h-screen bg-gradient-to-b from-bg-light to-gray-50 dark:from-bg-dark dark:to-gray-900">
         {/* Hero Section */}
-        <div className="relative py-20 bg-primary-blue overflow-hidden">
+        <div className="relative py-20 bg-rugby-teal overflow-hidden">
           <div className="absolute inset-0 opacity-10">
             <div className="absolute transform rotate-45 left-1/4 top-1/4">
-              <div className="w-96 h-96 rounded-full bg-white"></div>
+              <div className="w-96 h-96 rounded-full bg-rugby-yellow"></div>
             </div>
           </div>
           <div className="relative container-width mx-auto text-center">

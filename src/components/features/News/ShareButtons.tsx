@@ -17,39 +17,40 @@ interface ShareButtonsProps {
 export default function ShareButtons({ title }: ShareButtonsProps) {
   const [copied, setCopied] = useState(false);
 
-  const handleShare = async (platform: 'facebook' | 'twitter' | 'copy') => {
-    const url = window.location.href;
-    
-    switch (platform) {
-      case 'facebook':
-        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
-        break;
-      case 'twitter':
-        window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`, '_blank');
-        break;
-      case 'copy':
-        await navigator.clipboard.writeText(url);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-        break;
-    }
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(window.location.href);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="icon">
+        <Button 
+          variant="outline" 
+          size="icon"
+          className="hover:bg-rugby-teal/10 hover:text-rugby-teal border-rugby-teal/20"
+        >
           <Share2 className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => handleShare('facebook')}>
-          Share on Facebook
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => handleShare('twitter')}>
+        <DropdownMenuItem
+          className="cursor-pointer hover:bg-rugby-teal/10 hover:text-rugby-teal"
+          onClick={() => window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(window.location.href)}`, '_blank')}
+        >
           Share on Twitter
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => handleShare('copy')}>
+        <DropdownMenuItem
+          className="cursor-pointer hover:bg-rugby-teal/10 hover:text-rugby-teal"
+          onClick={() => window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`, '_blank')}
+        >
+          Share on Facebook
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          className="cursor-pointer hover:bg-rugby-teal/10 hover:text-rugby-teal"
+          onClick={handleCopyLink}
+        >
           {copied ? 'Copied!' : 'Copy Link'}
         </DropdownMenuItem>
       </DropdownMenuContent>

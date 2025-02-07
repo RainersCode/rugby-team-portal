@@ -67,10 +67,10 @@ export default function TeamPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-bg-light to-gray-50 dark:from-bg-dark dark:to-gray-900">
       {/* Hero Section */}
-      <div className="relative py-20 bg-primary-blue overflow-hidden">
+      <div className="relative py-20 bg-rugby-teal overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute transform rotate-45 left-1/4 top-1/4">
-            <div className="w-96 h-96 rounded-full bg-white"></div>
+            <div className="w-96 h-96 rounded-full bg-rugby-yellow"></div>
           </div>
         </div>
         <div className="relative container-width mx-auto text-center">
@@ -87,26 +87,26 @@ export default function TeamPage() {
       <div className="container-width py-12">
         {/* Team Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
-          <div className="bg-card rounded-xl p-6 shadow-lg">
-            <div className="text-3xl font-bold text-primary-blue mb-2">25</div>
+          <div className="bg-card rounded-xl p-6 shadow-lg border border-rugby-teal/20">
+            <div className="text-3xl font-bold text-rugby-teal mb-2">25</div>
             <div className="text-sm text-muted-foreground">
               Squad Players
             </div>
           </div>
-          <div className="bg-card rounded-xl p-6 shadow-lg">
-            <div className="text-3xl font-bold text-primary-blue mb-2">12</div>
+          <div className="bg-card rounded-xl p-6 shadow-lg border border-rugby-teal/20">
+            <div className="text-3xl font-bold text-rugby-teal mb-2">12</div>
             <div className="text-sm text-muted-foreground">
               International Players
             </div>
           </div>
-          <div className="bg-card rounded-xl p-6 shadow-lg">
-            <div className="text-3xl font-bold text-primary-blue mb-2">5</div>
+          <div className="bg-card rounded-xl p-6 shadow-lg border border-rugby-teal/20">
+            <div className="text-3xl font-bold text-rugby-teal mb-2">5</div>
             <div className="text-sm text-muted-foreground">
               Trophies Won
             </div>
           </div>
-          <div className="bg-card rounded-xl p-6 shadow-lg">
-            <div className="text-3xl font-bold text-primary-blue mb-2">85%</div>
+          <div className="bg-card rounded-xl p-6 shadow-lg border border-rugby-teal/20">
+            <div className="text-3xl font-bold text-rugby-teal mb-2">85%</div>
             <div className="text-sm text-muted-foreground">
               Win Rate
             </div>
@@ -121,8 +121,8 @@ export default function TeamPage() {
               onClick={() => setSelectedPosition(position)}
               className={`px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200 ${
                 selectedPosition === position
-                  ? "bg-primary-blue text-white"
-                  : "bg-card text-muted-foreground hover:bg-accent"
+                  ? "bg-rugby-teal text-white"
+                  : "bg-card text-muted-foreground hover:bg-rugby-yellow/10"
               }`}
             >
               {position}
@@ -142,7 +142,7 @@ export default function TeamPage() {
               className="group"
             >
               <div
-                className="bg-card rounded-xl overflow-hidden shadow-lg cursor-pointer transform transition-transform duration-300 hover:-translate-y-2"
+                className="bg-card rounded-xl overflow-hidden shadow-lg cursor-pointer transform transition-transform duration-300 hover:-translate-y-2 border border-rugby-teal/20"
                 onClick={() =>
                   setSelectedPlayer(
                     selectedPlayer === player.id ? null : player.id
@@ -160,10 +160,10 @@ export default function TeamPage() {
                   <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
                     <div className="flex items-center justify-between">
                       <div>
-                        <h3 className="text-xl font-bold">{player.name}</h3>
+                        <h3 className="text-xl font-bold group-hover:text-rugby-yellow transition-colors">{player.name}</h3>
                         <p className="text-sm opacity-90">{player.position}</p>
                       </div>
-                      <div className="text-2xl font-bold">#{player.number}</div>
+                      <div className="text-2xl font-bold text-rugby-yellow">#{player.number}</div>
                     </div>
                   </div>
                 </div>
@@ -178,19 +178,19 @@ export default function TeamPage() {
                     {/* Stats */}
                     <div className="grid grid-cols-3 gap-4">
                       <div className="text-center">
-                        <div className="text-xl font-bold text-primary-blue">
+                        <div className="text-xl font-bold text-rugby-teal">
                           {player.stats.matches}
                         </div>
                         <div className="text-sm text-muted-foreground">Matches</div>
                       </div>
                       <div className="text-center">
-                        <div className="text-xl font-bold text-primary-blue">
+                        <div className="text-xl font-bold text-rugby-red">
                           {player.stats.tries}
                         </div>
                         <div className="text-sm text-muted-foreground">Tries</div>
                       </div>
                       <div className="text-center">
-                        <div className="text-xl font-bold text-primary-blue">
+                        <div className="text-xl font-bold text-rugby-yellow">
                           {player.stats.tackles}
                         </div>
                         <div className="text-sm text-muted-foreground">Tackles</div>

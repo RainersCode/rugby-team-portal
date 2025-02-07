@@ -10,12 +10,17 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        'primary-blue': '#1a56db',
-        'secondary-navy': '#000033',
-        'accent-blue': '#1E90FF',
-        'gray-light': '#F5F5F5',
-        'gray-medium': '#666666',
-        'gray-dark': '#333333',
+        // Rugby theme colors
+        'rugby-red': 'rgb(225, 60, 50)',
+        'rugby-yellow': 'rgb(255, 205, 0)',
+        'rugby-teal': 'rgb(0, 85, 75)',
+        'rugby-black': 'rgb(0, 0, 0)',
+        'rugby-gray-4': 'rgb(195, 195, 195)',
+        'rugby-gray-1': 'rgb(220, 220, 220)',
+        // System colors
+        'primary': 'rgb(0, 85, 75)', // rugby-teal as primary
+        'secondary': 'rgb(225, 60, 50)', // rugby-red as secondary
+        'accent': 'rgb(255, 205, 0)', // rugby-yellow as accent
         'card-bg': {
           light: '#F8F9FA',
           dark: '#1A1A1A',

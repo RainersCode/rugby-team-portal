@@ -22,7 +22,7 @@ export default function LatestMatches({ upcomingMatches, completedMatches }: Lat
           </h2>
           <Link 
             href="/matches" 
-            className="text-primary-blue hover:text-primary-blue/80 font-medium transition-colors"
+            className="text-rugby-teal hover:text-rugby-teal/80 font-medium transition-colors"
           >
             View all matches →
           </Link>
