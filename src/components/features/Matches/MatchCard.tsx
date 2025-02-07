@@ -38,7 +38,7 @@ export default function MatchCard({ match, isLocalMatch, variant = 'default' }: 
       </div>
 
       {/* Teams & Score */}
-      <div className={`flex items-center justify-between ${variant === 'compact' ? 'gap-2 mb-2' : 'gap-4 mb-4'}`}>
+      <div className={`flex items-center gap-4 ${variant === 'compact' ? 'mb-3' : 'mb-6'}`}>
         {/* Home Team */}
         <div className={`flex-1 flex ${variant === 'compact' ? 'items-center gap-2' : 'flex-col items-center text-center'}`}>
           <div className={`relative ${variant === 'compact' ? 'w-6 h-6 flex-shrink-0' : 'w-16 h-16 mb-2'}`}>
@@ -52,15 +52,10 @@ export default function MatchCard({ match, isLocalMatch, variant = 'default' }: 
           <span className={`${variant === 'compact' ? 'text-sm truncate' : 'text-sm font-medium text-gray-900 dark:text-gray-100'}`}>
             {match.home_team}
           </span>
-          {isLive && variant !== 'compact' && (
-            <div className="mt-1 text-lg font-bold text-gray-900 dark:text-gray-100">
-              {match.home_score}
-            </div>
-          )}
         </div>
 
         {/* Score/VS */}
-        <div className={`flex ${variant === 'compact' ? 'items-center justify-center min-w-[40px]' : 'flex-col items-center justify-center min-w-[80px]'}`}>
+        <div className="flex flex-col items-center">
           {isCompleted ? (
             <div className={variant === 'compact' ? 'text-sm font-medium' : 'text-xl font-bold text-gray-900 dark:text-gray-100'}>
               {match.home_score} - {match.away_score}
@@ -86,7 +81,7 @@ export default function MatchCard({ match, isLocalMatch, variant = 'default' }: 
         </div>
 
         {/* Away Team */}
-        <div className={`flex-1 flex ${variant === 'compact' ? 'items-center gap-2 justify-end' : 'flex-col items-center text-center'}`}>
+        <div className={`flex-1 flex ${variant === 'compact' ? 'items-center gap-2 flex-row-reverse' : 'flex-col items-center text-center'}`}>
           {variant === 'compact' && <span className="text-sm truncate">{match.away_team}</span>}
           <div className={`relative ${variant === 'compact' ? 'w-6 h-6 flex-shrink-0' : 'w-16 h-16 mb-2'}`}>
             <Image
@@ -97,14 +92,9 @@ export default function MatchCard({ match, isLocalMatch, variant = 'default' }: 
             />
           </div>
           {variant !== 'compact' && (
-            <>
-              <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{match.away_team}</span>
-              {isLive && (
-                <div className="mt-1 text-lg font-bold text-gray-900 dark:text-gray-100">
-                  {match.away_score}
-                </div>
-              )}
-            </>
+            <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+              {match.away_team}
+            </span>
           )}
         </div>
       </div>

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import { Users, FileText, Calendar, Settings, BarChart, CalendarDays, Dumbbell } from "lucide-react";
+import { Users, FileText, Calendar, Settings, BarChart, CalendarDays, Dumbbell, Image as ImageIcon } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -134,6 +134,14 @@ export default function AdminDashboard() {
       href: "/admin/training",
       count: stats.exercises + stats.training_programs,
       color: "text-rose-500",
+    },
+    {
+      title: "Gallery",
+      description: "Manage photo galleries",
+      icon: ImageIcon,
+      href: "/admin/gallery",
+      count: 0,
+      color: "text-cyan-500",
     },
     {
       title: "Users",
