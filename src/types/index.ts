@@ -164,4 +164,21 @@ export interface WorkoutExercise {
   notes?: string;
   order_index: number;
   created_at: string;
+}
+
+export interface Activity {
+  id: string;
+  title: string;
+  description: string;
+  date: string;
+  location: string;
+  max_participants: number;
+  created_at: string;
+  updated_at: string;
+  participants: { count: number }[];
+  participant_details: {
+    id: string;
+    email: string;
+    full_name: string | null;
+  }[];
 } 

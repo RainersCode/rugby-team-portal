@@ -5,9 +5,11 @@ import { useRouter } from 'next/navigation';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Calendar, MapPin, Users, ChevronRight } from 'lucide-react';
+import { Calendar, MapPin, Users, ChevronRight, Grid, CalendarDays } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import ActivityCalendar from '@/components/features/Calendar/ActivityCalendar';
 
 interface Activity {
   id: string;
@@ -132,69 +134,94 @@ export default function ActivitiesClient({ activities: initialActivities, userId
         </p>
       </div>
 
-      <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-        {activities.map((activity) => {
-          const status = getParticipationStatus(activity);
-          const activityDate = new Date(activity.date);
-          const isUpcoming = activityDate > new Date();
+      <Tabs defaultValue="grid" className="space-y-8">
+        <div className="flex justify-center">
+          <TabsList className="grid grid-cols-2 w-[400px]">
+            <TabsTrigger value="grid" className="flex items-center gap-2">
+              <Grid className="w-4 h-4" />
+              Grid View
+            </TabsTrigger>
+            <TabsTrigger value="calendar" className="flex items-center gap-2">
+              <CalendarDays className="w-4 h-4" />
+              Calendar View
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
-          return (
-            <Card 
-              key={activity.id} 
-              className={`group relative overflow-hidden transition-all duration-300 hover:shadow-lg
-                ${isUpcoming ? 'border-blue-500/20' : 'border-gray-500/20'}
-              `}
-            >
-              <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background/10 pointer-events-none" />
-              
-              <CardHeader>
-                <div className="flex items-center justify-between mb-2">
-                  {status.badge}
-                  <span className="text-sm text-muted-foreground">
-                    {activity.participant_count} {activity.max_participants ? `/ ${activity.max_participants}` : ''} participants
-                  </span>
-                </div>
-                <CardTitle className="text-xl mb-2 group-hover:text-blue-500 transition-colors">
-                  {activity.title}
-                </CardTitle>
-                <CardDescription className="line-clamp-2">
-                  {activity.description}
-                </CardDescription>
-              </CardHeader>
+        <TabsContent value="grid">
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {activities.map((activity) => {
+              const status = getParticipationStatus(activity);
+              const activityDate = new Date(activity.date);
+              const isUpcoming = activityDate > new Date();
 
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center text-sm">
-                    <Calendar className="mr-2 h-4 w-4 text-blue-500" />
-                    <time dateTime={activity.date} className="text-muted-foreground">
-                      {formatDate(activity.date)}
-                    </time>
-                  </div>
+              return (
+                <Card 
+                  key={activity.id} 
+                  className={`group relative overflow-hidden transition-all duration-300 hover:shadow-lg
+                    ${isUpcoming ? 'border-blue-500/20' : 'border-gray-500/20'}
+                  `}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background/10 pointer-events-none" />
                   
-                  <div className="flex items-center text-sm">
-                    <MapPin className="mr-2 h-4 w-4 text-rose-500" />
-                    <span className="text-muted-foreground">{activity.location}</span>
-                  </div>
+                  <CardHeader>
+                    <div className="flex items-center justify-between mb-2">
+                      {status.badge}
+                      <span className="text-sm text-muted-foreground">
+                        {activity.participant_count} {activity.max_participants ? `/ ${activity.max_participants}` : ''} participants
+                      </span>
+                    </div>
+                    <CardTitle className="text-xl mb-2 group-hover:text-blue-500 transition-colors">
+                      {activity.title}
+                    </CardTitle>
+                    <CardDescription className="line-clamp-2">
+                      {activity.description}
+                    </CardDescription>
+                  </CardHeader>
 
-                  <div className="pt-4">
-                    <Button
-                      className="w-full group relative"
-                      variant={status.button.variant}
-                      disabled={status.button.disabled}
-                      onClick={() => handleParticipation(activity.id, activity.is_participating)}
-                    >
-                      {status.button.text}
-                      <ChevronRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="flex items-center text-sm">
+                        <Calendar className="mr-2 h-4 w-4 text-blue-500" />
+                        <time dateTime={activity.date} className="text-muted-foreground">
+                          {formatDate(activity.date)}
+                        </time>
+                      </div>
+                      
+                      <div className="flex items-center text-sm">
+                        <MapPin className="mr-2 h-4 w-4 text-rose-500" />
+                        <span className="text-muted-foreground">{activity.location}</span>
+                      </div>
 
-              <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-blue-300 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
-            </Card>
-          );
-        })}
-      </div>
+                      <div className="pt-4">
+                        <Button
+                          className="w-full group relative"
+                          variant={status.button.variant}
+                          disabled={status.button.disabled}
+                          onClick={() => handleParticipation(activity.id, activity.is_participating)}
+                        >
+                          {status.button.text}
+                          <ChevronRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+
+                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-blue-300 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
+                </Card>
+              );
+            })}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="calendar">
+          <Card>
+            <CardContent className="p-6">
+              <ActivityCalendar activities={activities} />
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 } 

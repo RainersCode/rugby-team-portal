@@ -27,7 +27,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatDate } from '@/lib/utils';
+import ActivityCalendar from '@/components/features/Calendar/ActivityCalendar';
 
 interface Profile {
   id: string;
@@ -221,123 +223,111 @@ export default function AdminActivitiesClient({ activities: initialActivities }:
         </CardHeader>
       </Card>
 
-      <Card>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Activity</TableHead>
-                <TableHead>Date & Location</TableHead>
-                <TableHead>Capacity</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {activities.map((activity) => (
-                <TableRow 
-                  key={activity.id}
-                  className={`group transition-colors ${
-                    !isUpcoming(activity.date) ? 'text-muted-foreground' : ''
-                  }`}
-                >
-                  <TableCell>
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium">{activity.title}</span>
-                        {getActivityStatus(activity.date)}
-                      </div>
-                      <div className="text-sm text-muted-foreground line-clamp-1">
-                        {activity.description}
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="space-y-1">
-                      <div className="flex items-center text-sm">
-                        <Calendar className="mr-2 h-4 w-4 text-blue-500" />
-                        {formatDate(activity.date)}
-                      </div>
-                      <div className="flex items-center text-sm text-muted-foreground">
-                        <MapPin className="mr-2 h-4 w-4 text-rose-500" />
-                        {activity.location}
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        {getCapacityStatus(activity)}
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-                        onClick={() => setSelectedActivity(activity)}
-                      >
-                        <Users className="h-4 w-4" />
-                        {getParticipantCount(activity)} {activity.max_participants ? `/ ${activity.max_participants}` : ''} participants
-                      </Button>
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => router.push(`/admin/activities/${activity.id}/edit`)}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="hover:text-destructive"
-                        onClick={() => handleDelete(activity.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+      <Tabs defaultValue="list" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="list">List View</TabsTrigger>
+          <TabsTrigger value="calendar">Calendar View</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="list">
+          <Card>
+            <CardContent className="p-0">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Activity</TableHead>
+                    <TableHead>Date & Location</TableHead>
+                    <TableHead>Capacity</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {activities.map((activity) => (
+                    <TableRow 
+                      key={activity.id}
+                      className={`group transition-colors ${
+                        !isUpcoming(activity.date) ? 'text-muted-foreground' : ''
+                      }`}
+                    >
+                      <TableCell>
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">{activity.title}</span>
+                            {getActivityStatus(activity.date)}
+                          </div>
+                          <div className="text-sm text-muted-foreground line-clamp-1">
+                            {activity.description}
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2 text-sm">
+                            <Calendar className="w-4 h-4" />
+                            {formatDate(activity.date)}
+                          </div>
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <MapPin className="w-4 h-4" />
+                            {activity.location}
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <Users className="w-4 h-4" />
+                            <span>
+                              {getParticipantCount(activity)}/{activity.max_participants || '∞'}
+                            </span>
+                          </div>
+                          {getCapacityStatus(activity)}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setSelectedActivity(activity)}
+                          >
+                            <Users className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => router.push(`/admin/activities/${activity.id}/edit`)}
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDelete(activity.id)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="calendar">
+          <ActivityCalendar activities={activities} />
+        </TabsContent>
+      </Tabs>
 
       <Dialog open={!!selectedActivity} onOpenChange={() => setSelectedActivity(null)}>
-        <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto bg-background border shadow-lg dark:border-gray-800">
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-xl">
-              <Users className="h-5 w-5" />
-              {selectedActivity?.title}
-            </DialogTitle>
-            <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-              <div className="flex items-center gap-1">
-                <Calendar className="h-4 w-4" />
-                {selectedActivity && formatDate(selectedActivity.date)}
-              </div>
-              <div className="flex items-center gap-1">
-                <MapPin className="h-4 w-4" />
-                {selectedActivity?.location}
-              </div>
-            </div>
+            <DialogTitle>Activity Participants</DialogTitle>
           </DialogHeader>
           {selectedActivity && (
-            <div className="mt-4">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h4 className="font-semibold mb-1">Participants</h4>
-                  <div className="text-sm text-muted-foreground">
-                    {getParticipantCount(selectedActivity)} {selectedActivity.max_participants ? `out of ${selectedActivity.max_participants}` : 'total'} participants
-                  </div>
-                </div>
-                {getCapacityStatus(selectedActivity)}
-              </div>
-              <div className="pr-2">
-                <ParticipantsList participants={selectedActivity.participant_details || []} />
-              </div>
-            </div>
+            <ParticipantsList participants={selectedActivity.participant_details} />
           )}
         </DialogContent>
       </Dialog>
