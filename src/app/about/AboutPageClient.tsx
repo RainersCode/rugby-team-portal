@@ -4,17 +4,17 @@ import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { Edit, MapPin, Calendar, Users, Trophy, Heart, Target } from 'lucide-react'
+import { Edit, MapPin, Calendar, Users, Trophy, Heart, Target, Star } from 'lucide-react'
 
 interface AboutPageClientProps {
   aboutData: {
-    mission?: string
-    vision?: string
-    history?: string
-    values?: string
-    team_image?: string
-    training_image?: string
-    community_image?: string
+    mission: string
+    history: string
+    values: string
+    team_highlights?: {
+      title: string
+      description: string
+    }[]
   }
   isAdmin: boolean
 }
@@ -27,155 +27,147 @@ export default function AboutPageClient({ aboutData, isAdmin }: AboutPageClientP
   }
 
   return (
-    <div className="space-y-24">
-      {/* Mission & Vision Section */}
-      <section className="grid md:grid-cols-2 gap-12">
-        <motion.div 
-          className="space-y-6"
-          {...fadeInUp}
-        >
-          <h2 className="text-3xl font-bold">Our Mission</h2>
-          <p className="text-gray-600 leading-relaxed">
-            {aboutData.mission || 'To promote rugby excellence, foster community engagement, and develop players both on and off the field.'}
-          </p>
-          <div className="grid grid-cols-2 gap-6">
-            <div className="flex items-start gap-3">
-              <Trophy className="w-5 h-5 text-primary-blue mt-1" />
-              <div>
-                <h3 className="font-semibold mb-1">Excellence</h3>
-                <p className="text-sm text-gray-600">Striving for the highest standards in everything we do</p>
+    <div className="space-y-32">
+      {/* Mission Section */}
+      <section className="relative">
+        <div className="absolute inset-0 bg-gradient-to-r from-primary-blue/5 to-transparent rounded-3xl" />
+        <div className="relative grid md:grid-cols-2 gap-12 p-8 md:p-12">
+          <motion.div 
+            className="space-y-8"
+            {...fadeInUp}
+          >
+            <div className="inline-flex items-center gap-2 bg-primary-blue/10 text-primary-blue rounded-full px-4 py-1">
+              <Trophy className="w-4 h-4" />
+              <span className="text-sm font-medium">Our Purpose</span>
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold mb-6">Our Mission</h2>
+              <p className="text-gray-600 leading-relaxed text-lg">
+                {aboutData.mission}
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-6">
+              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
+                <Trophy className="w-6 h-6 text-primary-blue mb-4" />
+                <h3 className="font-semibold mb-2">Excellence</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Striving for the highest standards in everything we do</p>
+              </div>
+              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
+                <Heart className="w-6 h-6 text-primary-blue mb-4" />
+                <h3 className="font-semibold mb-2">Passion</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Deep love and dedication for the sport</p>
               </div>
             </div>
-            <div className="flex items-start gap-3">
-              <Heart className="w-5 h-5 text-primary-blue mt-1" />
-              <div>
-                <h3 className="font-semibold mb-1">Passion</h3>
-                <p className="text-sm text-gray-600">Deep love and dedication for the sport</p>
+          </motion.div>
+          <motion.div 
+            className="space-y-8"
+            {...fadeInUp}
+            transition={{ delay: 0.2 }}
+          >
+            <div className="inline-flex items-center gap-2 bg-primary-blue/10 text-primary-blue rounded-full px-4 py-1">
+              <Star className="w-4 h-4" />
+              <span className="text-sm font-medium">Our Principles</span>
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold mb-6">Our Values</h2>
+              <p className="text-gray-600 leading-relaxed text-lg">
+                {aboutData.values}
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-6">
+              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
+                <Target className="w-6 h-6 text-primary-blue mb-4" />
+                <h3 className="font-semibold mb-2">Growth</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Continuous improvement and development</p>
+              </div>
+              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
+                <Users className="w-6 h-6 text-primary-blue mb-4" />
+                <h3 className="font-semibold mb-2">Unity</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Building strong bonds on and off the field</p>
               </div>
             </div>
-          </div>
-        </motion.div>
-        <motion.div 
-          className="space-y-6"
-          {...fadeInUp}
-          transition={{ delay: 0.2 }}
-        >
-          <h2 className="text-3xl font-bold">Our Vision</h2>
-          <p className="text-gray-600 leading-relaxed">
-            {aboutData.vision || 'To be a leading force in rugby, known for developing exceptional players and fostering a strong community spirit.'}
-          </p>
-          <div className="grid grid-cols-2 gap-6">
-            <div className="flex items-start gap-3">
-              <Target className="w-5 h-5 text-primary-blue mt-1" />
-              <div>
-                <h3 className="font-semibold mb-1">Growth</h3>
-                <p className="text-sm text-gray-600">Continuous improvement and development</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <Users className="w-5 h-5 text-primary-blue mt-1" />
-              <div>
-                <h3 className="font-semibold mb-1">Unity</h3>
-                <p className="text-sm text-gray-600">Building strong bonds on and off the field</p>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-      </section>
-
-      {/* Team Image Section */}
-      <motion.div 
-        className="relative h-[500px] rounded-2xl overflow-hidden"
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5 }}
-      >
-        <Image
-          src={aboutData.team_image || '/placeholder-team.jpg'}
-          alt="Our Team"
-          fill
-          className="object-cover"
-          priority
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-        <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
-          <h2 className="text-3xl font-bold mb-2">Our Team</h2>
-          <p className="text-white/90 max-w-2xl">
-            A diverse group of passionate individuals united by their love for rugby and commitment to excellence.
-          </p>
+          </motion.div>
         </div>
-      </motion.div>
+      </section>
 
       {/* History Section */}
-      <section className="grid md:grid-cols-2 gap-12 items-center">
-        <motion.div 
-          className="space-y-6"
-          {...fadeInUp}
-        >
-          <h2 className="text-3xl font-bold">Our History</h2>
-          <div className="prose prose-gray max-w-none">
-            <p className="text-gray-600 leading-relaxed">
-              {aboutData.history || 'Our club has a rich history of fostering rugby talent and building community connections. From humble beginnings, we have grown into a respected institution in the rugby world.'}
-            </p>
-          </div>
-        </motion.div>
-        <motion.div 
-          className="grid grid-cols-2 gap-4"
-          {...fadeInUp}
-          transition={{ delay: 0.2 }}
-        >
-          <div className="relative aspect-square rounded-lg overflow-hidden">
-            <Image
-              src={aboutData.training_image || '/placeholder-training.jpg'}
-              alt="Training session"
-              fill
-              className="object-cover hover:scale-105 transition-transform duration-300"
-            />
-          </div>
-          <div className="relative aspect-square rounded-lg overflow-hidden">
-            <Image
-              src={aboutData.community_image || '/placeholder-community.jpg'}
-              alt="Community event"
-              fill
-              className="object-cover hover:scale-105 transition-transform duration-300"
-            />
-          </div>
-        </motion.div>
-      </section>
-
-      {/* Values Section */}
-      <section className="relative bg-gray-50 -mx-4 px-4 py-16">
-        <div className="max-w-3xl mx-auto text-center space-y-6">
-          <h2 className="text-3xl font-bold">Our Values</h2>
-          <div className="prose prose-gray max-w-none">
-            <p className="text-gray-600 leading-relaxed">
-              {aboutData.values || 'We believe in respect, integrity, teamwork, and continuous improvement. These core values guide everything we do, from training sessions to community engagement.'}
-            </p>
-          </div>
+      <section className="relative">
+        <div className="absolute inset-0 bg-gradient-to-l from-primary-blue/5 to-transparent rounded-3xl" />
+        <div className="relative grid md:grid-cols-2 gap-12 p-8 md:p-12 items-start">
+          <motion.div 
+            className="space-y-8"
+            {...fadeInUp}
+          >
+            <div className="inline-flex items-center gap-2 bg-primary-blue/10 text-primary-blue rounded-full px-4 py-1">
+              <Calendar className="w-4 h-4" />
+              <span className="text-sm font-medium">Our Journey</span>
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold mb-6">Our History</h2>
+              <div className="prose prose-gray max-w-none">
+                <p className="text-gray-600 leading-relaxed text-lg">
+                  {aboutData.history}
+                </p>
+              </div>
+            </div>
+          </motion.div>
+          <motion.div 
+            className="space-y-8"
+            {...fadeInUp}
+            transition={{ delay: 0.2 }}
+          >
+            <div className="inline-flex items-center gap-2 bg-primary-blue/10 text-primary-blue rounded-full px-4 py-1">
+              <Star className="w-4 h-4" />
+              <span className="text-sm font-medium">Key Achievements</span>
+            </div>
+            <h2 className="text-3xl font-bold mb-6">Team Highlights</h2>
+            <div className="space-y-4">
+              {aboutData.team_highlights?.map((highlight, index) => (
+                <motion.div 
+                  key={index}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.1 * index }}
+                  className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow"
+                >
+                  <h3 className="font-semibold text-lg mb-2">{highlight.title}</h3>
+                  <p className="text-gray-600 dark:text-gray-400">{highlight.description}</p>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
         </div>
       </section>
 
       {/* Join Section */}
-      <section className="text-center space-y-8">
-        <div className="max-w-2xl mx-auto">
-          <h2 className="text-3xl font-bold mb-4">Join Our Rugby Family</h2>
-          <p className="text-gray-600 mb-8">
-            Whether you're an experienced player or new to rugby, we welcome everyone who shares our passion for the game.
-          </p>
-          <div className="flex justify-center gap-4">
-            <Link 
-              href="/contact"
-              className="bg-primary-blue text-white px-6 py-3 rounded-lg hover:bg-primary-blue/90 transition-colors"
-            >
-              Get Started
-            </Link>
-            <Link 
-              href="/training"
-              className="bg-gray-100 text-gray-900 px-6 py-3 rounded-lg hover:bg-gray-200 transition-colors"
-            >
-              View Schedule
-            </Link>
-          </div>
+      <section className="relative">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary-blue to-blue-600 rounded-3xl opacity-90" />
+        <div className="relative text-center space-y-8 p-8 md:p-12">
+          <motion.div 
+            className="max-w-2xl mx-auto space-y-6"
+            {...fadeInUp}
+          >
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+              Join Our Rugby Family
+            </h2>
+            <p className="text-lg text-white/90 mb-8">
+              Whether you're an experienced player or new to rugby, we welcome everyone who shares our passion for the game.
+            </p>
+            <div className="flex flex-wrap justify-center gap-4">
+              <Link 
+                href="/contact"
+                className="bg-white text-primary-blue px-8 py-3 rounded-lg hover:bg-white/90 transition-colors font-medium"
+              >
+                Get Started
+              </Link>
+              <Link 
+                href="/training"
+                className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+              >
+                View Schedule
+              </Link>
+            </div>
+          </motion.div>
         </div>
       </section>
 
