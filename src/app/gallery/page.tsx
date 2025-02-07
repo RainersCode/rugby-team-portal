@@ -8,12 +8,28 @@ export const metadata: Metadata = {
 
 export default function GalleryPage() {
   return (
-    <div className="container-width py-8 space-y-6">
-      <div>
-        <h1 className="text-3xl font-semibold">Gallery</h1>
-        <p className="text-muted-foreground mt-1">Browse our photo collections</p>
+    <div className="min-h-screen bg-gradient-to-b from-bg-light to-gray-50 dark:from-bg-dark dark:to-gray-900">
+      {/* Hero Section */}
+      <div className="relative py-20 bg-primary-blue overflow-hidden">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute transform rotate-45 left-1/4 top-1/4">
+            <div className="w-96 h-96 rounded-full bg-white"></div>
+          </div>
+        </div>
+        <div className="relative container-width text-center">
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+            Photo Gallery
+          </h1>
+          <p className="text-xl text-white/90 max-w-2xl mx-auto">
+            Explore our collection of memorable moments from matches, training sessions, and team events.
+          </p>
+        </div>
       </div>
-      <GalleryClient />
+
+      {/* Gallery Content */}
+      <div className="container-width py-12">
+        <GalleryClient />
+      </div>
     </div>
   );
 }

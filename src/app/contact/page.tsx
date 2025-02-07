@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Mail, Phone, MapPin, Clock, Send } from "lucide-react";
-import { toast } from "sonner";
+import { Phone, Mail, MapPin, Send } from "lucide-react";
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -11,51 +10,21 @@ export default function ContactPage() {
     subject: "",
     message: "",
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    try {
-      const response = await fetch("/api/send-message", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to send message");
-      }
-
-      // Clear form
-      setFormData({
-        name: "",
-        email: "",
-        subject: "",
-        message: "",
-      });
-
-      toast.success("Message sent successfully! We'll get back to you soon.");
-    } catch (error) {
-      toast.error("Failed to send message. Please try again later.");
-      console.error("Error sending message:", error);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    // Handle form submission
+    console.log(formData);
   };
 
   return (
@@ -67,7 +36,7 @@ export default function ContactPage() {
             <div className="w-96 h-96 rounded-full bg-white"></div>
           </div>
         </div>
-        <div className="relative container mx-auto px-4 text-center">
+        <div className="relative container-width mx-auto text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
             Get in Touch
           </h1>
@@ -78,12 +47,13 @@ export default function ContactPage() {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-12">
+      {/* Content Section */}
+      <div className="container-width py-12">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
           {/* Contact Information */}
           <div className="space-y-8">
-            <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-lg">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+            <div className="bg-card rounded-2xl p-8 shadow-lg">
+              <h2 className="text-2xl font-bold mb-6">
                 Contact Information
               </h2>
               <div className="space-y-6">
@@ -92,10 +62,10 @@ export default function ContactPage() {
                     <Phone className="w-6 h-6 text-primary-blue" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900 dark:text-white">
+                    <h3 className="font-semibold">
                       Phone
                     </h3>
-                    <p className="text-gray-600 dark:text-gray-300">
+                    <p className="text-muted-foreground">
                       +1 (555) 123-4567
                     </p>
                   </div>
@@ -105,10 +75,10 @@ export default function ContactPage() {
                     <Mail className="w-6 h-6 text-primary-blue" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900 dark:text-white">
+                    <h3 className="font-semibold">
                       Email
                     </h3>
-                    <p className="text-gray-600 dark:text-gray-300">
+                    <p className="text-muted-foreground">
                       info@rugbyteam.com
                     </p>
                   </div>
@@ -118,43 +88,41 @@ export default function ContactPage() {
                     <MapPin className="w-6 h-6 text-primary-blue" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900 dark:text-white">
+                    <h3 className="font-semibold">
                       Location
                     </h3>
-                    <p className="text-gray-600 dark:text-gray-300">
+                    <p className="text-muted-foreground">
                       123 Rugby Street, Sports City, SC 12345
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start space-x-4">
-                  <div className="flex-shrink-0">
-                    <Clock className="w-6 h-6 text-primary-blue" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 dark:text-white">
-                      Training Hours
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-300">
-                      Monday - Friday: 4:00 PM - 8:00 PM
-                      <br />
-                      Saturday: 9:00 AM - 1:00 PM
                     </p>
                   </div>
                 </div>
               </div>
             </div>
+
+            {/* Map or Additional Info */}
+            <div className="bg-card rounded-2xl p-8 shadow-lg">
+              <h2 className="text-2xl font-bold mb-6">
+                Training Ground
+              </h2>
+              <p className="text-muted-foreground mb-4">
+                Visit us during training hours to learn more about our club and watch the team in action.
+              </p>
+              <div className="aspect-video bg-muted rounded-lg">
+                {/* Add map or image here */}
+              </div>
+            </div>
           </div>
 
           {/* Contact Form */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-lg">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+          <div className="bg-card rounded-2xl p-8 shadow-lg">
+            <h2 className="text-2xl font-bold mb-6">
               Send us a Message
             </h2>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <label
                   htmlFor="name"
-                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                  className="block text-sm font-medium mb-2"
                 >
                   Your Name
                 </label>
@@ -164,14 +132,14 @@ export default function ContactPage() {
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-blue focus:border-transparent dark:bg-gray-700 dark:text-white"
+                  className="w-full px-4 py-3 rounded-lg border border-input bg-background focus:ring-2 focus:ring-primary-blue focus:border-transparent"
                   required
                 />
               </div>
               <div>
                 <label
                   htmlFor="email"
-                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                  className="block text-sm font-medium mb-2"
                 >
                   Email Address
                 </label>
@@ -181,14 +149,14 @@ export default function ContactPage() {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-blue focus:border-transparent dark:bg-gray-700 dark:text-white"
+                  className="w-full px-4 py-3 rounded-lg border border-input bg-background focus:ring-2 focus:ring-primary-blue focus:border-transparent"
                   required
                 />
               </div>
               <div>
                 <label
                   htmlFor="subject"
-                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                  className="block text-sm font-medium mb-2"
                 >
                   Subject
                 </label>
@@ -198,14 +166,14 @@ export default function ContactPage() {
                   name="subject"
                   value={formData.subject}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-blue focus:border-transparent dark:bg-gray-700 dark:text-white"
+                  className="w-full px-4 py-3 rounded-lg border border-input bg-background focus:ring-2 focus:ring-primary-blue focus:border-transparent"
                   required
                 />
               </div>
               <div>
                 <label
                   htmlFor="message"
-                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                  className="block text-sm font-medium mb-2"
                 >
                   Message
                 </label>
@@ -214,24 +182,17 @@ export default function ContactPage() {
                   name="message"
                   value={formData.message}
                   onChange={handleChange}
-                  rows={6}
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-blue focus:border-transparent dark:bg-gray-700 dark:text-white resize-none"
+                  rows={5}
+                  className="w-full px-4 py-3 rounded-lg border border-input bg-background focus:ring-2 focus:ring-primary-blue focus:border-transparent"
                   required
                 ></textarea>
               </div>
               <button
                 type="submit"
-                disabled={isSubmitting}
-                className="w-full flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-primary-blue rounded-lg hover:bg-primary-blue/90 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full flex items-center justify-center gap-2 bg-primary-blue hover:bg-primary-blue/90 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
               >
-                {isSubmitting ? (
-                  "Sending..."
-                ) : (
-                  <>
-                    Send Message
-                    <Send className="w-5 h-5 ml-2" />
-                  </>
-                )}
+                <Send className="w-5 h-5" />
+                Send Message
               </button>
             </form>
           </div>

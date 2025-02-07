@@ -89,31 +89,64 @@ export default async function NewsPage() {
       throw new Error(`Failed to fetch articles: ${error.message}`);
     }
 
-    if (!articles || articles.length === 0) {
-      return (
-        <div className="container-width py-8">
-          <h1 className="text-4xl font-bold text-secondary-navy mb-8">Latest News</h1>
-          <p className="text-gray-600">No articles found.</p>
-        </div>
-      );
-    }
-
     return (
-      <div className="container-width py-8">
-        <h1 className="text-4xl font-bold text-secondary-navy mb-8">Latest News</h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {articles.map((article) => (
-            <NewsCard key={article.id} article={article as Article} />
-          ))}
+      <div className="min-h-screen bg-gradient-to-b from-bg-light to-gray-50 dark:from-bg-dark dark:to-gray-900">
+        {/* Hero Section */}
+        <div className="relative py-20 bg-primary-blue overflow-hidden">
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute transform rotate-45 left-1/4 top-1/4">
+              <div className="w-96 h-96 rounded-full bg-white"></div>
+            </div>
+          </div>
+          <div className="relative container-width mx-auto text-center">
+            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+              Latest News
+            </h1>
+            <p className="text-xl text-white/90 max-w-2xl mx-auto">
+              Stay updated with the latest news, match reports, and club announcements.
+            </p>
+          </div>
+        </div>
+
+        {/* Content Section */}
+        <div className="container-width py-12">
+          {!articles || articles.length === 0 ? (
+            <p className="text-muted-foreground">No articles found.</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {articles.map((article) => (
+                <NewsCard key={article.id} article={article as Article} />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     );
   } catch (error) {
     console.error('Error fetching articles:', error);
     return (
-      <div className="container-width py-8">
-        <h1 className="text-4xl font-bold text-secondary-navy mb-8">Latest News</h1>
-        <p className="text-red-600">Failed to load articles. Please try again later.</p>
+      <div className="min-h-screen bg-gradient-to-b from-bg-light to-gray-50 dark:from-bg-dark dark:to-gray-900">
+        {/* Hero Section */}
+        <div className="relative py-20 bg-primary-blue overflow-hidden">
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute transform rotate-45 left-1/4 top-1/4">
+              <div className="w-96 h-96 rounded-full bg-white"></div>
+            </div>
+          </div>
+          <div className="relative container-width mx-auto text-center">
+            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+              Latest News
+            </h1>
+            <p className="text-xl text-white/90 max-w-2xl mx-auto">
+              Stay updated with the latest news, match reports, and club announcements.
+            </p>
+          </div>
+        </div>
+
+        {/* Content Section */}
+        <div className="container-width py-12">
+          <p className="text-destructive">Failed to load articles. Please try again later.</p>
+        </div>
       </div>
     );
   }

@@ -133,140 +133,101 @@ export default async function MatchesPage() {
     .sort((a: Match, b: Match) => new Date(b.match_date).getTime() - new Date(a.match_date).getTime());
 
   return (
-    <div className="container-width mx-auto px-4 py-8">
-      {errorMessage && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
-          {errorMessage}
+    <div className="min-h-screen bg-gradient-to-b from-bg-light to-gray-50 dark:from-bg-dark dark:to-gray-900">
+      {/* Hero Section */}
+      <div className="relative py-20 bg-primary-blue overflow-hidden">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute transform rotate-45 left-1/4 top-1/4">
+            <div className="w-96 h-96 rounded-full bg-white"></div>
+          </div>
         </div>
-      )}
+        <div className="relative container-width mx-auto text-center">
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+            Match Schedule
+          </h1>
+          <p className="text-xl text-white/90 max-w-2xl mx-auto">
+            Follow our team's journey through the season. View upcoming fixtures and past results.
+          </p>
+        </div>
+      </div>
 
-      <Tabs defaultValue="local" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 mb-8 h-14">
-          <TabsTrigger 
-            value="local" 
-            className="text-base data-[state=active]:bg-primary-blue data-[state=active]:text-white"
-          >
-            Local Matches
-          </TabsTrigger>
-          <TabsTrigger 
-            value="rugby" 
-            className="text-base data-[state=active]:bg-primary-blue data-[state=active]:text-white"
-          >
-            World Rugby
-          </TabsTrigger>
-        </TabsList>
+      {/* Content Section */}
+      <div className="container-width py-12">
+        {errorMessage && (
+          <div className="bg-destructive/10 border border-destructive text-destructive px-4 py-3 rounded-lg mb-6">
+            {errorMessage}
+          </div>
+        )}
 
-        {/* Local Database Matches */}
-        <TabsContent value="local">
-          {/* Upcoming Local Matches */}
-          <section className="mb-12">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">
-              Upcoming Local Matches
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {upcomingDbMatches.map((match: Match, index: number) => (
-                <MatchCard 
-                  key={`upcoming_local_${match.id}_${index}`} 
-                  match={match} 
-                  isLocalMatch={true} 
-                  variant="default"
-                />
-              ))}
-              {upcomingDbMatches.length === 0 && (
-                <p className="text-gray-500 dark:text-gray-400">No upcoming local matches scheduled.</p>
-              )}
-            </div>
-          </section>
+        <Tabs defaultValue="local" className="space-y-8">
+          <TabsList className="grid w-full grid-cols-2 h-14">
+            <TabsTrigger 
+              value="local" 
+              className="text-base data-[state=active]:bg-primary-blue data-[state=active]:text-white"
+            >
+              Local Matches
+            </TabsTrigger>
+            <TabsTrigger 
+              value="rugby" 
+              className="text-base data-[state=active]:bg-primary-blue data-[state=active]:text-white"
+            >
+              World Rugby
+            </TabsTrigger>
+          </TabsList>
 
-          {/* Past Local Matches */}
-          <section>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">
-              Past Local Matches
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {pastDbMatches.map((match: Match, index: number) => (
-                <MatchCard 
-                  key={`past_local_${match.id}_${index}`} 
-                  match={match} 
-                  isLocalMatch={true} 
-                  variant="default"
-                />
-              ))}
-              {pastDbMatches.length === 0 && (
-                <p className="text-gray-500 dark:text-gray-400">No past local matches available.</p>
-              )}
-            </div>
-          </section>
-        </TabsContent>
+          {/* Local Database Matches */}
+          <TabsContent value="local">
+            {/* Upcoming Local Matches */}
+            <section className="mb-12">
+              <h2 className="text-2xl font-bold mb-6">
+                Upcoming Local Matches
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {upcomingDbMatches.map((match: Match, index: number) => (
+                  <MatchCard 
+                    key={`upcoming_local_${match.id}_${index}`} 
+                    match={match} 
+                    isLocalMatch={true} 
+                    variant="default"
+                  />
+                ))}
+                {upcomingDbMatches.length === 0 && (
+                  <p className="text-muted-foreground">No upcoming local matches scheduled.</p>
+                )}
+              </div>
+            </section>
 
-        {/* API Rugby Matches */}
-        <TabsContent value="rugby">
-          <Tabs defaultValue="all" className="w-full">
-            <TabsList className="w-full flex flex-wrap gap-2 mb-8">
-              <TabsTrigger value="all">All Leagues</TabsTrigger>
-              <TabsTrigger value="premiership">Premiership Rugby</TabsTrigger>
-              <TabsTrigger value="top14">Top 14</TabsTrigger>
-              <TabsTrigger value="urc">United Rugby Championship</TabsTrigger>
-              <TabsTrigger value="super">Super Rugby</TabsTrigger>
-              <TabsTrigger value="champions">Champions Cup</TabsTrigger>
-            </TabsList>
+            {/* Past Local Matches */}
+            <section>
+              <h2 className="text-2xl font-bold mb-6">
+                Past Local Matches
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {pastDbMatches.map((match: Match, index: number) => (
+                  <MatchCard 
+                    key={`past_local_${match.id}_${index}`} 
+                    match={match} 
+                    isLocalMatch={true} 
+                    variant="default"
+                  />
+                ))}
+                {pastDbMatches.length === 0 && (
+                  <p className="text-muted-foreground">No past local matches available.</p>
+                )}
+              </div>
+            </section>
+          </TabsContent>
 
-            {/* All Leagues Tab */}
-            <TabsContent value="all">
-              <RugbyLeagueSection
-                title="World Rugby"
-                upcomingMatches={upcomingRugbyMatches}
-                pastMatches={pastRugbyMatches}
-              />
-            </TabsContent>
-
-            {/* Premiership Rugby Tab */}
-            <TabsContent value="premiership">
-              <RugbyLeagueSection
-                title="Premiership Rugby"
-                upcomingMatches={upcomingRugbyMatches.filter(m => m.competition.includes('Premiership'))}
-                pastMatches={pastRugbyMatches.filter(m => m.competition.includes('Premiership'))}
-              />
-            </TabsContent>
-
-            {/* Top 14 Tab */}
-            <TabsContent value="top14">
-              <RugbyLeagueSection
-                title="Top 14"
-                upcomingMatches={upcomingRugbyMatches.filter(m => m.competition.includes('Top 14'))}
-                pastMatches={pastRugbyMatches.filter(m => m.competition.includes('Top 14'))}
-              />
-            </TabsContent>
-
-            {/* United Rugby Championship Tab */}
-            <TabsContent value="urc">
-              <RugbyLeagueSection
-                title="United Rugby Championship"
-                upcomingMatches={upcomingRugbyMatches.filter(m => m.competition.includes('United Rugby'))}
-                pastMatches={pastRugbyMatches.filter(m => m.competition.includes('United Rugby'))}
-              />
-            </TabsContent>
-
-            {/* Super Rugby Tab */}
-            <TabsContent value="super">
-              <RugbyLeagueSection
-                title="Super Rugby"
-                upcomingMatches={upcomingRugbyMatches.filter(m => m.competition.includes('Super Rugby'))}
-                pastMatches={pastRugbyMatches.filter(m => m.competition.includes('Super Rugby'))}
-              />
-            </TabsContent>
-
-            {/* Champions Cup Tab */}
-            <TabsContent value="champions">
-              <RugbyLeagueSection
-                title="European Rugby Champions Cup"
-                upcomingMatches={upcomingRugbyMatches.filter(m => m.competition.includes('Champions Cup'))}
-                pastMatches={pastRugbyMatches.filter(m => m.competition.includes('Champions Cup'))}
-              />
-            </TabsContent>
-          </Tabs>
-        </TabsContent>
-      </Tabs>
+          {/* API Rugby Matches */}
+          <TabsContent value="rugby">
+            <RugbyLeagueSection 
+              title="Rugby"
+              upcomingMatches={upcomingRugbyMatches}
+              pastMatches={pastRugbyMatches}
+            />
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 } 

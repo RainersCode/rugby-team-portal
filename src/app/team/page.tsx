@@ -56,6 +56,14 @@ export default function TeamPage() {
       ? players
       : players.filter((player) => player.position === selectedPosition);
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-bg-light to-gray-50 dark:from-bg-dark dark:to-gray-900">
       {/* Hero Section */}
@@ -65,7 +73,7 @@ export default function TeamPage() {
             <div className="w-96 h-96 rounded-full bg-white"></div>
           </div>
         </div>
-        <div className="relative container mx-auto px-4 text-center">
+        <div className="relative container-width mx-auto text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
             Our Team
           </h1>
@@ -75,37 +83,38 @@ export default function TeamPage() {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-12">
+      {/* Content Section */}
+      <div className="container-width py-12">
         {/* Team Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
+          <div className="bg-card rounded-xl p-6 shadow-lg">
             <div className="text-3xl font-bold text-primary-blue mb-2">25</div>
-            <div className="text-sm text-gray-600 dark:text-gray-300">
+            <div className="text-sm text-muted-foreground">
               Squad Players
             </div>
           </div>
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
+          <div className="bg-card rounded-xl p-6 shadow-lg">
             <div className="text-3xl font-bold text-primary-blue mb-2">12</div>
-            <div className="text-sm text-gray-600 dark:text-gray-300">
+            <div className="text-sm text-muted-foreground">
               International Players
             </div>
           </div>
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
+          <div className="bg-card rounded-xl p-6 shadow-lg">
             <div className="text-3xl font-bold text-primary-blue mb-2">5</div>
-            <div className="text-sm text-gray-600 dark:text-gray-300">
+            <div className="text-sm text-muted-foreground">
               Trophies Won
             </div>
           </div>
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
+          <div className="bg-card rounded-xl p-6 shadow-lg">
             <div className="text-3xl font-bold text-primary-blue mb-2">85%</div>
-            <div className="text-sm text-gray-600 dark:text-gray-300">
+            <div className="text-sm text-muted-foreground">
               Win Rate
             </div>
           </div>
         </div>
 
         {/* Position Filter */}
-        <div className="flex flex-wrap gap-2 mb-12">
+        <div className="flex flex-wrap gap-2 mb-8">
           {positions.map((position) => (
             <button
               key={position}
@@ -113,7 +122,7 @@ export default function TeamPage() {
               className={`px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200 ${
                 selectedPosition === position
                   ? "bg-primary-blue text-white"
-                  : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  : "bg-card text-muted-foreground hover:bg-accent"
               }`}
             >
               {position}
@@ -133,7 +142,7 @@ export default function TeamPage() {
               className="group"
             >
               <div
-                className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-lg cursor-pointer transform transition-transform duration-300 hover:-translate-y-2"
+                className="bg-card rounded-xl overflow-hidden shadow-lg cursor-pointer transform transition-transform duration-300 hover:-translate-y-2"
                 onClick={() =>
                   setSelectedPlayer(
                     selectedPlayer === player.id ? null : player.id
@@ -172,31 +181,31 @@ export default function TeamPage() {
                         <div className="text-xl font-bold text-primary-blue">
                           {player.stats.matches}
                         </div>
-                        <div className="text-sm text-gray-500">Matches</div>
+                        <div className="text-sm text-muted-foreground">Matches</div>
                       </div>
                       <div className="text-center">
                         <div className="text-xl font-bold text-primary-blue">
                           {player.stats.tries}
                         </div>
-                        <div className="text-sm text-gray-500">Tries</div>
+                        <div className="text-sm text-muted-foreground">Tries</div>
                       </div>
                       <div className="text-center">
                         <div className="text-xl font-bold text-primary-blue">
                           {player.stats.tackles}
                         </div>
-                        <div className="text-sm text-gray-500">Tackles</div>
+                        <div className="text-sm text-muted-foreground">Tackles</div>
                       </div>
                     </div>
 
                     {/* Social Links */}
-                    {(player.social.instagram || player.social.twitter) && (
+                    {(player.social?.instagram || player.social?.twitter) && (
                       <div className="flex justify-center gap-4">
                         {player.social.instagram && (
                           <a
                             href={`https://instagram.com/${player.social.instagram}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-gray-500 hover:text-primary-blue"
+                            className="text-muted-foreground hover:text-primary-blue"
                           >
                             Instagram
                           </a>
@@ -206,7 +215,7 @@ export default function TeamPage() {
                             href={`https://twitter.com/${player.social.twitter}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-gray-500 hover:text-primary-blue"
+                            className="text-muted-foreground hover:text-primary-blue"
                           >
                             Twitter
                           </a>
@@ -215,10 +224,10 @@ export default function TeamPage() {
                     )}
 
                     {/* Achievements */}
-                    {player.achievements.length > 0 && (
+                    {player.achievements?.length > 0 && (
                       <div>
                         <h4 className="font-semibold mb-2">Achievements</h4>
-                        <ul className="list-disc list-inside text-sm text-gray-600 dark:text-gray-300">
+                        <ul className="list-disc list-inside text-sm text-muted-foreground">
                           {player.achievements.map((achievement, index) => (
                             <li key={index}>{achievement}</li>
                           ))}
