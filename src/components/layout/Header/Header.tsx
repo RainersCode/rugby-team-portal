@@ -7,7 +7,6 @@ import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import type { User } from "@supabase/auth-helpers-nextjs";
 import { MobileNav } from "@/components/mobile-nav";
 import UserNav from "./UserNav";
-import { ThemeToggle } from "@/components/shared/ThemeToggle";
 
 const mainNavItems = [
   { href: "/", label: "Home" },
@@ -106,7 +105,6 @@ export function Header() {
             })}
           </nav>
           <div className="flex items-center space-x-6 flex-shrink-0">
-            <ThemeToggle />
             {user ? (
               <UserNav user={user} />
             ) : (

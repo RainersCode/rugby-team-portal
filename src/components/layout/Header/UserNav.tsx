@@ -15,7 +15,6 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Users,
-  Settings,
   LayoutDashboard,
   FileText,
   Calendar,
@@ -66,8 +65,10 @@ export default function UserNav({ user }: UserNavProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="focus:outline-none">
-        <Avatar>
-          <AvatarFallback>{initials}</AvatarFallback>
+        <Avatar className="h-8 w-8 bg-rugby-teal/10 hover:bg-rugby-teal/20 transition-colors">
+          <AvatarFallback className="text-rugby-teal font-medium">
+            {initials}
+          </AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
