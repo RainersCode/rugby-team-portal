@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Calendar, MapPin, Users, ChevronRight, Grid, CalendarDays } from 'lucide-react';
+import { Calendar, MapPin, Users, ChevronRight } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -25,9 +25,10 @@ interface Activity {
 interface Props {
   activities: Activity[];
   userId?: string;
+  isAdmin?: boolean;
 }
 
-export default function ActivitiesClient({ activities: initialActivities, userId }: Props) {
+export default function ActivitiesClient({ activities: initialActivities, userId, isAdmin = false }: Props) {
   const [activities, setActivities] = useState(initialActivities);
   const router = useRouter();
   const supabase = createClientComponentClient();
@@ -138,11 +139,11 @@ export default function ActivitiesClient({ activities: initialActivities, userId
         <div className="flex justify-center">
           <TabsList className="grid grid-cols-2 w-[400px]">
             <TabsTrigger value="grid" className="flex items-center gap-2">
-              <Grid className="w-4 h-4" />
-              Grid View
+              <Users className="w-4 h-4" />
+              Card View
             </TabsTrigger>
             <TabsTrigger value="calendar" className="flex items-center gap-2">
-              <CalendarDays className="w-4 h-4" />
+              <Calendar className="w-4 h-4" />
               Calendar View
             </TabsTrigger>
           </TabsList>
@@ -215,11 +216,7 @@ export default function ActivitiesClient({ activities: initialActivities, userId
         </TabsContent>
 
         <TabsContent value="calendar">
-          <Card>
-            <CardContent className="p-6">
-              <ActivityCalendar activities={activities} />
-            </CardContent>
-          </Card>
+          <ActivityCalendar activities={activities} isAdmin={isAdmin} />
         </TabsContent>
       </Tabs>
     </div>

@@ -11,6 +11,18 @@ export default async function ActivitiesPage() {
   // Get current user session
   const { data: { session } } = await supabase.auth.getSession();
 
+  // Get user role if logged in
+  let isAdmin = false;
+  if (session?.user.id) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', session.user.id)
+      .single();
+    
+    isAdmin = profile?.role === 'admin';
+  }
+
   // Fetch activities with participant counts and user participation status
   const { data: activities } = await supabase
     .from('activities')
@@ -29,5 +41,11 @@ export default async function ActivitiesPage() {
     is_participating: activity.user_participation?.some(p => p.user_id === session?.user.id) || false
   })) || [];
 
-  return <ActivitiesClient activities={transformedActivities} userId={session?.user.id} />;
+  return (
+    <ActivitiesClient 
+      activities={transformedActivities} 
+      userId={session?.user.id}
+      isAdmin={isAdmin}
+    />
+  );
 } 
