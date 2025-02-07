@@ -221,7 +221,13 @@ export default function ActivitiesClient({ activities: initialActivities, userId
 
                         <div className="pt-4">
                           <Button
-                            className="w-full group relative bg-rugby-teal hover:bg-rugby-teal/90"
+                            className={`w-full group relative ${
+                              status.button.variant === "default" 
+                                ? "bg-rugby-teal hover:bg-rugby-teal/90 text-white font-medium" 
+                                : status.button.variant === "destructive"
+                                  ? "bg-rugby-red hover:bg-rugby-red/90 text-white font-medium"
+                                  : "bg-gray-100 text-gray-500"
+                            }`}
                             variant={status.button.variant}
                             disabled={status.button.disabled}
                             onClick={() => handleParticipation(activity.id, activity.is_participating)}

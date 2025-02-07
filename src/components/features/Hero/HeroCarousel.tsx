@@ -79,19 +79,19 @@ export default function HeroCarousel({ articles, nextMatch }: HeroCarouselProps)
 
       {/* Next Match Card */}
       {nextMatch && (
-        <div className="absolute bottom-0 left-0 right-0 md:bottom-16 md:left-auto md:right-8 lg:right-12 w-full md:w-[300px] z-10">
-          <Card className="bg-white/95 backdrop-blur-md shadow-xl hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 border border-white/20 rounded-none md:rounded-lg">
+        <div className="absolute bottom-0 left-0 right-0 md:bottom-16 md:left-auto md:right-8 lg:right-12 w-full md:w-[360px] z-10">
+          <Card className="bg-gradient-to-br from-white via-white to-gray-50 shadow-xl hover:shadow-2xl transition-all duration-300 border-0 rounded-none md:rounded-lg">
             <div className="p-2 md:p-4">
               <div className="flex justify-between items-center mb-1.5 md:mb-3">
-                <span className="text-[10px] md:text-xs font-medium bg-gradient-to-r from-rugby-teal to-rugby-teal/80 text-white px-2 py-0.5 md:px-2.5 md:py-1 rounded-none md:rounded-full">
+                <span className="text-[10px] md:text-xs font-medium bg-gradient-to-r from-rugby-teal to-rugby-teal/90 text-white px-2 py-0.5 md:px-3 md:py-1 rounded-none md:rounded-full shadow-sm">
                   Next Match
                 </span>
-                <span className="text-[10px] md:text-xs font-medium text-rugby-teal">
+                <span className="text-[10px] md:text-xs font-semibold bg-gradient-to-r from-rugby-teal to-rugby-teal/80 bg-clip-text text-transparent">
                   {format(new Date(nextMatch.match_date), 'MMM d')}
                 </span>
               </div>
               
-              <div className="flex items-center justify-between gap-2 md:gap-4">
+              <div className="flex items-center justify-between gap-3 md:gap-6 bg-gradient-to-br from-gray-50 to-white p-2 md:p-3 rounded-md">
                 {/* Home Team */}
                 <div className="flex flex-col items-center text-center flex-1">
                   <div className="relative w-6 h-6 md:w-12 md:h-12 mb-1 md:mb-2 transform hover:scale-110 transition-transform duration-300">
@@ -102,13 +102,13 @@ export default function HeroCarousel({ articles, nextMatch }: HeroCarouselProps)
                       className="object-contain drop-shadow-md"
                     />
                   </div>
-                  <span className="text-[10px] md:text-sm font-medium text-gray-900 dark:text-gray-100 line-clamp-1">
+                  <span className="text-[10px] md:text-sm font-semibold text-gray-900">
                     {nextMatch.home_team}
                   </span>
                 </div>
 
                 {/* Match Info */}
-                <div className="flex flex-col items-center">
+                <div className="flex flex-col items-center shrink-0">
                   <span className="text-[10px] md:text-sm font-bold bg-gradient-to-r from-rugby-yellow to-rugby-yellow/80 text-transparent bg-clip-text">VS</span>
                   <span className="text-[8px] md:text-xs font-medium text-rugby-teal mt-0.5 md:mt-1">
                     {format(new Date(nextMatch.match_date), 'HH:mm')}
@@ -125,16 +125,16 @@ export default function HeroCarousel({ articles, nextMatch }: HeroCarouselProps)
                       className="object-contain drop-shadow-md"
                     />
                   </div>
-                  <span className="text-[10px] md:text-sm font-medium text-gray-900 dark:text-gray-100 line-clamp-1">
+                  <span className="text-[10px] md:text-sm font-semibold text-gray-900">
                     {nextMatch.away_team}
                   </span>
                 </div>
               </div>
 
-              <div className="mt-1.5 md:mt-3 pt-1.5 md:pt-3 border-t border-rugby-teal/10">
+              <div className="mt-1.5 md:mt-3 pt-1.5 md:pt-3 border-t border-gray-200">
                 <div className="flex items-center gap-1 md:gap-1.5 text-[8px] md:text-xs">
                   <MapPin className="w-2.5 h-2.5 md:w-3 md:h-3 text-rugby-red" />
-                  <span className="truncate text-gray-600 dark:text-gray-400">{nextMatch.venue}</span>
+                  <span className="truncate text-gray-600 font-medium">{nextMatch.venue}</span>
                 </div>
               </div>
             </div>
