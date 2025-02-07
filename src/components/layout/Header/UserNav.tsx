@@ -21,7 +21,8 @@ import {
   LogOut,
   Dumbbell,
   Image,
-  Play
+  Play,
+  Settings
 } from "lucide-react";
 
 interface UserNavProps {
@@ -64,78 +65,101 @@ export default function UserNav({ user }: UserNavProps) {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="focus:outline-none">
-        <Avatar className="h-8 w-8 bg-rugby-teal/10 hover:bg-rugby-teal/20 transition-colors">
-          <AvatarFallback className="text-rugby-teal font-medium">
+      <DropdownMenuTrigger className="focus:outline-none group">
+        <Avatar className="h-8 w-8 bg-gradient-to-br from-rugby-teal/10 to-rugby-teal/20 hover:from-rugby-teal/20 hover:to-rugby-teal/30 transition-all duration-300 ring-2 ring-rugby-teal/20 group-hover:ring-rugby-teal/40">
+          <AvatarFallback className="text-rugby-teal font-semibold bg-transparent">
             {initials}
           </AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
+      <DropdownMenuContent align="end" className="w-64 p-2 bg-gradient-to-b from-white to-gray-50/80 dark:from-gray-900 dark:to-gray-900/80 backdrop-blur-xl border-rugby-teal/20 shadow-xl shadow-rugby-teal/10">
         <Link href="/profile">
-          <DropdownMenuItem className="cursor-pointer">
-            Profile
+          <DropdownMenuItem className="cursor-pointer flex items-center gap-2 px-3 py-2.5 hover:bg-rugby-teal/10 rounded-md transition-colors duration-200">
+            <div className="p-1.5 rounded-full bg-rugby-teal/10">
+              <Users className="w-4 h-4 text-rugby-teal" />
+            </div>
+            <span className="font-medium">Profile</span>
           </DropdownMenuItem>
         </Link>
         <Link href="/settings">
-          <DropdownMenuItem className="cursor-pointer">
-            Settings
+          <DropdownMenuItem className="cursor-pointer flex items-center gap-2 px-3 py-2.5 hover:bg-rugby-teal/10 rounded-md transition-colors duration-200">
+            <div className="p-1.5 rounded-full bg-rugby-yellow/10">
+              <Settings className="w-4 h-4 text-rugby-yellow" />
+            </div>
+            <span className="font-medium">Settings</span>
           </DropdownMenuItem>
         </Link>
         {isAdmin && (
           <>
-            <DropdownMenuSeparator />
+            <DropdownMenuSeparator className="my-2 bg-rugby-teal/10" />
+            <div className="px-3 py-1.5 text-xs font-semibold text-muted-foreground">Admin Panel</div>
             <Link href="/admin">
-              <DropdownMenuItem className="cursor-pointer flex items-center">
-                <LayoutDashboard className="w-4 h-4 mr-2" />
-                Admin Dashboard
+              <DropdownMenuItem className="cursor-pointer flex items-center gap-2 px-3 py-2.5 hover:bg-rugby-teal/10 rounded-md transition-colors duration-200">
+                <div className="p-1.5 rounded-full bg-rugby-teal/10">
+                  <LayoutDashboard className="w-4 h-4 text-rugby-teal" />
+                </div>
+                <span className="font-medium">Dashboard</span>
               </DropdownMenuItem>
             </Link>
             <Link href="/admin/players">
-              <DropdownMenuItem className="cursor-pointer flex items-center">
-                <Users className="w-4 h-4 mr-2" />
-                Manage Players
+              <DropdownMenuItem className="cursor-pointer flex items-center gap-2 px-3 py-2.5 hover:bg-rugby-teal/10 rounded-md transition-colors duration-200">
+                <div className="p-1.5 rounded-full bg-rugby-teal/10">
+                  <Users className="w-4 h-4 text-rugby-teal" />
+                </div>
+                <span className="font-medium">Players</span>
               </DropdownMenuItem>
             </Link>
             <Link href="/admin/articles">
-              <DropdownMenuItem className="cursor-pointer flex items-center">
-                <FileText className="w-4 h-4 mr-2" />
-                Manage Articles
+              <DropdownMenuItem className="cursor-pointer flex items-center gap-2 px-3 py-2.5 hover:bg-rugby-teal/10 rounded-md transition-colors duration-200">
+                <div className="p-1.5 rounded-full bg-rugby-teal/10">
+                  <FileText className="w-4 h-4 text-rugby-teal" />
+                </div>
+                <span className="font-medium">Articles</span>
               </DropdownMenuItem>
             </Link>
             <Link href="/admin/matches">
-              <DropdownMenuItem className="cursor-pointer flex items-center">
-                <Calendar className="w-4 h-4 mr-2" />
-                Manage Matches
+              <DropdownMenuItem className="cursor-pointer flex items-center gap-2 px-3 py-2.5 hover:bg-rugby-teal/10 rounded-md transition-colors duration-200">
+                <div className="p-1.5 rounded-full bg-rugby-teal/10">
+                  <Calendar className="w-4 h-4 text-rugby-teal" />
+                </div>
+                <span className="font-medium">Matches</span>
               </DropdownMenuItem>
             </Link>
             <Link href="/admin/training">
-              <DropdownMenuItem className="cursor-pointer flex items-center">
-                <Dumbbell className="w-4 h-4 mr-2" />
-                Manage Training
+              <DropdownMenuItem className="cursor-pointer flex items-center gap-2 px-3 py-2.5 hover:bg-rugby-teal/10 rounded-md transition-colors duration-200">
+                <div className="p-1.5 rounded-full bg-rugby-teal/10">
+                  <Dumbbell className="w-4 h-4 text-rugby-teal" />
+                </div>
+                <span className="font-medium">Training</span>
               </DropdownMenuItem>
             </Link>
             <Link href="/admin/gallery">
-              <DropdownMenuItem className="cursor-pointer flex items-center">
-                <Image className="w-4 h-4 mr-2" />
-                Manage Gallery
+              <DropdownMenuItem className="cursor-pointer flex items-center gap-2 px-3 py-2.5 hover:bg-rugby-teal/10 rounded-md transition-colors duration-200">
+                <div className="p-1.5 rounded-full bg-rugby-teal/10">
+                  <Image className="w-4 h-4 text-rugby-teal" />
+                </div>
+                <span className="font-medium">Gallery</span>
               </DropdownMenuItem>
             </Link>
             <Link href="/admin/live">
-              <DropdownMenuItem className="cursor-pointer flex items-center">
-                <Play className="w-4 h-4 mr-2" />
-                Manage Live Streams
+              <DropdownMenuItem className="cursor-pointer flex items-center gap-2 px-3 py-2.5 hover:bg-rugby-teal/10 rounded-md transition-colors duration-200">
+                <div className="p-1.5 rounded-full bg-rugby-teal/10">
+                  <Play className="w-4 h-4 text-rugby-teal" />
+                </div>
+                <span className="font-medium">Live Streams</span>
               </DropdownMenuItem>
             </Link>
           </>
         )}
-        <DropdownMenuSeparator />
+        <DropdownMenuSeparator className="my-2 bg-rugby-teal/10" />
         <DropdownMenuItem
-          className="cursor-pointer text-red-600 focus:text-red-600 flex items-center"
+          className="cursor-pointer flex items-center gap-2 px-3 py-2.5 hover:bg-rugby-red/10 rounded-md transition-colors duration-200 text-rugby-red"
           onClick={handleSignOut}
         >
-          <LogOut className="w-4 h-4 mr-2" />
-          Sign Out
+          <div className="p-1.5 rounded-full bg-rugby-red/10">
+            <LogOut className="w-4 h-4 text-rugby-red" />
+          </div>
+          <span className="font-medium">Sign Out</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
