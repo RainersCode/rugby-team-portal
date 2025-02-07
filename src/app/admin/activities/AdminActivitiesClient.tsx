@@ -107,29 +107,53 @@ export default function AdminActivitiesClient({ activities: initialActivities }:
   const isUpcoming = (date: string) => new Date(date) > new Date();
 
   const ParticipantsList = ({ participants }: { participants: Profile[] }) => {
-    if (participants.length === 0) {
-      return <div className="text-sm text-muted-foreground py-2">No participants yet</div>;
+    console.log('Participant details:', participants);
+
+    if (!participants || participants.length === 0) {
+      return (
+        <div className="text-center py-8">
+          <Users className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+          <h3 className="text-lg font-semibold mb-2">No Participants Yet</h3>
+          <p className="text-sm text-muted-foreground">
+            This activity has no registered participants.
+          </p>
+        </div>
+      );
     }
 
     return (
       <div className="max-h-[400px] overflow-y-auto pr-4 -mr-4">
-        <div className="space-y-2">
-          {participants.map((participant, index) => (
-            <div
-              key={participant.id}
-              className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent transition-colors"
-            >
-              <div>
-                <div className="font-medium">
-                  {participant.full_name || 'Unnamed User'}
+        <div className="space-y-3">
+          {participants.map((participant, index) => {
+            console.log('Rendering participant:', participant);
+            return (
+              <div
+                key={participant.id}
+                className="flex items-center justify-between p-4 rounded-lg border bg-card hover:bg-accent transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                    <span className="text-sm font-medium">
+                      {(participant.full_name || participant.email)?.charAt(0).toUpperCase() || '?'}
+                    </span>
+                  </div>
+                  <div>
+                    <div className="font-medium">
+                      {participant.full_name || 'Unnamed User'}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      {participant.email}
+                    </div>
+                  </div>
                 </div>
-                <div className="text-sm text-muted-foreground">
-                  {participant.email}
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="font-mono">
+                    #{String(index + 1).padStart(2, '0')}
+                  </Badge>
                 </div>
               </div>
-              <Badge variant="outline">{index + 1}</Badge>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     );
@@ -282,19 +306,36 @@ export default function AdminActivitiesClient({ activities: initialActivities }:
       </Card>
 
       <Dialog open={!!selectedActivity} onOpenChange={() => setSelectedActivity(null)}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-[500px] bg-background border shadow-lg">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+            <DialogTitle className="flex items-center gap-2 text-xl">
               <Users className="h-5 w-5" />
-              Participants for {selectedActivity?.title}
+              {selectedActivity?.title}
             </DialogTitle>
+            <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+              <div className="flex items-center gap-1">
+                <Calendar className="h-4 w-4" />
+                {selectedActivity && formatDate(selectedActivity.date)}
+              </div>
+              <div className="flex items-center gap-1">
+                <MapPin className="h-4 w-4" />
+                {selectedActivity?.location}
+              </div>
+            </div>
           </DialogHeader>
           {selectedActivity && (
             <div className="mt-4">
-              <div className="text-sm text-muted-foreground mb-4">
-                {getParticipantCount(selectedActivity)} {selectedActivity.max_participants ? `out of ${selectedActivity.max_participants}` : ''} participants
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h4 className="font-semibold mb-1">Participants</h4>
+                  <div className="text-sm text-muted-foreground">
+                    {getParticipantCount(selectedActivity)} {selectedActivity.max_participants ? `out of ${selectedActivity.max_participants}` : 'total'} participants
+                  </div>
+                </div>
+                {getCapacityStatus(selectedActivity)}
               </div>
-              <ParticipantsList participants={selectedActivity.participant_details} />
+              {console.log('Selected activity:', selectedActivity)}
+              <ParticipantsList participants={selectedActivity.participant_details || []} />
             </div>
           )}
         </DialogContent>

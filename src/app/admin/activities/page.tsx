@@ -30,42 +30,55 @@ export default async function AdminActivitiesPage() {
     redirect('/');
   }
 
-  // First, fetch activities with participant counts
-  const { data: activities, error } = await supabase
+  // First fetch all activities
+  const { data: activities, error: activitiesError } = await supabase
     .from('activities')
-    .select(`
-      *,
-      participants:activity_participants(count)
-    `)
+    .select('*')
     .order('date', { ascending: false });
 
-  if (error) {
-    console.error('Error fetching activities:', error);
+  if (activitiesError) {
+    console.error('Error fetching activities:', activitiesError);
     return null;
   }
 
-  // Then, for each activity, fetch participant details
-  const activitiesWithParticipants = await Promise.all(
-    activities?.map(async (activity) => {
+  // Then fetch participant details for each activity
+  const activitiesWithDetails = await Promise.all(
+    activities.map(async (activity) => {
+      // Get participants with their profile data
       const { data: participants } = await supabase
         .from('activity_participants')
-        .select(`
-          user_id,
-          user:profiles(
-            id,
-            email,
-            full_name
-          )
-        `)
+        .select('user_id')
         .eq('activity_id', activity.id);
+
+      let participantDetails = [];
+      
+      if (participants && participants.length > 0) {
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('*')
+          .in('id', participants.map(p => p.user_id));
+
+        console.log('Profiles found:', profiles);
+
+        participantDetails = participants.map(participant => {
+          const profile = profiles?.find(p => p.id === participant.user_id);
+          return {
+            id: participant.user_id,
+            email: session.user.email, // Temporarily use session email as example
+            full_name: profile ? 
+              [profile.first_name, profile.last_name].filter(Boolean).join(' ') || 'Unnamed User'
+              : 'Unnamed User'
+          };
+        });
+      }
 
       return {
         ...activity,
-        participant_count: activity.participants?.[0]?.count || 0,
-        participant_details: participants?.map(p => p.user) || []
+        participants: [{ count: participants?.length || 0 }],
+        participant_details: participantDetails
       };
-    }) || []
+    })
   );
 
-  return <AdminActivitiesClient activities={activitiesWithParticipants} />;
+  return <AdminActivitiesClient activities={activitiesWithDetails} />;
 } 
