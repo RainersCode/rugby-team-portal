@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import AdminActivitiesClient from './AdminActivitiesClient';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export default async function AdminActivitiesPage() {
   const cookieStore = cookies();
@@ -29,14 +30,42 @@ export default async function AdminActivitiesPage() {
     redirect('/');
   }
 
-  // Fetch activities with participant counts
-  const { data: activities } = await supabase
+  // First, fetch activities with participant counts
+  const { data: activities, error } = await supabase
     .from('activities')
     .select(`
       *,
       participants:activity_participants(count)
     `)
-    .order('date', { ascending: true });
+    .order('date', { ascending: false });
 
-  return <AdminActivitiesClient activities={activities || []} />;
+  if (error) {
+    console.error('Error fetching activities:', error);
+    return null;
+  }
+
+  // Then, for each activity, fetch participant details
+  const activitiesWithParticipants = await Promise.all(
+    activities?.map(async (activity) => {
+      const { data: participants } = await supabase
+        .from('activity_participants')
+        .select(`
+          user_id,
+          user:profiles(
+            id,
+            email,
+            full_name
+          )
+        `)
+        .eq('activity_id', activity.id);
+
+      return {
+        ...activity,
+        participant_count: activity.participants?.[0]?.count || 0,
+        participant_details: participants?.map(p => p.user) || []
+      };
+    }) || []
+  );
+
+  return <AdminActivitiesClient activities={activitiesWithParticipants} />;
 } 
