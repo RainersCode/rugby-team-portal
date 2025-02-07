@@ -15,6 +15,7 @@ const mainNavItems = [
   { href: "/matches", label: "Matches" },
   { href: "/training", label: "Training" },
   { href: "/activities", label: "Activities" },
+  { href: "/live", label: "Live" },
   { href: "/gallery", label: "Gallery" },
   { href: "/news", label: "News" },
   { href: "/about", label: "About" },

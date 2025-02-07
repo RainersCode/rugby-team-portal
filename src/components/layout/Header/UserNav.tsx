@@ -21,7 +21,8 @@ import {
   Calendar,
   LogOut,
   Dumbbell,
-  Image
+  Image,
+  Play
 } from "lucide-react";
 
 interface UserNavProps {
@@ -117,6 +118,12 @@ export default function UserNav({ user }: UserNavProps) {
               <DropdownMenuItem className="cursor-pointer flex items-center">
                 <Image className="w-4 h-4 mr-2" />
                 Manage Gallery
+              </DropdownMenuItem>
+            </Link>
+            <Link href="/admin/live">
+              <DropdownMenuItem className="cursor-pointer flex items-center">
+                <Play className="w-4 h-4 mr-2" />
+                Manage Live Streams
               </DropdownMenuItem>
             </Link>
           </>
