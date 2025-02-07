@@ -87,8 +87,8 @@ export default function AdminActivitiesClient({ activities: initialActivities }:
 
     if (!max) return <Badge variant="secondary">No Limit</Badge>;
     if (count >= max) return <Badge variant="destructive">Full</Badge>;
-    if (count >= max * 0.8) return <Badge variant="warning">Almost Full</Badge>;
-    return <Badge variant="success">Available</Badge>;
+    if (count >= max * 0.8) return <Badge variant="secondary">Almost Full</Badge>;
+    return <Badge variant="outline">Available</Badge>;
   };
 
   const getActivityStatus = (date: string) => {
@@ -99,7 +99,7 @@ export default function AdminActivitiesClient({ activities: initialActivities }:
       return <Badge variant="secondary">Past</Badge>;
     }
     if (activityDate.toDateString() === now.toDateString()) {
-      return <Badge variant="warning">Today</Badge>;
+      return <Badge variant="secondary">Today</Badge>;
     }
     return <Badge variant="default">Upcoming</Badge>;
   };
@@ -161,7 +161,7 @@ export default function AdminActivitiesClient({ activities: initialActivities }:
 
   if (activities.length === 0) {
     return (
-      <div className="space-y-6">
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
         <Card className="border-none shadow-none bg-transparent">
           <CardHeader className="px-0 pt-0">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -200,7 +200,7 @@ export default function AdminActivitiesClient({ activities: initialActivities }:
   }
 
   return (
-    <div className="space-y-6">
+    <div className="container mx-auto px-4 py-8 max-w-7xl">
       <Card className="border-none shadow-none bg-transparent">
         <CardHeader className="px-0 pt-0">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -306,7 +306,7 @@ export default function AdminActivitiesClient({ activities: initialActivities }:
       </Card>
 
       <Dialog open={!!selectedActivity} onOpenChange={() => setSelectedActivity(null)}>
-        <DialogContent className="sm:max-w-[500px] bg-background border shadow-lg">
+        <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto bg-background border shadow-lg dark:border-gray-800">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-xl">
               <Users className="h-5 w-5" />
@@ -334,8 +334,9 @@ export default function AdminActivitiesClient({ activities: initialActivities }:
                 </div>
                 {getCapacityStatus(selectedActivity)}
               </div>
-              {console.log('Selected activity:', selectedActivity)}
-              <ParticipantsList participants={selectedActivity.participant_details || []} />
+              <div className="pr-2">
+                <ParticipantsList participants={selectedActivity.participant_details || []} />
+              </div>
             </div>
           )}
         </DialogContent>
