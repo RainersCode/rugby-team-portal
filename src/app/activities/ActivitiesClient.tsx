@@ -1,16 +1,22 @@
 "use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Calendar, MapPin, Users, ChevronRight } from 'lucide-react';
-import { formatDate } from '@/lib/utils';
-import { Badge } from '@/components/ui/badge';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Calendar, MapPin, Users, ChevronRight } from "lucide-react";
+import { formatDate } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import ActivityCalendar from '@/components/features/Calendar/ActivityCalendar';
-import { Activity as BaseActivity } from '@/types';
+import { Activity as BaseActivity } from "@/types";
+import CustomCalendar from "@/components/features/Calendar/CustomCalendar";
 
 interface ActivityWithParticipation extends BaseActivity {
   participant_count: number;
@@ -23,65 +29,81 @@ interface Props {
   isAdmin?: boolean;
 }
 
-export default function ActivitiesClient({ activities: initialActivities, userId, isAdmin = false }: Props) {
+export default function ActivitiesClient({
+  activities: initialActivities,
+  userId,
+  isAdmin = false,
+}: Props) {
   const [activities, setActivities] = useState(initialActivities);
   const router = useRouter();
   const supabase = createClientComponentClient();
 
-  const handleParticipation = async (activityId: string, isParticipating: boolean) => {
+  const handleParticipation = async (
+    activityId: string,
+    isParticipating: boolean
+  ) => {
     if (!userId) {
-      router.push('/auth/signin');
+      router.push("/auth/signin");
       return;
     }
 
     try {
       if (isParticipating) {
         const { error } = await supabase
-          .from('activity_participants')
+          .from("activity_participants")
           .delete()
-          .eq('activity_id', activityId)
-          .eq('user_id', userId);
+          .eq("activity_id", activityId)
+          .eq("user_id", userId);
 
         if (error) throw error;
       } else {
         const { error } = await supabase
-          .from('activity_participants')
+          .from("activity_participants")
           .insert([{ activity_id: activityId, user_id: userId }]);
 
         if (error) throw error;
       }
 
-      setActivities(activities.map(activity => {
-        if (activity.id === activityId) {
-          return {
-            ...activity,
-            is_participating: !isParticipating,
-            participant_count: isParticipating
-              ? activity.participant_count - 1
-              : activity.participant_count + 1
-          };
-        }
-        return activity;
-      }));
+      setActivities(
+        activities.map((activity) => {
+          if (activity.id === activityId) {
+            return {
+              ...activity,
+              is_participating: !isParticipating,
+              participant_count: isParticipating
+                ? activity.participant_count - 1
+                : activity.participant_count + 1,
+            };
+          }
+          return activity;
+        })
+      );
 
       router.refresh();
     } catch (error) {
-      console.error('Error updating participation:', error);
+      console.error("Error updating participation:", error);
     }
   };
 
   const isActivityFull = (activity: ActivityWithParticipation) => {
-    return activity.max_participants !== null && activity.participant_count >= activity.max_participants;
+    return (
+      activity.max_participants !== null &&
+      activity.participant_count >= activity.max_participants
+    );
   };
 
   const getParticipationStatus = (activity: ActivityWithParticipation) => {
     if (activity.is_participating) {
       return {
-        badge: <Badge className="bg-rugby-teal/10 text-rugby-teal hover:bg-rugby-teal/20 transition-colors">You're In!</Badge>,
+        badge: (
+          <Badge className="bg-rugby-teal/10 text-rugby-teal hover:bg-rugby-teal/20 transition-colors">
+            You're In!
+          </Badge>
+        ),
         button: {
           variant: "destructive" as const,
           text: "Cancel Participation",
-        }
+        },
       };
     }
     if (isActivityFull(activity)) {
@@ -90,16 +112,20 @@ export default function ActivitiesClient({ activities: initialActivities, userId
         button: {
           variant: "outline" as const,
           text: "Activity Full",
-          disabled: true
-        }
+          disabled: true,
+        },
       };
     }
     return {
-      badge: <Badge className="bg-rugby-yellow/10 text-rugby-yellow hover:bg-rugby-yellow/20 transition-colors">Spots Available</Badge>,
+      badge: (
+        <Badge className="bg-rugby-yellow/10 text-rugby-yellow hover:bg-rugby-yellow/20 transition-colors">
+          Spots Available
+        </Badge>
+      ),
       button: {
         variant: "default" as const,
         text: "Join Activity",
-      }
+      },
     };
   };
 
@@ -118,7 +144,8 @@ export default function ActivitiesClient({ activities: initialActivities, userId
               Team Activities
             </h1>
             <p className="text-xl text-white/90 max-w-2xl mx-auto">
-              Join our team activities and events. Stay active and connected with the community.
+              Join our team activities and events. Stay active and connected
+              with the community.
             </p>
           </div>
         </div>
@@ -128,9 +155,12 @@ export default function ActivitiesClient({ activities: initialActivities, userId
           <Card className="text-center p-8 border-rugby-teal/20">
             <CardContent>
               <Calendar className="w-12 h-12 mx-auto mb-4 text-rugby-teal" />
-              <h3 className="text-lg font-semibold mb-2">No Upcoming Activities</h3>
+              <h3 className="text-lg font-semibold mb-2">
+                No Upcoming Activities
+              </h3>
               <p className="text-muted-foreground">
-                Check back later for new activities or contact the team for more information.
+                Check back later for new activities or contact the team for more
+                information.
               </p>
             </CardContent>
           </Card>
@@ -153,7 +183,8 @@ export default function ActivitiesClient({ activities: initialActivities, userId
             Team Activities
           </h1>
           <p className="text-xl text-white/90 max-w-2xl mx-auto">
-            Join our team activities and events. Stay active and connected with the community.
+            Join our team activities and events. Stay active and connected with
+            the community.
           </p>
         </div>
       </div>
@@ -163,11 +194,17 @@ export default function ActivitiesClient({ activities: initialActivities, userId
         <Tabs defaultValue="grid" className="space-y-8">
           <div className="flex justify-center">
             <TabsList className="grid grid-cols-2 w-[400px]">
-              <TabsTrigger value="grid" className="flex items-center gap-2 data-[state=active]:bg-rugby-teal data-[state=active]:text-white">
+              <TabsTrigger
+                value="grid"
+                className="flex items-center gap-2 data-[state=active]:bg-rugby-teal data-[state=active]:text-white"
+              >
                 <Users className="w-4 h-4" />
                 Card View
               </TabsTrigger>
-              <TabsTrigger value="calendar" className="flex items-center gap-2 data-[state=active]:bg-rugby-teal data-[state=active]:text-white">
+              <TabsTrigger
+                value="calendar"
+                className="flex items-center gap-2 data-[state=active]:bg-rugby-teal data-[state=active]:text-white"
+              >
                 <Calendar className="w-4 h-4" />
                 Calendar View
               </TabsTrigger>
@@ -182,19 +219,27 @@ export default function ActivitiesClient({ activities: initialActivities, userId
                 const isUpcoming = activityDate > new Date();
 
                 return (
-                  <Card 
-                    key={activity.id} 
+                  <Card
+                    key={activity.id}
                     className={`group relative overflow-hidden transition-all duration-300 hover:shadow-lg border-rugby-teal/20
-                      ${isUpcoming ? 'bg-white dark:bg-gray-900' : 'bg-gray-50/50 dark:bg-gray-900/50'}
+                      ${
+                        isUpcoming
+                          ? "bg-white dark:bg-gray-900"
+                          : "bg-gray-50/50 dark:bg-gray-900/50"
+                      }
                     `}
                   >
                     <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background/10 pointer-events-none" />
-                    
+
                     <CardHeader>
                       <div className="flex items-center justify-between mb-2">
                         {status.badge}
                         <span className="text-sm text-muted-foreground">
-                          {activity.participant_count} {activity.max_participants ? `/ ${activity.max_participants}` : ''} participants
+                          {activity.participant_count}{" "}
+                          {activity.max_participants
+                            ? `/ ${activity.max_participants}`
+                            : ""}{" "}
+                          participants
                         </span>
                       </div>
                       <CardTitle className="text-xl mb-2 group-hover:text-rugby-teal transition-colors">
@@ -209,28 +254,38 @@ export default function ActivitiesClient({ activities: initialActivities, userId
                       <div className="space-y-4">
                         <div className="flex items-center text-sm">
                           <Calendar className="mr-2 h-4 w-4 text-rugby-teal" />
-                          <time dateTime={activity.date} className="text-muted-foreground">
+                          <time
+                            dateTime={activity.date}
+                            className="text-muted-foreground"
+                          >
                             {formatDate(activity.date)}
                           </time>
                         </div>
-                        
+
                         <div className="flex items-center text-sm">
                           <MapPin className="mr-2 h-4 w-4 text-rugby-red" />
-                          <span className="text-muted-foreground">{activity.location}</span>
+                          <span className="text-muted-foreground">
+                            {activity.location}
+                          </span>
                         </div>
 
                         <div className="pt-4">
                           <Button
                             className={`w-full group relative ${
-                              status.button.variant === "default" 
-                                ? "bg-rugby-teal hover:bg-rugby-teal/90 text-white font-medium" 
+                              status.button.variant === "default"
+                                ? "bg-rugby-teal hover:bg-rugby-teal/90 text-white font-medium"
                                 : status.button.variant === "destructive"
-                                  ? "bg-rugby-red hover:bg-rugby-red/90 text-white font-medium"
-                                  : "bg-gray-100 text-gray-500"
+                                ? "bg-rugby-red hover:bg-rugby-red/90 text-white font-medium"
+                                : "bg-gray-100 text-gray-500"
                             }`}
                             variant={status.button.variant}
                             disabled={status.button.disabled}
-                            onClick={() => handleParticipation(activity.id, activity.is_participating)}
+                            onClick={() =>
+                              handleParticipation(
+                                activity.id,
+                                activity.is_participating
+                              )
+                            }
                           >
                             {status.button.text}
                             <ChevronRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
@@ -247,10 +302,10 @@ export default function ActivitiesClient({ activities: initialActivities, userId
           </TabsContent>
 
           <TabsContent value="calendar">
-            <ActivityCalendar activities={activities} isAdmin={isAdmin} />
+            <CustomCalendar activities={activities} isAdmin={isAdmin} />
           </TabsContent>
         </Tabs>
       </div>
     </div>
   );
-} 
+}

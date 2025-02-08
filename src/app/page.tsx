@@ -5,9 +5,9 @@ import { cookies } from "next/headers";
 import LatestMatches from "@/components/features/Matches/LatestMatches";
 import HeroCarousel from "@/components/features/Hero/HeroCarousel";
 import InstagramFeed from "@/components/features/Instagram/InstagramFeed";
-import { Match } from "@/types";
-import FeaturedPrograms from '@/components/features/Training/FeaturedPrograms';
-import { TrainingProgram } from '@/types';
+import TwitterFeed from "@/components/features/Twitter/TwitterFeed";
+import FeaturedPrograms from "@/components/features/Training/FeaturedPrograms";
+import { TrainingProgram } from "@/types";
 
 export const revalidate = 3600; // Revalidate every hour
 export const dynamic = "force-dynamic";
@@ -44,16 +44,17 @@ export default async function Home() {
 
   // Fetch featured training programs (latest 3 programs)
   const { data: programsData } = await supabase
-    .from('training_programs_with_authors')
-    .select('*')
-    .order('created_at', { ascending: false })
+    .from("training_programs_with_authors")
+    .select("*")
+    .order("created_at", { ascending: false })
     .limit(3);
 
   // Transform the programs data to include the author field
-  const programs = programsData?.map(program => ({
-    ...program,
-    author: program.author_email ? { email: program.author_email } : null
-  })) || [];
+  const programs =
+    programsData?.map((program) => ({
+      ...program,
+      author: program.author_email ? { email: program.author_email } : null,
+    })) || [];
 
   return (
     <div className="space-y-12 pb-12">
@@ -89,13 +90,13 @@ export default async function Home() {
                   />
                 </div>
                 <div className="p-6">
-                  <h3 className="text-xl font-bold mt-2 mb-3 text-gray-900 dark:text-gray-100 group-hover:text-rugby-teal transition-colors">{article.title}</h3>
+                  <h3 className="text-xl font-bold mt-2 mb-3 text-gray-900 dark:text-gray-100 group-hover:text-rugby-teal transition-colors">
+                    {article.title}
+                  </h3>
                   <p className="text-gray-600 dark:text-gray-400 mb-4">
                     {article.content.substring(0, 150)}...
                   </p>
-                  <span
-                    className="text-rugby-teal hover:text-rugby-teal/80 transition-colors font-semibold"
-                  >
+                  <span className="text-rugby-teal hover:text-rugby-teal/80 transition-colors font-semibold">
                     Read More
                   </span>
                 </div>
@@ -104,6 +105,46 @@ export default async function Home() {
             </article>
           ))}
         </div>
+      </section>
+
+      {/* Twitter Feed Section */}
+      <section className="container-width">
+        <div className="flex flex-col mb-8">
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+            Rugby Updates
+          </h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+            Click on any account to view their latest tweets. Tweet feeds may
+            take a few seconds to load.
+          </p>
+        </div>
+        <TwitterFeed
+          usernames={[
+            // International Rugby
+            { username: "WorldRugby", category: "International Rugby" },
+            { username: "SixNationsRugby", category: "International Rugby" },
+            { username: "rugbyworldcup", category: "International Rugby" },
+            { username: "RugbyEurope", category: "International Rugby" },
+
+            // Major Leagues & Tournaments
+            { username: "ChampionsCup", category: "Major Leagues" },
+            { username: "premrugby", category: "Major Leagues" },
+            { username: "URC", category: "Major Leagues" },
+            { username: "top14rugby", category: "Major Leagues" },
+
+            // News & Analysis
+            { username: "RugbyPass", category: "News & Analysis" },
+            { username: "TheRugbyPaper", category: "News & Analysis" },
+            { username: "RugbyInsideLine", category: "News & Analysis" },
+            { username: "RugbyWorldMag", category: "News & Analysis" },
+
+            // National Teams
+            { username: "EnglandRugby", category: "National Teams" },
+            { username: "WelshRugbyUnion", category: "National Teams" },
+            { username: "IrishRugby", category: "National Teams" },
+            { username: "FranceRugby", category: "National Teams" },
+          ]}
+        />
       </section>
 
       {/* Call to Action Section */}
@@ -193,12 +234,13 @@ export default async function Home() {
       )}
 
       {/* Latest Matches Section */}
-      {(upcomingMatches?.length > 0 || completedMatches?.length > 0) && (
+      {(upcomingMatches?.length ?? 0) > 0 ||
+      (completedMatches?.length ?? 0) > 0 ? (
         <LatestMatches
           upcomingMatches={upcomingMatches || []}
           completedMatches={completedMatches || []}
         />
-      )}
+      ) : null}
 
       {/* Sponsors Section */}
       <section className="container-width bg-gray-50 dark:bg-gray-900 py-16">
@@ -212,12 +254,14 @@ export default async function Home() {
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 items-center justify-items-center">
           {[1, 2, 3, 4, 5, 6, 7].map((num) => (
-            <div 
-              key={num} 
+            <div
+              key={num}
               className="relative w-48 h-24 bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm hover:shadow-md transition-all duration-300 border border-rugby-teal/20"
             >
               <Image
-                src={`/logo/${num === 1 ? 'Sponsor' : 'Sponsoru'}${num === 3 ? '_logo' : ' logo'} ${num}.png`}
+                src={`/logo/${num === 1 ? "Sponsor" : "Sponsoru"}${
+                  num === 3 ? "_logo" : " logo"
+                } ${num}.png`}
                 alt={`Sponsor ${num}`}
                 fill
                 className="object-contain filter hover:brightness-110 transition-all duration-300"

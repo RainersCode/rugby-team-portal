@@ -203,12 +203,12 @@ export default function AdminDashboard() {
           <CardContent>{/* Add recent activity list here */}</CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
+      <Card>
+        <CardHeader>
             <CardTitle>Quick Actions</CardTitle>
             <CardDescription>Common administrative tasks</CardDescription>
-          </CardHeader>
-          <CardContent>
+        </CardHeader>
+        <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               <Link href="/admin/players/new">
                 <Card className="hover:bg-accent transition-colors cursor-pointer">
@@ -258,10 +258,10 @@ export default function AdminDashboard() {
                   </CardContent>
                 </Card>
               </Link>
-            </div>
-          </CardContent>
-        </Card>
+                    </div>
+        </CardContent>
+      </Card>
       </div>
     </div>
   );
-}
+} 

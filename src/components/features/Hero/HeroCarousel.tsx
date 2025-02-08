@@ -1,19 +1,22 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
-import { ChevronLeft, ChevronRight, CalendarDays, MapPin } from 'lucide-react';
-import { Article, Match } from '@/types';
-import { format } from 'date-fns';
-import { Card } from '@/components/ui/card';
+import { useState, useEffect } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { ChevronLeft, ChevronRight, CalendarDays, MapPin } from "lucide-react";
+import { Article, Match } from "@/types";
+import { format } from "date-fns";
+import { Card } from "@/components/ui/card";
 
 interface HeroCarouselProps {
   articles: Article[];
   nextMatch?: Match;
 }
 
-export default function HeroCarousel({ articles, nextMatch }: HeroCarouselProps) {
+export default function HeroCarousel({
+  articles,
+  nextMatch,
+}: HeroCarouselProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
 
   // Auto-slide every 5 seconds
@@ -35,12 +38,12 @@ export default function HeroCarousel({ articles, nextMatch }: HeroCarouselProps)
 
   return (
     <section className="relative h-[500px] md:h-[600px] w-full overflow-hidden bg-gradient-to-b from-gray-900 to-black">
-      <div 
+      <div
         className="absolute inset-0 flex transition-transform duration-700 ease-out"
         style={{ transform: `translateX(-${currentSlide * 100}%)` }}
       >
         {articles.map((article, index) => (
-          <div 
+          <div
             key={article.id}
             className="relative w-full h-full flex-shrink-0"
           >
@@ -52,7 +55,7 @@ export default function HeroCarousel({ articles, nextMatch }: HeroCarouselProps)
               className="object-cover"
               priority={index === 0}
             />
-            <div className="absolute inset-0 z-20 flex items-center">
+            <div className="absolute inset-0 z-20 flex items-center pb-32 md:pb-40">
               <div className="container-width text-white px-4 md:px-0 animate-fade-in-up">
                 <span className="inline-block bg-gradient-to-r from-rugby-teal to-rugby-teal/80 text-white text-xs md:text-sm px-4 py-1.5 rounded-full mb-3 md:mb-4 shadow-lg backdrop-blur-sm">
                   Latest News
@@ -87,10 +90,10 @@ export default function HeroCarousel({ articles, nextMatch }: HeroCarouselProps)
                   Next Match
                 </span>
                 <span className="text-[10px] md:text-xs font-semibold bg-gradient-to-r from-rugby-teal to-rugby-teal/80 bg-clip-text text-transparent">
-                  {format(new Date(nextMatch.match_date), 'MMM d')}
+                  {format(new Date(nextMatch.match_date), "MMM d")}
                 </span>
               </div>
-              
+
               <div className="flex items-center justify-between gap-3 md:gap-6 bg-gradient-to-br from-gray-50 to-white p-2 md:p-3 rounded-md">
                 {/* Home Team */}
                 <div className="flex flex-col items-center text-center flex-1">
@@ -109,9 +112,11 @@ export default function HeroCarousel({ articles, nextMatch }: HeroCarouselProps)
 
                 {/* Match Info */}
                 <div className="flex flex-col items-center shrink-0">
-                  <span className="text-[10px] md:text-sm font-bold bg-gradient-to-r from-rugby-yellow to-rugby-yellow/80 text-transparent bg-clip-text">VS</span>
+                  <span className="text-[10px] md:text-sm font-bold bg-gradient-to-r from-rugby-yellow to-rugby-yellow/80 text-transparent bg-clip-text">
+                    VS
+                  </span>
                   <span className="text-[8px] md:text-xs font-medium text-rugby-teal mt-0.5 md:mt-1">
-                    {format(new Date(nextMatch.match_date), 'HH:mm')}
+                    {format(new Date(nextMatch.match_date), "HH:mm")}
                   </span>
                 </div>
 
@@ -134,7 +139,9 @@ export default function HeroCarousel({ articles, nextMatch }: HeroCarouselProps)
               <div className="mt-1.5 md:mt-3 pt-1.5 md:pt-3 border-t border-gray-200">
                 <div className="flex items-center gap-1 md:gap-1.5 text-[8px] md:text-xs">
                   <MapPin className="w-2.5 h-2.5 md:w-3 md:h-3 text-rugby-red" />
-                  <span className="truncate text-gray-600 font-medium">{nextMatch.venue}</span>
+                  <span className="truncate text-gray-600 font-medium">
+                    {nextMatch.venue}
+                  </span>
                 </div>
               </div>
             </div>
@@ -165,9 +172,9 @@ export default function HeroCarousel({ articles, nextMatch }: HeroCarouselProps)
             key={index}
             onClick={() => setCurrentSlide(index)}
             className={`transition-all duration-300 ${
-              currentSlide === index 
-                ? 'w-6 md:w-8 h-1.5 bg-rugby-yellow rounded-full' 
-                : 'w-1.5 h-1.5 bg-white/50 hover:bg-white/75 rounded-full'
+              currentSlide === index
+                ? "w-6 md:w-8 h-1.5 bg-rugby-yellow rounded-full"
+                : "w-1.5 h-1.5 bg-white/50 hover:bg-white/75 rounded-full"
             }`}
             aria-label={`Go to slide ${index + 1}`}
           />
@@ -175,4 +182,4 @@ export default function HeroCarousel({ articles, nextMatch }: HeroCarouselProps)
       </div>
     </section>
   );
-} 
+}

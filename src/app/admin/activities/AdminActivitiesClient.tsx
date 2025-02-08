@@ -1,16 +1,24 @@
 "use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import { Plus, Pencil, Trash2, Users, Calendar, MapPin, Clock } from 'lucide-react';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import {
+  Plus,
+  Pencil,
+  Trash2,
+  Users,
+  Calendar,
+  MapPin,
+  Clock,
+} from "lucide-react";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
   CardDescription,
-} from '@/components/ui/card';
+} from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -18,9 +26,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -28,8 +36,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { formatDate } from '@/lib/utils';
-import ActivityCalendar from '@/components/features/Calendar/ActivityCalendar';
+import { formatDate } from "@/lib/utils";
+import CustomCalendar from "@/components/features/Calendar/CustomCalendar";
 
 interface Profile {
   id: string;
@@ -54,28 +62,31 @@ interface Props {
   activities: Activity[];
 }
 
-export default function AdminActivitiesClient({ activities: initialActivities }: Props) {
+export default function AdminActivitiesClient({
+  activities: initialActivities,
+}: Props) {
   const [activities, setActivities] = useState<Activity[]>(initialActivities);
-  const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
+  const [selectedActivity, setSelectedActivity] = useState<Activity | null>(
+    null
+  );
   const router = useRouter();
   const supabase = createClientComponentClient();
 
   const handleDelete = async (id: string) => {
-    const confirmed = window.confirm('Are you sure you want to delete this activity?');
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this activity?"
+    );
     if (!confirmed) return;
 
     try {
-      const { error } = await supabase
-        .from('activities')
-        .delete()
-        .eq('id', id);
+      const { error } = await supabase.from("activities").delete().eq("id", id);
 
       if (error) throw error;
 
-      setActivities(activities.filter(activity => activity.id !== id));
+      setActivities(activities.filter((activity) => activity.id !== id));
       router.refresh();
     } catch (error) {
-      console.error('Error deleting activity:', error);
+      console.error("Error deleting activity:", error);
     }
   };
 
@@ -89,14 +100,15 @@ export default function AdminActivitiesClient({ activities: initialActivities }:
 
     if (!max) return <Badge variant="secondary">No Limit</Badge>;
     if (count >= max) return <Badge variant="destructive">Full</Badge>;
-    if (count >= max * 0.8) return <Badge variant="secondary">Almost Full</Badge>;
+    if (count >= max * 0.8)
+      return <Badge variant="secondary">Almost Full</Badge>;
     return <Badge variant="outline">Available</Badge>;
   };
 
   const getActivityStatus = (date: string) => {
     const activityDate = new Date(date);
     const now = new Date();
-    
+
     if (activityDate < now) {
       return <Badge variant="secondary">Past</Badge>;
     }
@@ -109,7 +121,7 @@ export default function AdminActivitiesClient({ activities: initialActivities }:
   const isUpcoming = (date: string) => new Date(date) > new Date();
 
   const ParticipantsList = ({ participants }: { participants: Profile[] }) => {
-    console.log('Participant details:', participants);
+    console.log("Participant details:", participants);
 
     if (!participants || participants.length === 0) {
       return (
@@ -127,7 +139,7 @@ export default function AdminActivitiesClient({ activities: initialActivities }:
       <div className="max-h-[400px] overflow-y-auto pr-4 -mr-4">
         <div className="space-y-3">
           {participants.map((participant, index) => {
-            console.log('Rendering participant:', participant);
+            console.log("Rendering participant:", participant);
             return (
               <div
                 key={participant.id}
@@ -136,12 +148,14 @@ export default function AdminActivitiesClient({ activities: initialActivities }:
                 <div className="flex items-center gap-3">
                   <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
                     <span className="text-sm font-medium">
-                      {(participant.full_name || participant.email)?.charAt(0).toUpperCase() || '?'}
+                      {(participant.full_name || participant.email)
+                        ?.charAt(0)
+                        .toUpperCase() || "?"}
                     </span>
                   </div>
                   <div>
                     <div className="font-medium">
-                      {participant.full_name || 'Unnamed User'}
+                      {participant.full_name || "Unnamed User"}
                     </div>
                     <div className="text-sm text-muted-foreground">
                       {participant.email}
@@ -150,7 +164,7 @@ export default function AdminActivitiesClient({ activities: initialActivities }:
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge variant="outline" className="font-mono">
-                    #{String(index + 1).padStart(2, '0')}
+                    #{String(index + 1).padStart(2, "0")}
                   </Badge>
                 </div>
               </div>
@@ -173,8 +187,8 @@ export default function AdminActivitiesClient({ activities: initialActivities }:
                   Manage and organize team activities and events
                 </CardDescription>
               </div>
-              <Button 
-                onClick={() => router.push('/admin/activities/new')}
+              <Button
+                onClick={() => router.push("/admin/activities/new")}
                 className="w-full md:w-auto"
               >
                 <Plus className="w-4 h-4 mr-2" />
@@ -191,7 +205,7 @@ export default function AdminActivitiesClient({ activities: initialActivities }:
             <p className="text-muted-foreground mb-4">
               Get started by creating your first activity
             </p>
-            <Button onClick={() => router.push('/admin/activities/new')}>
+            <Button onClick={() => router.push("/admin/activities/new")}>
               <Plus className="w-4 h-4 mr-2" />
               Create Activity
             </Button>
@@ -212,8 +226,8 @@ export default function AdminActivitiesClient({ activities: initialActivities }:
                 Manage and organize team activities and events
               </CardDescription>
             </div>
-            <Button 
-              onClick={() => router.push('/admin/activities/new')}
+            <Button
+              onClick={() => router.push("/admin/activities/new")}
               className="w-full md:w-auto"
             >
               <Plus className="w-4 h-4 mr-2" />
@@ -243,16 +257,20 @@ export default function AdminActivitiesClient({ activities: initialActivities }:
                 </TableHeader>
                 <TableBody>
                   {activities.map((activity) => (
-                    <TableRow 
+                    <TableRow
                       key={activity.id}
                       className={`group transition-colors ${
-                        !isUpcoming(activity.date) ? 'text-muted-foreground' : ''
+                        !isUpcoming(activity.date)
+                          ? "text-muted-foreground"
+                          : ""
                       }`}
                     >
                       <TableCell>
                         <div className="space-y-1">
                           <div className="flex items-center gap-2">
-                            <span className="font-medium">{activity.title}</span>
+                            <span className="font-medium">
+                              {activity.title}
+                            </span>
                             {getActivityStatus(activity.date)}
                           </div>
                           <div className="text-sm text-muted-foreground line-clamp-1">
@@ -277,7 +295,8 @@ export default function AdminActivitiesClient({ activities: initialActivities }:
                           <div className="flex items-center gap-2">
                             <Users className="w-4 h-4" />
                             <span>
-                              {getParticipantCount(activity)}/{activity.max_participants || '∞'}
+                              {getParticipantCount(activity)}/
+                              {activity.max_participants || "∞"}
                             </span>
                           </div>
                           {getCapacityStatus(activity)}
@@ -295,7 +314,11 @@ export default function AdminActivitiesClient({ activities: initialActivities }:
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => router.push(`/admin/activities/${activity.id}/edit`)}
+                            onClick={() =>
+                              router.push(
+                                `/admin/activities/${activity.id}/edit`
+                              )
+                            }
                           >
                             <Pencil className="w-4 h-4" />
                           </Button>
@@ -317,20 +340,25 @@ export default function AdminActivitiesClient({ activities: initialActivities }:
         </TabsContent>
 
         <TabsContent value="calendar">
-          <ActivityCalendar activities={activities} />
+          <CustomCalendar activities={activities} isAdmin={true} />
         </TabsContent>
       </Tabs>
 
-      <Dialog open={!!selectedActivity} onOpenChange={() => setSelectedActivity(null)}>
+      <Dialog
+        open={!!selectedActivity}
+        onOpenChange={() => setSelectedActivity(null)}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Activity Participants</DialogTitle>
           </DialogHeader>
           {selectedActivity && (
-            <ParticipantsList participants={selectedActivity.participant_details} />
+            <ParticipantsList
+              participants={selectedActivity.participant_details}
+            />
           )}
         </DialogContent>
       </Dialog>
     </div>
   );
-} 
+}
