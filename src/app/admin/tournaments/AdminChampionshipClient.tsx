@@ -331,40 +331,86 @@ export default function AdminChampionshipClient({
               setFormData({});
               setIsDialogOpen(true);
             }}
+            className="bg-rugby-teal hover:bg-rugby-teal/90"
           >
             <Plus className="h-4 w-4 mr-2" /> Add Standing
           </Button>
         </div>
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead>Position</TableHead>
-              <TableHead>Team</TableHead>
-              <TableHead>P</TableHead>
-              <TableHead>W</TableHead>
-              <TableHead>D</TableHead>
-              <TableHead>L</TableHead>
-              <TableHead>PF</TableHead>
-              <TableHead>TBP</TableHead>
-              <TableHead>LBP</TableHead>
-              <TableHead>PTS</TableHead>
-              <TableHead>Actions</TableHead>
+            <TableRow className="bg-rugby-teal/5 hover:bg-rugby-teal/5">
+              <TableHead className="text-rugby-teal font-semibold">
+                Position
+              </TableHead>
+              <TableHead className="text-rugby-teal font-semibold">
+                Team
+              </TableHead>
+              <TableHead className="text-center text-rugby-teal font-semibold">
+                P
+              </TableHead>
+              <TableHead className="text-center text-rugby-teal font-semibold">
+                W
+              </TableHead>
+              <TableHead className="text-center text-rugby-teal font-semibold">
+                D
+              </TableHead>
+              <TableHead className="text-center text-rugby-teal font-semibold">
+                L
+              </TableHead>
+              <TableHead className="text-center text-rugby-teal font-semibold">
+                PF
+              </TableHead>
+              <TableHead className="text-center text-rugby-teal font-semibold">
+                TBP
+              </TableHead>
+              <TableHead className="text-center text-rugby-teal font-semibold">
+                LBP
+              </TableHead>
+              <TableHead className="text-center text-rugby-teal font-semibold">
+                PTS
+              </TableHead>
+              <TableHead className="text-right text-rugby-teal font-semibold">
+                Actions
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {standings.map((standing) => (
-              <TableRow key={standing.id}>
-                <TableCell>{standing.position}</TableCell>
-                <TableCell>{standing.team_name}</TableCell>
-                <TableCell>{standing.played}</TableCell>
-                <TableCell>{standing.won}</TableCell>
-                <TableCell>{standing.drawn}</TableCell>
-                <TableCell>{standing.lost}</TableCell>
-                <TableCell>{standing.points_for}</TableCell>
-                <TableCell>{standing.try_bonus_points}</TableCell>
-                <TableCell>{standing.losing_bonus_points}</TableCell>
-                <TableCell>{standing.total_points}</TableCell>
-                <TableCell>
+            {standings.map((standing, index) => (
+              <TableRow
+                key={standing.id}
+                className={`
+                  ${
+                    index % 2 === 0
+                      ? "bg-white dark:bg-gray-900"
+                      : "bg-rugby-teal/5 dark:bg-gray-800/50"
+                  } 
+                  hover:bg-rugby-teal/10 dark:hover:bg-rugby-teal/10 transition-colors
+                  border-b border-rugby-teal/10
+                `}
+              >
+                <TableCell className="font-medium">
+                  {standing.position}
+                </TableCell>
+                <TableCell className="font-medium">
+                  {standing.team_name}
+                </TableCell>
+                <TableCell className="text-center">{standing.played}</TableCell>
+                <TableCell className="text-center">{standing.won}</TableCell>
+                <TableCell className="text-center">{standing.drawn}</TableCell>
+                <TableCell className="text-center">{standing.lost}</TableCell>
+                <TableCell className="text-center">
+                  {standing.points_for}
+                </TableCell>
+                <TableCell className="text-center">
+                  {standing.try_bonus_points}
+                </TableCell>
+                <TableCell className="text-center">
+                  {standing.losing_bonus_points}
+                </TableCell>
+                <TableCell className="text-center font-semibold text-rugby-teal">
+                  {standing.total_points}
+                </TableCell>
+                <TableCell className="text-right">
                   <Button
                     variant="ghost"
                     size="sm"
@@ -373,6 +419,7 @@ export default function AdminChampionshipClient({
                       setFormData(standing);
                       setIsDialogOpen(true);
                     }}
+                    className="mr-2 hover:bg-rugby-teal/10 hover:text-rugby-teal"
                   >
                     <Pencil className="h-4 w-4" />
                   </Button>
@@ -380,6 +427,7 @@ export default function AdminChampionshipClient({
                     variant="ghost"
                     size="sm"
                     onClick={() => handleDelete(standing.id)}
+                    className="text-red-500 hover:text-red-700 hover:bg-red-50"
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>

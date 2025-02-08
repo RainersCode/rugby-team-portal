@@ -104,45 +104,52 @@ export default async function TournamentsPage() {
               <Card className="overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full">
-                    <thead className="bg-gray-50 dark:bg-gray-800">
+                    <thead className="bg-rugby-teal/5">
                       <tr>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-12">
+                        <th className="px-4 py-3 text-left text-xs font-medium text-rugby-teal uppercase tracking-wider w-12">
                           Pos
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        <th className="px-4 py-3 text-left text-xs font-medium text-rugby-teal uppercase tracking-wider">
                           Team
                         </th>
-                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-12">
+                        <th className="px-4 py-3 text-center text-xs font-medium text-rugby-teal uppercase tracking-wider w-12">
                           P
                         </th>
-                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-12">
+                        <th className="px-4 py-3 text-center text-xs font-medium text-rugby-teal uppercase tracking-wider w-12">
                           W
                         </th>
-                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-12">
+                        <th className="px-4 py-3 text-center text-xs font-medium text-rugby-teal uppercase tracking-wider w-12">
                           D
                         </th>
-                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-12">
+                        <th className="px-4 py-3 text-center text-xs font-medium text-rugby-teal uppercase tracking-wider w-12">
                           L
                         </th>
-                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-16">
+                        <th className="px-4 py-3 text-center text-xs font-medium text-rugby-teal uppercase tracking-wider w-16">
                           PF
                         </th>
-                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-12">
+                        <th className="px-4 py-3 text-center text-xs font-medium text-rugby-teal uppercase tracking-wider w-12">
                           TBP
                         </th>
-                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-12">
+                        <th className="px-4 py-3 text-center text-xs font-medium text-rugby-teal uppercase tracking-wider w-12">
                           LBP
                         </th>
-                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-16">
+                        <th className="px-4 py-3 text-center text-xs font-medium text-rugby-teal uppercase tracking-wider w-16">
                           PTS
                         </th>
                       </tr>
                     </thead>
                     <tbody className="bg-white dark:bg-card-bg-dark divide-y divide-gray-200 dark:divide-gray-700">
-                      {championshipStandings?.map((team) => (
+                      {championshipStandings?.map((team, index) => (
                         <tr
                           key={team.team_name}
-                          className="hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                          className={`
+                            ${
+                              index % 2 === 0
+                                ? "bg-white dark:bg-gray-900"
+                                : "bg-rugby-teal/5 dark:bg-gray-800/50"
+                            } 
+                            hover:bg-rugby-teal/10 dark:hover:bg-rugby-teal/10 transition-colors
+                          `}
                         >
                           <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100 text-center">
                             {team.position}
@@ -171,7 +178,7 @@ export default async function TournamentsPage() {
                           <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 text-center">
                             {team.losing_bonus_points}
                           </td>
-                          <td className="px-4 py-3 whitespace-nowrap text-sm font-bold text-gray-900 dark:text-gray-100 text-center">
+                          <td className="px-4 py-3 whitespace-nowrap text-sm font-bold text-rugby-teal text-center">
                             {team.total_points}
                           </td>
                         </tr>
@@ -186,36 +193,43 @@ export default async function TournamentsPage() {
               <Card className="overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full">
-                    <thead className="bg-gray-50 dark:bg-gray-800">
+                    <thead className="bg-rugby-teal/5">
                       <tr>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-12">
+                        <th className="px-4 py-3 text-left text-xs font-medium text-rugby-teal uppercase tracking-wider w-12">
                           Pos
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        <th className="px-4 py-3 text-left text-xs font-medium text-rugby-teal uppercase tracking-wider">
                           Team
                         </th>
-                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-12">
+                        <th className="px-4 py-3 text-center text-xs font-medium text-rugby-teal uppercase tracking-wider w-12">
                           P
                         </th>
-                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-12">
+                        <th className="px-4 py-3 text-center text-xs font-medium text-rugby-teal uppercase tracking-wider w-12">
                           W
                         </th>
-                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-12">
+                        <th className="px-4 py-3 text-center text-xs font-medium text-rugby-teal uppercase tracking-wider w-12">
                           D
                         </th>
-                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-12">
+                        <th className="px-4 py-3 text-center text-xs font-medium text-rugby-teal uppercase tracking-wider w-12">
                           L
                         </th>
-                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-16">
+                        <th className="px-4 py-3 text-center text-xs font-medium text-rugby-teal uppercase tracking-wider w-16">
                           PTS
                         </th>
                       </tr>
                     </thead>
                     <tbody className="bg-white dark:bg-card-bg-dark divide-y divide-gray-200 dark:divide-gray-700">
-                      {sevensStandings?.map((team) => (
+                      {sevensStandings?.map((team, index) => (
                         <tr
                           key={team.team_name}
-                          className="hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                          className={`
+                            ${
+                              index % 2 === 0
+                                ? "bg-white dark:bg-gray-900"
+                                : "bg-rugby-teal/5 dark:bg-gray-800/50"
+                            } 
+                            hover:bg-rugby-teal/10 dark:hover:bg-rugby-teal/10 transition-colors
+                          `}
                         >
                           <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100 text-center">
                             {team.position}
@@ -235,7 +249,7 @@ export default async function TournamentsPage() {
                           <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 text-center">
                             {team.lost}
                           </td>
-                          <td className="px-4 py-3 whitespace-nowrap text-sm font-bold text-gray-900 dark:text-gray-100 text-center">
+                          <td className="px-4 py-3 whitespace-nowrap text-sm font-bold text-rugby-teal text-center">
                             {team.total_points}
                           </td>
                         </tr>

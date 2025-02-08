@@ -282,33 +282,62 @@ export default function AdminSevensClient() {
 
       <Table>
         <TableHeader>
-          <TableRow>
-            <TableHead>Position</TableHead>
-            <TableHead>Team</TableHead>
-            <TableHead className="text-center">P</TableHead>
-            <TableHead className="text-center">W</TableHead>
-            <TableHead className="text-center">D</TableHead>
-            <TableHead className="text-center">L</TableHead>
-            <TableHead className="text-center">PTS</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
+          <TableRow className="bg-rugby-teal/5 hover:bg-rugby-teal/5">
+            <TableHead className="text-rugby-teal font-semibold">
+              Position
+            </TableHead>
+            <TableHead className="text-rugby-teal font-semibold">
+              Team
+            </TableHead>
+            <TableHead className="text-center text-rugby-teal font-semibold">
+              P
+            </TableHead>
+            <TableHead className="text-center text-rugby-teal font-semibold">
+              W
+            </TableHead>
+            <TableHead className="text-center text-rugby-teal font-semibold">
+              D
+            </TableHead>
+            <TableHead className="text-center text-rugby-teal font-semibold">
+              L
+            </TableHead>
+            <TableHead className="text-center text-rugby-teal font-semibold">
+              PTS
+            </TableHead>
+            <TableHead className="text-right text-rugby-teal font-semibold">
+              Actions
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {teams.map((team) => (
-            <TableRow key={team.id}>
-              <TableCell>{team.position}</TableCell>
-              <TableCell>{team.team_name}</TableCell>
+          {teams.map((team, index) => (
+            <TableRow
+              key={team.id}
+              className={`
+                ${
+                  index % 2 === 0
+                    ? "bg-white dark:bg-gray-900"
+                    : "bg-rugby-teal/5 dark:bg-gray-800/50"
+                } 
+                hover:bg-rugby-teal/10 dark:hover:bg-rugby-teal/10 transition-colors
+                border-b border-rugby-teal/10
+              `}
+            >
+              <TableCell className="font-medium">{team.position}</TableCell>
+              <TableCell className="font-medium">{team.team_name}</TableCell>
               <TableCell className="text-center">{team.played}</TableCell>
               <TableCell className="text-center">{team.won}</TableCell>
               <TableCell className="text-center">{team.drawn}</TableCell>
               <TableCell className="text-center">{team.lost}</TableCell>
-              <TableCell className="text-center">{team.total_points}</TableCell>
+              <TableCell className="text-center font-semibold text-rugby-teal">
+                {team.total_points}
+              </TableCell>
               <TableCell className="text-right">
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => handleEdit(team)}
-                  className="mr-2"
+                  className="mr-2 hover:bg-rugby-teal/10 hover:text-rugby-teal"
                 >
                   <Pencil className="h-4 w-4" />
                 </Button>
@@ -316,7 +345,7 @@ export default function AdminSevensClient() {
                   variant="ghost"
                   size="sm"
                   onClick={() => handleDelete(team.id)}
-                  className="text-red-500 hover:text-red-700"
+                  className="text-red-500 hover:text-red-700 hover:bg-red-50"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
