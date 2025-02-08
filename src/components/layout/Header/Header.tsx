@@ -35,7 +35,7 @@ const mainNavItems: MainNavItem[] = [
   {
     label: "Tournaments",
     items: [
-      { href: "/tournaments/league", label: "League" },
+      { href: "/tournaments/championship", label: "Championship" },
       { href: "/tournaments/cup", label: "Cup" },
       { href: "/tournaments/sevens", label: "Sevens" },
     ],
@@ -61,6 +61,7 @@ const mainNavItems: MainNavItem[] = [
 export function Header() {
   const pathname = usePathname();
   const [user, setUser] = useState<User | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const supabase = createClientComponentClient();
 
   useEffect(() => {
@@ -69,14 +70,36 @@ export function Header() {
         data: { user },
       } = await supabase.auth.getUser();
       setUser(user);
+
+      if (user) {
+        // Check if user is admin
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", user.id)
+          .single();
+
+        setIsAdmin(profile?.role === "admin");
+      }
     };
 
     getUser();
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setUser(session?.user ?? null);
+      if (session?.user) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", session.user.id)
+          .single();
+
+        setIsAdmin(profile?.role === "admin");
+      } else {
+        setIsAdmin(false);
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -215,7 +238,7 @@ export function Header() {
           </nav>
           <div className="flex items-center space-x-6 flex-shrink-0">
             {user ? (
-              <UserNav user={user} />
+              <UserNav user={user} isAdmin={isAdmin} />
             ) : (
               <Link
                 href="/auth/signin"

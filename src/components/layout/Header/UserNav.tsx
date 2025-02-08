@@ -22,16 +22,17 @@ import {
   Dumbbell,
   Image,
   Play,
-  Settings
+  Settings,
+  Trophy,
 } from "lucide-react";
 
 interface UserNavProps {
   user: User;
+  isAdmin?: boolean;
 }
 
-export default function UserNav({ user }: UserNavProps) {
+export default function UserNav({ user, isAdmin }: UserNavProps) {
   const router = useRouter();
-  const [isAdmin, setIsAdmin] = useState(false);
   const [initials, setInitials] = useState("");
 
   useEffect(() => {
@@ -47,7 +48,6 @@ export default function UserNav({ user }: UserNavProps) {
         .single();
 
       if (profile) {
-        setIsAdmin(profile.role === "admin");
         const firstInitial = profile.first_name ? profile.first_name[0] : "";
         const lastInitial = profile.last_name ? profile.last_name[0] : "";
         setInitials((firstInitial + lastInitial).toUpperCase() || "U");
@@ -72,7 +72,10 @@ export default function UserNav({ user }: UserNavProps) {
           </AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-64 p-2 bg-gradient-to-b from-white to-gray-50/80 dark:from-gray-900 dark:to-gray-900/80 backdrop-blur-xl border-rugby-teal/20 shadow-xl shadow-rugby-teal/10">
+      <DropdownMenuContent
+        align="end"
+        className="w-64 p-2 bg-gradient-to-b from-white to-gray-50/80 dark:from-gray-900 dark:to-gray-900/80 backdrop-blur-xl border-rugby-teal/20 shadow-xl shadow-rugby-teal/10"
+      >
         <Link href="/profile">
           <DropdownMenuItem className="cursor-pointer flex items-center gap-2 px-3 py-2.5 hover:bg-rugby-teal/10 rounded-md transition-colors duration-200">
             <div className="p-1.5 rounded-full bg-rugby-teal/10">
@@ -92,7 +95,9 @@ export default function UserNav({ user }: UserNavProps) {
         {isAdmin && (
           <>
             <DropdownMenuSeparator className="my-2 bg-rugby-teal/10" />
-            <div className="px-3 py-1.5 text-xs font-semibold text-muted-foreground">Admin Panel</div>
+            <div className="px-3 py-1.5 text-xs font-semibold text-muted-foreground">
+              Admin Panel
+            </div>
             <Link href="/admin">
               <DropdownMenuItem className="cursor-pointer flex items-center gap-2 px-3 py-2.5 hover:bg-rugby-teal/10 rounded-md transition-colors duration-200">
                 <div className="p-1.5 rounded-full bg-rugby-teal/10">
@@ -109,20 +114,28 @@ export default function UserNav({ user }: UserNavProps) {
                 <span className="font-medium">Players</span>
               </DropdownMenuItem>
             </Link>
-            <Link href="/admin/articles">
-              <DropdownMenuItem className="cursor-pointer flex items-center gap-2 px-3 py-2.5 hover:bg-rugby-teal/10 rounded-md transition-colors duration-200">
-                <div className="p-1.5 rounded-full bg-rugby-teal/10">
-                  <FileText className="w-4 h-4 text-rugby-teal" />
-                </div>
-                <span className="font-medium">Articles</span>
-              </DropdownMenuItem>
-            </Link>
             <Link href="/admin/matches">
               <DropdownMenuItem className="cursor-pointer flex items-center gap-2 px-3 py-2.5 hover:bg-rugby-teal/10 rounded-md transition-colors duration-200">
                 <div className="p-1.5 rounded-full bg-rugby-teal/10">
                   <Calendar className="w-4 h-4 text-rugby-teal" />
                 </div>
                 <span className="font-medium">Matches</span>
+              </DropdownMenuItem>
+            </Link>
+            <Link href="/admin/championship">
+              <DropdownMenuItem className="cursor-pointer flex items-center gap-2 px-3 py-2.5 hover:bg-rugby-teal/10 rounded-md transition-colors duration-200">
+                <div className="p-1.5 rounded-full bg-rugby-teal/10">
+                  <Trophy className="w-4 h-4 text-rugby-teal" />
+                </div>
+                <span className="font-medium">Championship</span>
+              </DropdownMenuItem>
+            </Link>
+            <Link href="/admin/articles">
+              <DropdownMenuItem className="cursor-pointer flex items-center gap-2 px-3 py-2.5 hover:bg-rugby-teal/10 rounded-md transition-colors duration-200">
+                <div className="p-1.5 rounded-full bg-rugby-teal/10">
+                  <FileText className="w-4 h-4 text-rugby-teal" />
+                </div>
+                <span className="font-medium">Articles</span>
               </DropdownMenuItem>
             </Link>
             <Link href="/admin/training">
