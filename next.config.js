@@ -10,12 +10,13 @@ const nextConfig = {
         protocol: "https",
         hostname: "picsum.photos",
       },
+      {
+        protocol: "https",
+        hostname: "media.api-sports.io",
+        pathname: "/rugby/teams/**",
+      },
     ],
-    domains: [
-      "www.thesportsdb.com", 
-      "thesportsdb.com",
-      "placehold.co"
-    ],
+    domains: ["www.thesportsdb.com", "thesportsdb.com", "placehold.co"],
   },
 };
 
