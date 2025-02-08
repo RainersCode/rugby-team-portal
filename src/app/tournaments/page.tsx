@@ -5,6 +5,7 @@ import { cookies } from "next/headers";
 import { Match } from "@/types";
 import MatchCard from "@/components/features/Matches/MatchCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import CupBracket from "@/components/features/Cup/CupBracket";
 
 export const dynamic = "force-dynamic";
 
@@ -30,10 +31,10 @@ export default async function TournamentsPage() {
     .select("*")
     .order("position");
 
-  const { data: cupStandings } = await supabase
-    .from("current_cup_standings")
+  const { data: cupMatches } = await supabase
+    .from("cup_matches")
     .select("*")
-    .order("position");
+    .order("round", { ascending: false });
 
   // Fetch upcoming matches
   const { data: matches } = await supabase
@@ -261,66 +262,16 @@ export default async function TournamentsPage() {
             </TabsContent>
 
             <TabsContent value="cup">
-              <Card className="overflow-hidden">
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead className="bg-gray-50 dark:bg-gray-800">
-                      <tr>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-12">
-                          Pos
-                        </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                          Team
-                        </th>
-                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-12">
-                          P
-                        </th>
-                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-12">
-                          W
-                        </th>
-                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-12">
-                          D
-                        </th>
-                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-12">
-                          L
-                        </th>
-                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-16">
-                          PTS
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white dark:bg-card-bg-dark divide-y divide-gray-200 dark:divide-gray-700">
-                      {cupStandings?.map((team) => (
-                        <tr
-                          key={team.team_name}
-                          className="hover:bg-gray-50 dark:hover:bg-gray-800/50"
-                        >
-                          <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100 text-center">
-                            {team.position}
-                          </td>
-                          <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
-                            {team.team_name}
-                          </td>
-                          <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 text-center">
-                            {team.played}
-                          </td>
-                          <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 text-center">
-                            {team.won}
-                          </td>
-                          <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 text-center">
-                            {team.drawn}
-                          </td>
-                          <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 text-center">
-                            {team.lost}
-                          </td>
-                          <td className="px-4 py-3 whitespace-nowrap text-sm font-bold text-gray-900 dark:text-gray-100 text-center">
-                            {team.total_points}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+              <Card className="overflow-hidden p-6">
+                <div className="mb-4">
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+                    Cup Playoff Bracket
+                  </h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                    Current cup competition playoff structure
+                  </p>
                 </div>
+                <CupBracket matches={cupMatches || []} />
               </Card>
             </TabsContent>
           </Tabs>

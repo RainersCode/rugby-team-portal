@@ -3,6 +3,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AdminChampionshipClient from "./AdminChampionshipClient";
 import AdminSevensClient from "./AdminSevensClient";
+import AdminCupClient from "./AdminCupClient";
 import { useEffect, useState } from "react";
 
 export default function AdminTournamentsPage() {
@@ -22,6 +23,7 @@ export default function AdminTournamentsPage() {
         <TabsList>
           <TabsTrigger value="championship">Championship</TabsTrigger>
           <TabsTrigger value="sevens">Sevens</TabsTrigger>
+          <TabsTrigger value="cup">Cup</TabsTrigger>
         </TabsList>
 
         <TabsContent value="championship" className="space-y-4">
@@ -56,6 +58,10 @@ export default function AdminTournamentsPage() {
 
         <TabsContent value="sevens" className="space-y-4">
           <AdminSevensClient key={`sevens-${activeTab}`} />
+        </TabsContent>
+
+        <TabsContent value="cup" className="space-y-4">
+          <AdminCupClient key={`cup-${activeTab}`} />
         </TabsContent>
       </Tabs>
     </div>
