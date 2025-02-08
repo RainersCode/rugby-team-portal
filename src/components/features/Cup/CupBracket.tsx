@@ -27,7 +27,7 @@ export default function CupBracket({ matches }: CupBracketProps) {
         <div className="flex justify-center items-center h-full">
           <div className="flex flex-col space-y-8">
             {/* Quarter Finals */}
-            <div className="flex space-x-8">
+            <div className="flex justify-between px-8">
               <div className="flex flex-col space-y-16">
                 {quarters.slice(0, 2).map((match) => (
                   <MatchCard key={match.id} match={match} />
@@ -41,7 +41,7 @@ export default function CupBracket({ matches }: CupBracketProps) {
             </div>
 
             {/* Semi Finals */}
-            <div className="flex justify-center space-x-32">
+            <div className="flex justify-around px-16 gap-24">
               {semis.map((match) => (
                 <MatchCard key={match.id} match={match} />
               ))}
