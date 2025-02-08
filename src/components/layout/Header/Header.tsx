@@ -32,14 +32,7 @@ const mainNavItems: MainNavItem[] = [
   { href: "/team", label: "Team" },
   { href: "/matches", label: "Matches" },
   { href: "/training", label: "Training" },
-  {
-    label: "Tournaments",
-    items: [
-      { href: "/tournaments/championship", label: "Championship" },
-      { href: "/tournaments/cup", label: "Cup" },
-      { href: "/tournaments/sevens", label: "Sevens" },
-    ],
-  },
+  { href: "/tournaments", label: "Tournaments" },
   {
     label: "Media",
     items: [

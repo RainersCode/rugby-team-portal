@@ -122,12 +122,12 @@ export default function UserNav({ user, isAdmin }: UserNavProps) {
                 <span className="font-medium">Matches</span>
               </DropdownMenuItem>
             </Link>
-            <Link href="/admin/championship">
+            <Link href="/admin/tournaments">
               <DropdownMenuItem className="cursor-pointer flex items-center gap-2 px-3 py-2.5 hover:bg-rugby-teal/10 rounded-md transition-colors duration-200">
                 <div className="p-1.5 rounded-full bg-rugby-teal/10">
                   <Trophy className="w-4 h-4 text-rugby-teal" />
                 </div>
-                <span className="font-medium">Championship</span>
+                <span className="font-medium">Tournaments</span>
               </DropdownMenuItem>
             </Link>
             <Link href="/admin/articles">
