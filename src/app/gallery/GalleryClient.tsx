@@ -109,7 +109,7 @@ export default function GalleryClient() {
             transition={{ duration: 0.5, delay: index * 0.1 }}
           >
             <Card 
-              className="group cursor-pointer hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border-rugby-teal/20 hover:border-rugby-teal"
+              className="group cursor-pointer overflow-hidden bg-white dark:bg-gray-800/50 backdrop-blur-sm hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border-rugby-teal/20 hover:border-rugby-teal relative"
               onClick={() => handleGalleryClick(gallery)}
             >
               <CardHeader>
@@ -117,34 +117,37 @@ export default function GalleryClient() {
                   <span className="group-hover:text-rugby-teal transition-colors">
                     {gallery.title}
                   </span>
-                  <span className="text-sm text-muted-foreground">
+                  <span className="text-sm text-muted-foreground bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full">
                     {gallery.photos?.length || 0} photos
                   </span>
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="aspect-video relative mb-4 bg-muted rounded-lg overflow-hidden group-hover:shadow-lg transition-all">
+                <div className="aspect-video relative mb-4 rounded-lg overflow-hidden group-hover:shadow-lg transition-all">
                   {gallery.photos?.[0] ? (
-                    <Image
-                      src={gallery.photos[0].image_url}
-                      alt={gallery.photos[0].title}
-                      fill
-                      className="object-cover transition-transform duration-300 group-hover:scale-105"
-                    />
+                    <>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10" />
+                      <Image
+                        src={gallery.photos[0].image_url}
+                        alt={gallery.photos[0].title}
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-110"
+                      />
+                    </>
                   ) : (
-                    <div className="flex items-center justify-center h-full">
+                    <div className="flex items-center justify-center h-full bg-gray-100 dark:bg-gray-700">
                       <ImageIcon className="h-12 w-12 text-muted-foreground/50" />
                     </div>
                   )}
                 </div>
-                <p className="text-sm text-muted-foreground line-clamp-2">
+                <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
                   {gallery.description}
                 </p>
-                <div className="mt-4 grid grid-cols-4 gap-2">
-                  {gallery.photos?.slice(1, 5).map((photo) => (
+                <div className="grid grid-cols-4 gap-2 relative">
+                  {gallery.photos?.slice(1, 5).map((photo, index) => (
                     <div
                       key={photo.id}
-                      className="aspect-square relative rounded-md overflow-hidden"
+                      className="aspect-square relative rounded-md overflow-hidden transform transition-transform duration-300 hover:scale-105"
                     >
                       <Image
                         src={photo.image_url}
@@ -152,6 +155,11 @@ export default function GalleryClient() {
                         fill
                         className="object-cover"
                       />
+                      {index === 3 && gallery.photos && gallery.photos.length > 5 && (
+                        <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                          <span className="text-white text-sm font-medium">+{gallery.photos.length - 5}</span>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
