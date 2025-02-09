@@ -115,37 +115,38 @@ export default async function Home() {
             Rugby Updates
           </h2>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-            Click on any account to view their latest tweets. Tweet feeds may
-            take a few seconds to load.
+            Stay updated with the latest rugby news and updates from around the world. Select any account to view their latest tweets.
           </p>
         </div>
-        <TwitterFeed
-          usernames={[
-            // International Rugby
-            { username: "WorldRugby", category: "International Rugby" },
-            { username: "SixNationsRugby", category: "International Rugby" },
-            { username: "rugbyworldcup", category: "International Rugby" },
-            { username: "RugbyEurope", category: "International Rugby" },
+        <div className="bg-white dark:bg-gray-800/50 rounded-xl p-6 shadow-lg">
+          <TwitterFeed
+            usernames={[
+              // International Rugby
+              { username: "WorldRugby", category: "International Rugby" },
+              { username: "SixNationsRugby", category: "International Rugby" },
+              { username: "rugbyworldcup", category: "International Rugby" },
+              { username: "RugbyEurope", category: "International Rugby" },
 
-            // Major Leagues & Tournaments
-            { username: "ChampionsCup", category: "Major Leagues" },
-            { username: "premrugby", category: "Major Leagues" },
-            { username: "URC", category: "Major Leagues" },
-            { username: "top14rugby", category: "Major Leagues" },
+              // Major Leagues & Tournaments
+              { username: "ChampionsCup", category: "Major Leagues" },
+              { username: "premrugby", category: "Major Leagues" },
+              { username: "URC", category: "Major Leagues" },
+              { username: "top14rugby", category: "Major Leagues" },
 
-            // News & Analysis
-            { username: "RugbyPass", category: "News & Analysis" },
-            { username: "TheRugbyPaper", category: "News & Analysis" },
-            { username: "RugbyInsideLine", category: "News & Analysis" },
-            { username: "RugbyWorldMag", category: "News & Analysis" },
+              // News & Analysis
+              { username: "RugbyPass", category: "News & Analysis" },
+              { username: "TheRugbyPaper", category: "News & Analysis" },
+              { username: "RugbyInsideLine", category: "News & Analysis" },
+              { username: "RugbyWorldMag", category: "News & Analysis" },
 
-            // National Teams
-            { username: "EnglandRugby", category: "National Teams" },
-            { username: "WelshRugbyUnion", category: "National Teams" },
-            { username: "IrishRugby", category: "National Teams" },
-            { username: "FranceRugby", category: "National Teams" },
-          ]}
-        />
+              // National Teams
+              { username: "EnglandRugby", category: "National Teams" },
+              { username: "WelshRugbyUnion", category: "National Teams" },
+              { username: "IrishRugby", category: "National Teams" },
+              { username: "FranceRugby", category: "National Teams" },
+            ]}
+          />
+        </div>
       </section>
 
       {/* Call to Action Section */}
