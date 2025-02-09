@@ -75,36 +75,60 @@ export default async function Home() {
             View all news →
           </Link>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {articles?.slice(0, 3).map((article) => (
-            <article
-              key={article.id}
-              className="group relative bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden border border-rugby-teal/20 hover:border-rugby-teal transition-all duration-300"
-            >
-              <Link href={`/news/${article.slug}`}>
-                <div className="relative h-48">
-                  <Image
-                    src={article.image}
-                    alt={article.title}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-                <div className="p-6">
-                  <h3 className="text-xl font-bold mt-2 mb-3 text-gray-900 dark:text-gray-100 group-hover:text-rugby-teal transition-colors">
-                    {article.title}
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-400 mb-4">
-                    {article.content.substring(0, 150)}...
-                  </p>
-                  <span className="text-rugby-teal hover:text-rugby-teal/80 transition-colors font-semibold">
-                    Read More
-                  </span>
-                </div>
-              </Link>
-              <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-rugby-teal to-rugby-yellow transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
-            </article>
-          ))}
+        <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-4 auto-rows-[250px]">
+          {articles?.slice(0, 6).map((article, index) => {
+            // Define different layouts for each card
+            const layouts = {
+              0: "md:col-span-2 md:row-span-2", // Large featured card
+              1: "md:col-span-2 md:row-span-1", // Medium horizontal card
+              2: "md:col-span-2 md:row-span-1", // Medium horizontal card
+              3: "md:col-span-2 md:row-span-1", // Medium horizontal card
+              4: "md:col-span-1 md:row-span-1", // Small square card
+              5: "md:col-span-1 md:row-span-1", // Small square card
+            };
+
+            return (
+              <article
+                key={article.id}
+                className={`group relative bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden border border-rugby-teal/20 hover:border-rugby-teal transition-all duration-300 ${
+                  layouts[index as keyof typeof layouts]
+                }`}
+              >
+                <Link href={`/news/${article.slug}`} className="block h-full">
+                  <div className="relative w-full h-full">
+                    <Image
+                      src={article.image}
+                      alt={article.title}
+                      fill
+                      className="object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+                    <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+                      <h3 className={`font-bold mb-2 line-clamp-2 ${
+                        index === 0 ? 'text-2xl' : 'text-lg'
+                      }`}>
+                        {article.title}
+                      </h3>
+                      {index === 0 && (
+                        <p className="text-sm text-gray-200 line-clamp-2 mb-2">
+                          {article.content.substring(0, 150)}...
+                        </p>
+                      )}
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-rugby-yellow">
+                          Read More
+                        </span>
+                        <span className="text-xs text-gray-300">
+                          {new Date(article.created_at).toLocaleDateString()}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-rugby-teal to-rugby-yellow transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
+              </article>
+            );
+          })}
         </div>
       </section>
 

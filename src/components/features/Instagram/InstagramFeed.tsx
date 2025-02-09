@@ -151,11 +151,11 @@ export default function InstagramFeed({
 
   if (loading) {
     return (
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 auto-rows-[200px]">
         {Array.from({ length: limit }).map((_, index) => (
           <div
             key={index}
-            className="aspect-square bg-gray-100 dark:bg-gray-800 rounded-lg animate-pulse"
+            className="bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse"
           />
         ))}
       </div>
@@ -163,50 +163,77 @@ export default function InstagramFeed({
   }
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-      {posts.map((post) => (
-        <a
-          key={post.id}
-          href={post.permalink}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="group relative aspect-square rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800"
-        >
-          <Image
-            src={
-              post.media_type === "VIDEO"
-                ? post.thumbnail_url || post.media_url
-                : post.media_url
-            }
-            alt={post.caption || "Instagram post"}
-            fill
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
-          />
-          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-            <div className="absolute inset-0 flex flex-col items-center justify-center text-white p-4">
-              {post.caption && (
-                <p className="text-sm text-center line-clamp-3 mb-4">
-                  {post.caption}
-                </p>
-              )}
-              <div className="flex items-center gap-4">
-                {post.likes_count !== undefined && (
-                  <div className="flex items-center gap-1">
-                    <Heart className="w-5 h-5" />
-                    <span>{post.likes_count}</span>
-                  </div>
+    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 auto-rows-[200px]">
+      {posts.map((post, index) => {
+        // Define different layouts for each card
+        const layouts = {
+          0: "md:col-span-2 md:row-span-2", // Large square featured card
+          1: "md:col-span-1 md:row-span-2", // Tall vertical card
+          2: "md:col-span-1 md:row-span-1", // Small square card
+          3: "md:col-span-1 md:row-span-1", // Small square card
+          4: "md:col-span-2 md:row-span-1", // Wide horizontal card
+          5: "md:col-span-1 md:row-span-2", // Tall vertical card
+          6: "md:col-span-2 md:row-span-1", // Wide horizontal card
+          7: "md:col-span-1 md:row-span-1", // Small square card
+        };
+
+        // Define text size based on card size
+        const getTextSize = (index: number) => {
+          const largeCards = [0]; // Large featured cards
+          const mediumCards = [1, 4, 5, 6]; // Tall or wide cards
+          
+          if (largeCards.includes(index)) return 'text-xl';
+          if (mediumCards.includes(index)) return 'text-base';
+          return 'text-sm';
+        };
+
+        return (
+          <a
+            key={post.id}
+            href={post.permalink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`group relative overflow-hidden bg-gray-100 dark:bg-gray-800 rounded-xl shadow-md border border-rugby-teal/20 hover:border-rugby-teal transition-all duration-300 ${
+              layouts[index as keyof typeof layouts]
+            }`}
+          >
+            <Image
+              src={
+                post.media_type === "VIDEO"
+                  ? post.thumbnail_url || post.media_url
+                  : post.media_url
+              }
+              alt={post.caption || "Instagram post"}
+              fill
+              className="object-cover transition-transform duration-300 group-hover:scale-105"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              <div className="absolute inset-0 flex flex-col items-start justify-end p-4 text-white">
+                {post.caption && (
+                  <p className={`font-medium mb-3 line-clamp-3 ${getTextSize(index)}`}>
+                    {post.caption}
+                  </p>
                 )}
-                {post.comments_count !== undefined && (
-                  <div className="flex items-center gap-1">
-                    <MessageCircle className="w-5 h-5" />
-                    <span>{post.comments_count}</span>
-                  </div>
-                )}
+                <div className="flex items-center gap-4 text-sm">
+                  {post.likes_count !== undefined && (
+                    <div className="flex items-center gap-1.5">
+                      <Heart className="w-4 h-4 text-rugby-yellow" />
+                      <span>{post.likes_count}</span>
+                    </div>
+                  )}
+                  {post.comments_count !== undefined && (
+                    <div className="flex items-center gap-1.5">
+                      <MessageCircle className="w-4 h-4 text-rugby-yellow" />
+                      <span>{post.comments_count}</span>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-        </a>
-      ))}
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-rugby-yellow to-rugby-teal transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
+          </a>
+        );
+      })}
     </div>
   );
 }
