@@ -13,7 +13,9 @@ import {
   Calendar,
   Timer,
   ArrowRight,
-  RotateCcw
+  RotateCcw,
+  Play,
+  Video
 } from 'lucide-react';
 import { TrainingProgram, ProgramWorkout, WorkoutExercise } from '@/types';
 import { Metadata } from 'next';
@@ -197,11 +199,11 @@ export default async function ProgramPage({ params }: PageProps) {
                         {workout.workout_exercises?.map((workoutExercise) => (
                           <div 
                             key={workoutExercise.id}
-                            className="flex items-center gap-4 p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50"
+                            className="flex items-center gap-4 p-4 rounded-lg bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800/70 transition-colors mb-3"
                           >
                             {/* Exercise Image */}
                             {workoutExercise.exercise?.image_url && (
-                              <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
+                              <div className="relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
                                 <Image
                                   src={workoutExercise.exercise.image_url}
                                   alt={workoutExercise.exercise.name}
@@ -212,44 +214,50 @@ export default async function ProgramPage({ params }: PageProps) {
                             )}
 
                             {/* Exercise Info */}
-                            <div className="flex-1">
-                              <h4 className="font-medium text-gray-900 dark:text-gray-100">
+                            <div className="flex-grow">
+                              <h4 className="font-medium text-gray-900 dark:text-gray-100 text-lg">
                                 {workoutExercise.exercise?.name}
                               </h4>
-                              <div className="flex items-center gap-3 text-sm text-gray-500 mt-1">
+                              <div className="flex items-center flex-wrap gap-3 text-sm mt-2">
                                 {workoutExercise.sets && (
-                                  <span>{workoutExercise.sets} sets</span>
+                                  <Badge className="bg-rugby-teal text-white hover:bg-rugby-teal/90 px-3 py-1 text-base">
+                                    {workoutExercise.sets} sets
+                                  </Badge>
                                 )}
                                 {workoutExercise.reps && (
-                                  <>
-                                    <ArrowRight className="w-3 h-3" />
-                                    <span>{workoutExercise.reps} reps</span>
-                                  </>
+                                  <Badge className="bg-amber-500 text-white hover:bg-amber-600 px-3 py-1 text-base">
+                                    {workoutExercise.reps} reps
+                                  </Badge>
                                 )}
                                 {workoutExercise.duration_seconds && (
-                                  <>
-                                    <ArrowRight className="w-3 h-3" />
-                                    <span>{workoutExercise.duration_seconds}s</span>
-                                  </>
+                                  <Badge className="bg-rugby-red text-white hover:bg-rugby-red/90 px-3 py-1 text-base">
+                                    {workoutExercise.duration_seconds}s
+                                  </Badge>
                                 )}
                                 {workoutExercise.rest_seconds && (
-                                  <>
-                                    <ArrowRight className="w-3 h-3" />
-                                    <span>{workoutExercise.rest_seconds}s rest</span>
-                                  </>
+                                  <Badge className="bg-gray-600 text-white hover:bg-gray-700 px-3 py-1 text-base">
+                                    {workoutExercise.rest_seconds}s rest
+                                  </Badge>
                                 )}
                               </div>
+                              
+                              {workoutExercise.exercise?.description && (
+                                <p className="text-sm text-gray-600 dark:text-gray-300 mt-2 line-clamp-2">
+                                  {workoutExercise.exercise.description}
+                                </p>
+                              )}
                             </div>
 
-                            {/* Video Tutorial */}
+                            {/* Video Tutorial Button */}
                             {workoutExercise.exercise?.video_url && (
                               <Link
                                 href={workoutExercise.exercise.video_url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="flex-shrink-0 p-2 text-primary-blue hover:text-primary-blue/80"
+                                className="flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-lg bg-rugby-teal text-white hover:bg-rugby-teal/90 transition-colors"
                               >
-                                <RotateCcw className="w-5 h-5" />
+                                <Video className="w-4 h-4" />
+                                <span className="hidden sm:inline">Watch Tutorial</span>
                               </Link>
                             )}
                           </div>
