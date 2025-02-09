@@ -7,7 +7,22 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { ImageUpload } from '@/components/ui/image-upload';
 import { ArticleBlock } from '@/types';
-import { PlusCircle, Heading, Image as ImageIcon, Type, Trash2, ArrowUp, ArrowDown, Italic } from 'lucide-react';
+import { 
+  PlusCircle, 
+  Heading, 
+  Image as ImageIcon, 
+  Type, 
+  Trash2, 
+  ArrowUp, 
+  ArrowDown, 
+  Italic,
+  Bold,
+  Underline,
+  Link,
+  AlignLeft,
+  AlignCenter,
+  AlignRight
+} from 'lucide-react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import {
   Select,
@@ -42,7 +57,12 @@ export default function ArticleEditor({ onSubmit, initialData, isSubmitting, aut
   const [authorId, setAuthorId] = useState(initialData?.author_id || '');
   const [blocks, setBlocks] = useState<ArticleBlock[]>(
     initialData?.blocks || [
-      { type: 'paragraph', content: initialData?.content || '', styles: {} }
+      { type: 'paragraph', content: initialData?.content || '', styles: {
+        italic: false,
+        bold: false,
+        underline: false,
+        align: 'left'
+      } }
     ]
   );
   const supabase = createClientComponentClient();
@@ -130,13 +150,16 @@ export default function ArticleEditor({ onSubmit, initialData, isSubmitting, aut
     setBlocks(newBlocks);
   };
 
-  const toggleStyle = (index: number, style: 'italic') => {
+  const toggleStyle = (index: number, style: 'italic' | 'bold' | 'underline' | 'align') => {
     const block = blocks[index];
     if (block.type === 'paragraph') {
       updateBlock(index, {
         styles: {
           ...block.styles,
-          [style]: !block.styles?.[style]
+          [style]: style === 'align' ? 
+            (block.styles?.align === 'left' ? 'center' : 
+             block.styles?.align === 'center' ? 'right' : 'left') :
+            !block.styles?.[style]
         }
       });
     }
@@ -186,6 +209,7 @@ export default function ArticleEditor({ onSubmit, initialData, isSubmitting, aut
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Enter article title"
           required
+          className="bg-background border-input"
         />
       </div>
 
@@ -193,7 +217,7 @@ export default function ArticleEditor({ onSubmit, initialData, isSubmitting, aut
         <div className="space-y-2">
           <Label htmlFor="author">Author</Label>
           <Select value={authorId} onValueChange={setAuthorId}>
-            <SelectTrigger className="bg-background data-[state=open]:bg-background focus:bg-background hover:bg-background">
+            <SelectTrigger className="bg-background border-input">
               <SelectValue placeholder="Select author" />
             </SelectTrigger>
             <SelectContent className="bg-popover border shadow-md">
@@ -220,7 +244,7 @@ export default function ArticleEditor({ onSubmit, initialData, isSubmitting, aut
               type="button"
               variant="destructive"
               size="sm"
-              className="absolute top-2 right-2"
+              className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white"
               onClick={handleMainImageDelete}
             >
               <Trash2 className="h-4 w-4" />
@@ -238,6 +262,7 @@ export default function ArticleEditor({ onSubmit, initialData, isSubmitting, aut
               variant="outline"
               size="sm"
               onClick={() => addBlock('paragraph')}
+              className="bg-background hover:bg-accent border-input"
             >
               <Type className="w-4 h-4 mr-2" />
               Add Text
@@ -247,6 +272,7 @@ export default function ArticleEditor({ onSubmit, initialData, isSubmitting, aut
               variant="outline"
               size="sm"
               onClick={() => addBlock('heading')}
+              className="bg-background hover:bg-accent border-input"
             >
               <Heading className="w-4 h-4 mr-2" />
               Add Heading
@@ -256,6 +282,7 @@ export default function ArticleEditor({ onSubmit, initialData, isSubmitting, aut
               variant="outline"
               size="sm"
               onClick={() => addBlock('image')}
+              className="bg-background hover:bg-accent border-input"
             >
               <ImageIcon className="w-4 h-4 mr-2" />
               Add Image
@@ -265,137 +292,150 @@ export default function ArticleEditor({ onSubmit, initialData, isSubmitting, aut
 
         <div className="space-y-4">
           {blocks.map((block, index) => (
-            <div key={index} className="flex gap-4 items-start bg-muted/30 p-4 rounded-lg">
-              <div className="flex flex-col gap-2">
+            <div key={index} className="relative p-4 border rounded-lg bg-background">
+              <div className="absolute right-2 top-2 flex gap-2 p-1 rounded-md bg-muted">
                 <Button
                   type="button"
                   variant="ghost"
-                  size="icon"
+                  size="sm"
                   onClick={() => moveBlock(index, 'up')}
                   disabled={index === 0}
+                  className="hover:bg-accent text-foreground disabled:text-muted-foreground"
                 >
-                  <ArrowUp className="w-4 h-4" />
+                  <ArrowUp className="h-4 w-4" />
                 </Button>
                 <Button
                   type="button"
                   variant="ghost"
-                  size="icon"
+                  size="sm"
                   onClick={() => moveBlock(index, 'down')}
                   disabled={index === blocks.length - 1}
+                  className="hover:bg-accent text-foreground disabled:text-muted-foreground"
                 >
-                  <ArrowDown className="w-4 h-4" />
+                  <ArrowDown className="h-4 w-4" />
                 </Button>
-              </div>
-
-              <div className="flex-1">
-                {block.type === 'heading' && (
-                  <div className="space-y-2">
-                    <Select
-                      value={String(block.level || 2)}
-                      onValueChange={(value) => updateBlock(index, { level: Number(value) as 1 | 2 | 3 })}
-                    >
-                      <SelectTrigger className="bg-background data-[state=open]:bg-background focus:bg-background hover:bg-background">
-                        <SelectValue placeholder="Select heading level" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-popover bg-bg-light dark:bg-bg-dark border-l border-gray-200 dark:border-gray-800">
-                        <SelectItem value="1" className="hover:bg-accent">Heading 1</SelectItem>
-                        <SelectItem value="2" className="hover:bg-accent">Heading 2</SelectItem>
-                        <SelectItem value="3" className="hover:bg-accent">Heading 3</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Input
-                      value={block.content}
-                      onChange={(e) => updateBlock(index, { content: e.target.value })}
-                      placeholder="Heading text"
-                    />
-                  </div>
-                )}
-
-                {block.type === 'paragraph' && (
-                  <div className="space-y-2">
-                    <div className="flex gap-2">
-                      <Button
-                        type="button"
-                        variant={block.styles?.italic ? "secondary" : "ghost"}
-                        size="sm"
-                        onClick={() => toggleStyle(index, 'italic')}
-                      >
-                        <Italic className="h-4 w-4" />
-                      </Button>
-                    </div>
-                    <Textarea
-                      value={block.content}
-                      onChange={(e) => updateBlock(index, { content: e.target.value })}
-                      placeholder="Enter your content here..."
-                      className={`min-h-[100px] ${block.styles?.italic ? 'italic' : ''}`}
-                    />
-                  </div>
-                )}
-
-                {block.type === 'image' && (
-                  <div className="space-y-2">
-                    <div className="relative">
-                      <ImageUpload
-                        onUploadComplete={(url) => updateBlock(index, { imageUrl: url })}
-                        defaultImage={block.imageUrl}
-                        id={`block-image-${index}`}
-                      />
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="sm"
-                        className="absolute top-2 right-2"
-                        onClick={async () => {
-                          if (block.imageUrl) {
-                            // If there's an image, delete it from storage first
-                            if (confirm('Are you sure you want to delete this image?')) {
-                              try {
-                                await deleteImageFromStorage(block.imageUrl);
-                              } catch (error) {
-                                console.error('Failed to delete image:', error);
-                                alert('Failed to delete image from storage. The block will still be removed.');
-                              }
-                            } else {
-                              return; // If user cancels deletion, do nothing
-                            }
-                          }
-                          // Always remove the block
-                          removeBlock(index);
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                    <Input
-                      value={block.imageAlt || ''}
-                      onChange={(e) => updateBlock(index, { imageAlt: e.target.value })}
-                      placeholder="Image description"
-                    />
-                  </div>
-                )}
-              </div>
-
-              {/* Only show block delete button for non-image blocks */}
-              {block.type !== 'image' && (
+                <div className="w-px h-6 bg-border mx-1" />
                 <Button
                   type="button"
                   variant="ghost"
-                  size="icon"
+                  size="sm"
                   onClick={() => removeBlock(index)}
+                  className="hover:bg-red-100 dark:hover:bg-red-900/50 text-red-500 dark:text-red-400"
                 >
-                  <Trash2 className="w-4 w-4" />
+                  <Trash2 className="h-4 w-4" />
                 </Button>
+              </div>
+
+              {block.type === 'paragraph' && (
+                <div className="space-y-2">
+                  <div className="flex gap-2 mb-2 p-2 rounded-md bg-muted">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => toggleStyle(index, 'bold')}
+                      className={`hover:bg-accent text-foreground ${block.styles?.bold ? 'bg-accent/50' : ''}`}
+                    >
+                      <Bold className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => toggleStyle(index, 'italic')}
+                      className={`hover:bg-accent text-foreground ${block.styles?.italic ? 'bg-accent/50' : ''}`}
+                    >
+                      <Italic className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => toggleStyle(index, 'underline')}
+                      className={`hover:bg-accent text-foreground ${block.styles?.underline ? 'bg-accent/50' : ''}`}
+                    >
+                      <Underline className="h-4 w-4" />
+                    </Button>
+                    <div className="w-px h-6 bg-border mx-2" />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => toggleStyle(index, 'align')}
+                      className="hover:bg-accent text-foreground"
+                    >
+                      {block.styles?.align === 'left' && <AlignLeft className="h-4 w-4" />}
+                      {block.styles?.align === 'center' && <AlignCenter className="h-4 w-4" />}
+                      {block.styles?.align === 'right' && <AlignRight className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                  <Textarea
+                    value={block.content}
+                    onChange={(e) => updateBlock(index, { content: e.target.value })}
+                    placeholder="Enter text content"
+                    className={`min-h-[100px] bg-background border-input text-foreground ${
+                      block.styles?.italic ? 'italic' : ''
+                    } ${
+                      block.styles?.bold ? 'font-bold' : ''
+                    } ${
+                      block.styles?.underline ? 'underline' : ''
+                    } text-${block.styles?.align || 'left'}`}
+                  />
+                </div>
+              )}
+
+              {block.type === 'heading' && (
+                <div className="space-y-2">
+                  <Select
+                    value={block.level?.toString()}
+                    onValueChange={(value) => updateBlock(index, { level: parseInt(value) })}
+                  >
+                    <SelectTrigger className="w-32 bg-background border-input">
+                      <SelectValue placeholder="Select level" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1">H1</SelectItem>
+                      <SelectItem value="2">H2</SelectItem>
+                      <SelectItem value="3">H3</SelectItem>
+                      <SelectItem value="4">H4</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Input
+                    value={block.content}
+                    onChange={(e) => updateBlock(index, { content: e.target.value })}
+                    placeholder="Enter heading text"
+                    className="bg-background border-input"
+                  />
+                </div>
+              )}
+
+              {block.type === 'image' && (
+                <div className="space-y-2 mt-8">
+                  <ImageUpload
+                    onUploadComplete={(url) => updateBlock(index, { imageUrl: url })}
+                    defaultImage={block.imageUrl}
+                    id={`block-image-${index}`}
+                  />
+                  <Input
+                    value={block.imageAlt || ''}
+                    onChange={(e) => updateBlock(index, { imageAlt: e.target.value })}
+                    placeholder="Enter image alt text"
+                    className="mt-2 bg-background border-input"
+                  />
+                </div>
               )}
             </div>
           ))}
         </div>
       </div>
 
-      <div className="flex justify-end">
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Saving...' : 'Save Article'}
-        </Button>
-      </div>
+      <Button 
+        type="submit" 
+        disabled={isSubmitting}
+        className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+      >
+        {isSubmitting ? 'Saving...' : 'Save Article'}
+      </Button>
     </form>
   );
 } 
