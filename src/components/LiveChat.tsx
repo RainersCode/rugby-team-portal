@@ -18,6 +18,23 @@ interface ChatMessage {
   user_image?: string;
 }
 
+const getAvatarColor = (userId: string) => {
+  const colors = [
+    'bg-blue-100 text-blue-600',
+    'bg-green-100 text-green-600',
+    'bg-purple-100 text-purple-600',
+    'bg-pink-100 text-pink-600',
+    'bg-orange-100 text-orange-600',
+    'bg-cyan-100 text-cyan-600',
+    'bg-rose-100 text-rose-600',
+    'bg-violet-100 text-violet-600',
+  ];
+  
+  // Use the user ID to consistently pick a color
+  const colorIndex = userId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % colors.length;
+  return colors[colorIndex];
+};
+
 export default function LiveChat() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState('');
@@ -200,45 +217,81 @@ export default function LiveChat() {
   }
 
   return (
-    <Card className="h-full flex flex-col">
-      <div className="p-4 border-b flex items-center justify-between">
-        <h3 className="font-semibold">Live Chat</h3>
-        <p className="text-sm text-muted-foreground">
-          Logged in as {user.user_metadata?.full_name || user.email?.split('@')[0]}
+    <Card className="h-full flex flex-col bg-white dark:bg-gray-900 shadow-xl">
+      <div className="p-4 border-b flex items-center justify-between bg-rugby-teal/5 dark:bg-rugby-teal/10">
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 bg-rugby-teal rounded-full animate-pulse" />
+          <h3 className="font-semibold text-lg">Live Chat</h3>
+        </div>
+        <p className="text-sm text-muted-foreground flex items-center gap-2">
+          <span className="hidden sm:inline">Logged in as</span>
+          <span className="font-medium text-rugby-teal">
+            {user.user_metadata?.full_name || user.email?.split('@')[0]}
+          </span>
         </p>
       </div>
       
       <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
         <div className="space-y-4">
-          {messages.map((message) => (
-            <div key={message.id} className="flex items-start gap-3">
-              <Avatar>
-                <AvatarImage src={message.user_image} />
-                <AvatarFallback>{message.user_name[0]}</AvatarFallback>
-              </Avatar>
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <p className="text-sm font-medium">{message.user_name}</p>
-                  <span className="text-xs text-muted-foreground">
-                    {format(new Date(message.created_at), 'HH:mm')}
-                  </span>
+          {messages.map((message) => {
+            const isCurrentUser = message.user_id === user.id;
+            return (
+              <div 
+                key={message.id} 
+                className={`flex items-start gap-3 ${isCurrentUser ? 'flex-row-reverse' : ''}`}
+              >
+                <Avatar className={`w-8 h-8 ${isCurrentUser ? 'ml-2' : 'mr-2'}`}>
+                  <AvatarImage src={message.user_image} />
+                  <AvatarFallback className={
+                    isCurrentUser 
+                      ? "bg-rugby-teal/20 text-rugby-teal" 
+                      : getAvatarColor(message.user_id)
+                  }>
+                    {message.user_name[0]}
+                  </AvatarFallback>
+                </Avatar>
+                <div className={`flex-1 ${isCurrentUser ? 'text-right' : ''}`}>
+                  <div className={`flex items-center gap-2 ${isCurrentUser ? 'justify-end' : ''}`}>
+                    <span className="text-xs text-muted-foreground">
+                      {format(new Date(message.created_at), 'HH:mm')}
+                    </span>
+                    <p className={`text-sm font-medium ${
+                      isCurrentUser ? 'text-rugby-teal' : 'text-gray-700 dark:text-gray-200'
+                    }`}>
+                      {message.user_name}
+                    </p>
+                  </div>
+                  <div 
+                    className={`
+                      mt-1 inline-block rounded-lg px-4 py-2 max-w-[80%] break-words shadow-sm
+                      ${isCurrentUser 
+                        ? 'bg-rugby-teal/10 text-rugby-teal ml-auto border border-rugby-teal/20' 
+                        : 'bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700'
+                      }
+                    `}
+                  >
+                    <p className="text-sm">{message.content}</p>
+                  </div>
                 </div>
-                <p className="text-sm text-muted-foreground">{message.content}</p>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </ScrollArea>
 
-      <form onSubmit={handleSendMessage} className="p-4 border-t flex gap-2">
+      <form onSubmit={handleSendMessage} className="p-4 border-t flex gap-2 bg-rugby-teal/5 dark:bg-rugby-teal/10">
         <Input
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
           placeholder="Type a message..."
-          className="flex-1"
+          className="flex-1 bg-white dark:bg-gray-800 border-rugby-teal/20 focus:border-rugby-teal focus:ring-rugby-teal"
           disabled={isSending}
         />
-        <Button type="submit" disabled={isSending}>
+        <Button 
+          type="submit" 
+          disabled={isSending}
+          className="bg-rugby-teal hover:bg-rugby-teal/90 text-white px-6"
+        >
           {isSending ? (
             <>
               <Loader2 className="w-4 h-4 animate-spin mr-2" />
