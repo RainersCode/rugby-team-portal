@@ -20,8 +20,16 @@
 }
 
 @layer base {
+  /* Apply Georgia to all body text by default */
   body {
     @apply bg-white text-black min-h-screen;
+    font-family: Georgia, serif;
+  }
+
+  /* Apply Jockey One to all headings with increased letter spacing */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-jockey-one);
+    letter-spacing: 0.05em;  /* Increased letter spacing */
   }
 }
 
@@ -34,7 +42,6 @@
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
 }
 
 @keyframes shimmer {
