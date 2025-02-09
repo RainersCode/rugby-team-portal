@@ -195,7 +195,7 @@ export default function AdminLiveClient({ initialStreams }: Props) {
               New Live Stream
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-lg">
+          <DialogContent className="bg-gradient-to-b from-white to-gray-50/80 dark:from-gray-900 dark:to-gray-900/80 backdrop-blur-xl border-rugby-teal/20">
             <DialogHeader>
               <DialogTitle>Create New Live Stream</DialogTitle>
               <DialogDescription>
@@ -207,6 +207,7 @@ export default function AdminLiveClient({ initialStreams }: Props) {
                 e.preventDefault();
                 handleCreateStream();
               }}
+              className="space-y-4"
             >
               <div className="space-y-4">
                 <div>
@@ -218,6 +219,7 @@ export default function AdminLiveClient({ initialStreams }: Props) {
                       setFormData({ ...formData, title: e.target.value })
                     }
                     required
+                    className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm"
                   />
                 </div>
                 <div>
@@ -231,6 +233,7 @@ export default function AdminLiveClient({ initialStreams }: Props) {
                         description: e.target.value,
                       })
                     }
+                    className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm"
                   />
                 </div>
                 <div>
@@ -242,6 +245,7 @@ export default function AdminLiveClient({ initialStreams }: Props) {
                       setFormData({ ...formData, youtube_id: e.target.value })
                     }
                     required
+                    className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm"
                   />
                 </div>
                 <div>
@@ -251,12 +255,10 @@ export default function AdminLiveClient({ initialStreams }: Props) {
                     id="stream_date"
                     value={formData.stream_date}
                     onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        stream_date: e.target.value,
-                      })
+                      setFormData({ ...formData, stream_date: e.target.value })
                     }
                     required
+                    className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm"
                   />
                 </div>
                 <div>
