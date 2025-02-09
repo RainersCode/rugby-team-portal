@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Clock, Users, Play } from "lucide-react";
 import { format } from "date-fns";
+import LiveChat from '@/components/LiveChat';
 
 interface LiveStream {
   id: string;
@@ -32,60 +33,65 @@ export default function LivePageClient({ activeStream, pastStreams }: LivePageCl
         <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">
           {selectedStream ? 'Current Broadcast' : 'Live Stream'}
         </h2>
-        <div className="bg-card rounded-xl overflow-hidden shadow-xl border border-rugby-teal/20 group hover:shadow-2xl transition-all duration-300">
-          {selectedStream ? (
-            <>
-              {/* YouTube Embed */}
-              <div className="aspect-video w-full">
-                <iframe
-                  src={`https://www.youtube.com/embed/${selectedStream.youtube_id}${selectedStream.status === 'active' ? '?autoplay=1' : ''}`}
-                  className="w-full h-full"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
-              </div>
-              
-              {/* Stream Info */}
-              <div className="p-6">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <h3 className="text-xl font-bold mb-2 group-hover:text-rugby-teal transition-colors">{selectedStream.title}</h3>
-                    <p className="text-muted-foreground">{selectedStream.description}</p>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <div className="bg-card rounded-xl overflow-hidden shadow-xl border border-rugby-teal/20 group hover:shadow-2xl transition-all duration-300">
+              {selectedStream ? (
+                <>
+                  {/* YouTube Embed */}
+                  <div className="aspect-video w-full">
+                    <iframe
+                      src={`https://www.youtube.com/embed/${selectedStream.youtube_id}${selectedStream.status === 'active' ? '?autoplay=1' : ''}`}
+                      className="w-full h-full"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
                   </div>
-                  <Badge className={selectedStream.status === 'active' 
-                    ? 'bg-rugby-red/10 text-rugby-red hover:bg-rugby-red/20' 
-                    : 'bg-rugby-teal/10 text-rugby-teal hover:bg-rugby-teal/20'}>
-                    {selectedStream.status === 'active' ? 'LIVE' : 'RECORDED'}
-                  </Badge>
-                </div>
-                
-                <div className="flex items-center gap-6 mt-4 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-rugby-teal" />
-                    {format(new Date(selectedStream.stream_date), 'MMM d, yyyy')}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-rugby-yellow" />
-                    {format(new Date(selectedStream.stream_date), 'HH:mm')}
-                  </div>
-                  {selectedStream.viewers_count && (
-                    <div className="flex items-center gap-2">
-                      <Users className="w-4 h-4 text-rugby-red" />
-                      {selectedStream.viewers_count} viewers
+                  
+                  {/* Stream Info */}
+                  <div className="p-6">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h3 className="text-xl font-bold mb-2 group-hover:text-rugby-teal transition-colors">{selectedStream.title}</h3>
+                        <p className="text-muted-foreground">{selectedStream.description}</p>
+                      </div>
+                      <Badge className={selectedStream.status === 'active' 
+                        ? 'bg-rugby-red/10 text-rugby-red hover:bg-rugby-red/20' 
+                        : 'bg-rugby-teal/10 text-rugby-teal hover:bg-rugby-teal/20'}>
+                        {selectedStream.status === 'active' ? 'LIVE' : 'RECORDED'}
+                      </Badge>
                     </div>
-                  )}
+                    
+                    <div className="flex items-center gap-6 mt-4 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-4 h-4 text-rugby-teal" />
+                        {format(new Date(selectedStream.stream_date), 'MMM d, yyyy')}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Clock className="w-4 h-4 text-rugby-yellow" />
+                        {format(new Date(selectedStream.stream_date), 'HH:mm')}
+                      </div>
+                      {selectedStream.viewers_count && (
+                        <div className="flex items-center gap-2">
+                          <Users className="w-4 h-4 text-rugby-red" />
+                          {selectedStream.viewers_count} viewers
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div className="p-6 text-center">
+                  <p className="text-muted-foreground">No active stream at the moment.</p>
                 </div>
-              </div>
-            </>
-          ) : (
-            <div className="aspect-video w-full bg-muted flex items-center justify-center">
-              <div className="text-center text-muted-foreground">
-                <Play className="w-12 h-12 mx-auto mb-4 text-rugby-teal opacity-50" />
-                <p>No active live stream</p>
-                <p className="text-sm">Check back later for our next broadcast</p>
-              </div>
+              )}
             </div>
-          )}
+          </div>
+          
+          {/* Chat Panel */}
+          <div className="lg:col-span-1 h-[600px]">
+            <LiveChat />
+          </div>
         </div>
       </section>
 
