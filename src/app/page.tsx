@@ -8,6 +8,7 @@ import InstagramFeed from "@/components/features/Instagram/InstagramFeed";
 import TwitterFeed from "@/components/features/Twitter/TwitterFeed";
 import FeaturedPrograms from "@/components/features/Training/FeaturedPrograms";
 import { TrainingProgram } from "@/types";
+import { Button } from "@/components/ui/button";
 
 export const revalidate = 3600; // Revalidate every hour
 export const dynamic = "force-dynamic";
@@ -170,18 +171,12 @@ export default async function Home() {
               passion, and create lasting memories.
             </p>
             <div className="flex flex-wrap gap-4 justify-center lg:justify-start">
-              <Link
-                href="/contact"
-                className="bg-white text-rugby-teal px-8 py-3 rounded-lg hover:bg-white/90 transition-colors font-medium"
-              >
+              <Button href="/contact" variant="primary" size="lg">
                 Get Started
-              </Link>
-              <Link
-                href="/training"
-                className="bg-rugby-yellow text-rugby-black px-8 py-3 rounded-lg hover:bg-rugby-yellow/90 transition-colors font-medium"
-              >
+              </Button>
+              <Button href="/training" variant="secondary" size="lg">
                 View Schedule
-              </Link>
+              </Button>
             </div>
           </div>
 

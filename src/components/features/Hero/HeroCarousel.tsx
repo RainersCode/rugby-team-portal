@@ -7,6 +7,7 @@ import { ChevronLeft, ChevronRight, CalendarDays, MapPin } from "lucide-react";
 import { Article, Match } from "@/types";
 import { format } from "date-fns";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 interface HeroCarouselProps {
   articles: Article[];
@@ -66,14 +67,15 @@ export default function HeroCarousel({
                 <p className="text-base md:text-lg mb-6 md:mb-8 max-w-2xl line-clamp-2 text-white/90">
                   {article.content}
                 </p>
-                <Link
+                <Button
                   href={`/news/${article.slug}`}
-                  className="group relative inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border-2 border-white/30 hover:border-white text-white px-6 md:px-8 py-2.5 md:py-3.5 rounded-full transition-all duration-300 text-sm md:text-base overflow-hidden"
+                  variant="ghost"
+                  size="md"
+                  className="group"
                 >
-                  <span className="relative z-10 font-medium">Read More</span>
-                  <ChevronRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform relative z-10" />
-                  <div className="absolute inset-0 bg-gradient-to-r from-rugby-teal to-rugby-teal/80 opacity-0 group-hover:opacity-100 transition-opacity" />
-                </Link>
+                  <span>Read More</span>
+                  <ChevronRight className="w-4 h-4 ml-2 transform group-hover:translate-x-1 transition-transform" />
+                </Button>
               </div>
             </div>
           </div>
