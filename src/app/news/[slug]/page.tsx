@@ -7,6 +7,8 @@ import { Metadata } from 'next';
 import { Article, ArticleBlock } from '@/types';
 import { cn } from '@/lib/utils';
 import ShareButtons from '@/components/features/News/ShareButtons';
+import Link from 'next/link';
+import NewsCard from '@/components/features/News/NewsCard';
 
 interface Props {
   params: {
@@ -112,6 +114,30 @@ async function getArticle(slug: string): Promise<Article | null> {
   }
 }
 
+async function getLatestArticles(currentSlug: string, limit: number = 3): Promise<Article[]> {
+  try {
+    const cookieStore = cookies();
+    const supabase = createServerComponentClient({ cookies: () => cookieStore });
+    
+    const { data: articles, error } = await supabase
+      .from('articles')
+      .select('*')
+      .neq('slug', currentSlug)
+      .order('created_at', { ascending: false })
+      .limit(limit);
+
+    if (error) {
+      console.error('Error fetching latest articles:', error);
+      return [];
+    }
+
+    return articles || [];
+  } catch (error) {
+    console.error('Unexpected error fetching latest articles:', error);
+    return [];
+  }
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const article = await getArticle(params.slug);
   
@@ -121,14 +147,51 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   }
 
+  // Create a brief excerpt from the content
+  const excerpt = article.content.substring(0, 160) + '...';
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  const articleUrl = `${baseUrl}/news/${params.slug}`;
+
   return {
     title: article.title,
-    description: article.content.substring(0, 160),
+    description: excerpt,
+    openGraph: {
+      type: 'article',
+      title: article.title,
+      description: excerpt,
+      url: articleUrl,
+      images: [
+        {
+          url: article.image.startsWith('http') 
+            ? article.image 
+            : `${baseUrl}${article.image}`,
+          width: 1200,
+          height: 630,
+          alt: article.title,
+        }
+      ],
+      siteName: 'Regbija Lapa',
+      publishedTime: article.created_at,
+      authors: [article.user?.email || 'Regbija Lapa'],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: article.title,
+      description: excerpt,
+      images: [article.image.startsWith('http') 
+        ? article.image 
+        : `${baseUrl}${article.image}`
+      ],
+    },
+    alternates: {
+      canonical: articleUrl,
+    },
   };
 }
 
 export default async function ArticlePage({ params }: Props) {
   const article = await getArticle(params.slug);
+  const latestArticles = await getLatestArticles(params.slug);
 
   if (!article) {
     notFound();
@@ -141,12 +204,9 @@ export default async function ArticlePage({ params }: Props) {
       <article className="max-w-4xl mx-auto">
         {/* Article Header */}
         <header className="mb-8">
-          <div className="flex justify-between items-start">
-            <h1 className="text-4xl font-bold text-rugby-teal mb-4">
-              {article.title}
-            </h1>
-            <ShareButtons title={article.title} />
-          </div>
+          <h1 className="text-4xl font-bold text-rugby-teal mb-4">
+            {article.title}
+          </h1>
           <div className="flex items-center text-content-medium gap-4">
             <time className="text-rugby-teal/80">{formatDate(article.created_at)}</time>
             <span className="text-rugby-teal/80">By {authorEmail}</span>
@@ -176,7 +236,43 @@ export default async function ArticlePage({ params }: Props) {
             </p>
           )}
         </div>
+
+        {/* Share Section */}
+        <div className="mt-12 pt-8 border-t border-rugby-teal/10">
+          <div className="flex flex-col items-center gap-4">
+            <h3 className="text-lg font-semibold text-content-medium">Share this article</h3>
+            <div className="bg-card-bg-light dark:bg-card-bg-dark p-4 rounded-full shadow-lg border border-rugby-teal/20">
+              <ShareButtons title={article.title} size="lg" />
+            </div>
+          </div>
+        </div>
       </article>
+
+      {/* Latest Articles Section */}
+      {latestArticles.length > 0 && (
+        <section className="mt-16 max-w-4xl mx-auto border-t border-rugby-teal/10 pt-12">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xl font-bold text-rugby-teal">
+              More News
+            </h2>
+            <Link
+              href="/news"
+              className="text-rugby-teal hover:text-rugby-teal/80 font-medium transition-colors text-sm"
+            >
+              View all news →
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {latestArticles.map((article) => (
+              <NewsCard 
+                key={article.id} 
+                article={article} 
+                variant="compact"
+              />
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 } 

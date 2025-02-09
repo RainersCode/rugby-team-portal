@@ -1,59 +1,62 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
-import { Share2 } from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { useState } from 'react';
+import { Share2, Facebook, Twitter, Linkedin } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface ShareButtonsProps {
   title: string;
+  size?: 'default' | 'lg';
 }
 
-export default function ShareButtons({ title }: ShareButtonsProps) {
-  const [copied, setCopied] = useState(false);
-
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(window.location.href);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
+export default function ShareButtons({ title, size = 'default' }: ShareButtonsProps) {
+  const isLarge = size === 'lg';
+  const encodedTitle = encodeURIComponent(title);
+  const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
+  
+  const shareLinks = [
+    {
+      name: 'Facebook',
+      icon: Facebook,
+      url: `https://www.facebook.com/sharer/sharer.php?u=${currentUrl}`,
+    },
+    {
+      name: 'Twitter',
+      icon: Twitter,
+      url: `https://twitter.com/intent/tweet?text=${encodedTitle}&url=${currentUrl}`,
+    },
+    {
+      name: 'LinkedIn',
+      icon: Linkedin,
+      url: `https://www.linkedin.com/shareArticle?mini=true&url=${currentUrl}&title=${encodedTitle}`,
+    },
+  ];
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button 
-          variant="outline" 
-          size="icon"
-          className="hover:bg-rugby-teal/10 hover:text-rugby-teal border-rugby-teal/20"
-        >
-          <Share2 className="h-4 w-4" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem
-          className="cursor-pointer hover:bg-rugby-teal/10 hover:text-rugby-teal"
-          onClick={() => window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(window.location.href)}`, '_blank')}
-        >
-          Share on Twitter
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          className="cursor-pointer hover:bg-rugby-teal/10 hover:text-rugby-teal"
-          onClick={() => window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`, '_blank')}
-        >
-          Share on Facebook
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          className="cursor-pointer hover:bg-rugby-teal/10 hover:text-rugby-teal"
-          onClick={handleCopyLink}
-        >
-          {copied ? 'Copied!' : 'Copy Link'}
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <div className="flex items-center gap-3">
+      {shareLinks.map((platform) => {
+        const Icon = platform.icon;
+        return (
+          <a
+            key={platform.name}
+            href={platform.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={cn(
+              "group flex items-center justify-center transition-all duration-300",
+              isLarge ? "p-3" : "p-2",
+              "hover:bg-rugby-teal/10 rounded-full"
+            )}
+            title={`Share on ${platform.name}`}
+          >
+            <Icon 
+              className={cn(
+                "text-rugby-teal transition-colors duration-300 group-hover:text-rugby-teal/80",
+                isLarge ? "w-6 h-6" : "w-4 h-4"
+              )} 
+            />
+          </a>
+        );
+      })}
+    </div>
   );
 } 
