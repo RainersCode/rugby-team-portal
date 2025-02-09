@@ -591,7 +591,7 @@ export default function AdminPlayersPage() {
                 </div>
               </div>
             </div>
-            <div className="p-4 flex justify-end gap-2">
+            <div className="flex justify-end gap-2 p-4">
               <Dialog
                 open={isEditing && selectedPlayer?.id === player.id}
                 onOpenChange={(open: boolean) => {
@@ -610,6 +610,7 @@ export default function AdminPlayersPage() {
                       handleEdit(player);
                       setIsAddingNew(false);
                     }}
+                    className="text-gray-700 hover:text-rugby-teal dark:text-gray-300 dark:hover:text-rugby-teal"
                   >
                     <Pencil className="w-4 h-4" />
                   </Button>
@@ -784,7 +785,7 @@ export default function AdminPlayersPage() {
                 variant="ghost"
                 size="icon"
                 onClick={() => handleDelete(player.id)}
-                className="text-red-500 hover:text-red-600"
+                className="text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-500"
               >
                 <Trash2 className="w-4 h-4" />
               </Button>

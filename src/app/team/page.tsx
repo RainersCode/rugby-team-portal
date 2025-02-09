@@ -7,6 +7,62 @@ import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import type { Player } from "@/types";
 import PlayerCard from "@/components/features/Team/PlayerCard";
 
+// Sample data for development
+const samplePlayers: Player[] = [
+  {
+    id: 1,
+    name: "James Wilson",
+    position: "Fly-half",
+    number: 10,
+    image: "https://picsum.photos/seed/player1/800/1200",
+    nationality: "England",
+    height: "1.83m",
+    weight: "88kg",
+    age: 25,
+    stats: {
+      matches: 45,
+      tries: 12,
+      assists: 34,
+      tackles: 156,
+    },
+  },
+  {
+    id: 2,
+    name: "Tom Smith",
+    position: "Prop",
+    number: 1,
+    image: "https://picsum.photos/seed/player2/800/1200",
+    nationality: "Wales",
+    height: "1.88m",
+    weight: "118kg",
+    age: 28,
+    stats: {
+      matches: 52,
+      tries: 5,
+      assists: 8,
+      tackles: 245,
+    },
+  },
+  {
+    id: 3,
+    name: "David Jones",
+    position: "Scrum-half",
+    number: 9,
+    image: "https://picsum.photos/seed/player3/800/1200",
+    nationality: "Scotland",
+    height: "1.75m",
+    weight: "82kg",
+    age: 24,
+    stats: {
+      matches: 38,
+      tries: 15,
+      assists: 42,
+      tackles: 128,
+    },
+  },
+  // Add more sample players as needed
+];
+
 const positions = [
   "All",
   "Prop",
@@ -24,8 +80,8 @@ const positions = [
 export default function TeamPage() {
   const [selectedPosition, setSelectedPosition] = useState("All");
   const [selectedPlayer, setSelectedPlayer] = useState<number | null>(null);
-  const [players, setPlayers] = useState<Player[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [players, setPlayers] = useState<Player[]>(samplePlayers); // Initialize with sample data
+  const [loading, setLoading] = useState(false); // Start with false since we have sample data
   const supabase = createClientComponentClient();
 
   useEffect(() => {
@@ -34,6 +90,7 @@ export default function TeamPage() {
 
   const fetchPlayers = async () => {
     try {
+      setLoading(true);
       const { data, error } = await supabase
         .from("players")
         .select("*")
@@ -43,9 +100,12 @@ export default function TeamPage() {
         throw error;
       }
 
-      setPlayers(data || []);
+      if (data && data.length > 0) {
+        setPlayers(data); // Only update if we got data from Supabase
+      }
     } catch (error) {
       console.error("Error fetching players:", error);
+      // Keep using sample data if there's an error
     } finally {
       setLoading(false);
     }
@@ -139,104 +199,8 @@ export default function TeamPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="group"
             >
-              <div
-                className="bg-card rounded-xl overflow-hidden shadow-lg cursor-pointer transform transition-transform duration-300 hover:-translate-y-2 border border-rugby-teal/20"
-                onClick={() =>
-                  setSelectedPlayer(
-                    selectedPlayer === player.id ? null : player.id
-                  )
-                }
-              >
-                <div className="relative h-80">
-                  <Image
-                    src={player.image}
-                    alt={player.name}
-                    fill
-                    className="object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="text-xl font-bold group-hover:text-rugby-yellow transition-colors">{player.name}</h3>
-                        <p className="text-sm opacity-90">{player.position}</p>
-                      </div>
-                      <div className="text-2xl font-bold text-rugby-yellow">#{player.number}</div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Player Details (Expandable) */}
-                <div
-                  className={`overflow-hidden transition-all duration-300 ${
-                    selectedPlayer === player.id ? "max-h-96" : "max-h-0"
-                  }`}
-                >
-                  <div className="p-4 space-y-4">
-                    {/* Stats */}
-                    <div className="grid grid-cols-3 gap-4">
-                      <div className="text-center">
-                        <div className="text-xl font-bold text-rugby-teal">
-                          {player.stats.matches}
-                        </div>
-                        <div className="text-sm text-muted-foreground">Matches</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-xl font-bold text-rugby-red">
-                          {player.stats.tries}
-                        </div>
-                        <div className="text-sm text-muted-foreground">Tries</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-xl font-bold text-rugby-yellow">
-                          {player.stats.tackles}
-                        </div>
-                        <div className="text-sm text-muted-foreground">Tackles</div>
-                      </div>
-                    </div>
-
-                    {/* Social Links */}
-                    {(player.social?.instagram || player.social?.twitter) && (
-                      <div className="flex justify-center gap-4">
-                        {player.social.instagram && (
-                          <a
-                            href={`https://instagram.com/${player.social.instagram}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-muted-foreground hover:text-primary-blue"
-                          >
-                            Instagram
-                          </a>
-                        )}
-                        {player.social.twitter && (
-                          <a
-                            href={`https://twitter.com/${player.social.twitter}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-muted-foreground hover:text-primary-blue"
-                          >
-                            Twitter
-                          </a>
-                        )}
-                      </div>
-                    )}
-
-                    {/* Achievements */}
-                    {player.achievements?.length > 0 && (
-                      <div>
-                        <h4 className="font-semibold mb-2">Achievements</h4>
-                        <ul className="list-disc list-inside text-sm text-muted-foreground">
-                          {player.achievements.map((achievement, index) => (
-                            <li key={index}>{achievement}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
+              <PlayerCard player={player} />
             </motion.div>
           ))}
         </div>
