@@ -196,10 +196,20 @@ export default async function Home() {
               passion, and create lasting memories.
             </p>
             <div className="flex flex-wrap gap-4 justify-center lg:justify-start">
-              <Button href="/contact" variant="primary" size="lg">
+              <Button 
+                href="/contact"
+                variant="primary"
+                size="lg"
+                className="bg-white text-rugby-teal hover:bg-white/90"
+              >
                 Get Started
               </Button>
-              <Button href="/training" variant="secondary" size="lg">
+              <Button 
+                href="/training"
+                variant="outline"
+                size="lg"
+                className="border-white text-white hover:bg-white hover:text-rugby-teal"
+              >
                 View Schedule
               </Button>
             </div>

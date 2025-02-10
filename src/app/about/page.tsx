@@ -1,6 +1,7 @@
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 import AboutPageClient from './AboutPageClient'
+import Image from 'next/image'
 
 export const dynamic = 'force-dynamic'
 
@@ -29,18 +30,41 @@ export default async function AboutPage() {
     .select('*')
     .single()
 
+  // Get hero image URL
+  const { data } = supabase.storage
+    .from('public')
+    .getPublicUrl('images/rugby-hero.jpg')
+
+  const heroImageUrl = data?.publicUrl
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-bg-light to-gray-50 dark:from-bg-dark dark:to-gray-900">
       {/* Hero Section */}
-      <div className="relative min-h-[600px] bg-rugby-teal overflow-hidden">
-        {/* Decorative Elements */}
-        <div className="absolute inset-0 overflow-hidden">
+      <div className="relative min-h-[600px] overflow-hidden">
+        {/* Hero Image */}
+        {heroImageUrl && (
+          <div className="absolute inset-0">
+            <Image
+              src={heroImageUrl}
+              alt="Rugby club hero image"
+              fill
+              className="object-cover"
+              priority
+            />
+          </div>
+        )}
+        
+        {/* Overlay with rugby pattern and gradients */}
+        <div className="absolute inset-0">
           {/* Rugby pattern background */}
           <div className="absolute top-0 left-0 w-full h-full bg-[url('/rugby-pattern.png')] opacity-5" 
                style={{ backgroundSize: '30px' }} />
           
+          {/* Dark overlay for better text readability */}
+          <div className="absolute inset-0 bg-black/40" />
+          
           {/* Soft overlay gradient */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/5 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-transparent" />
           
           {/* Decorative circles */}
           <div className="absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full bg-rugby-yellow/10 blur-3xl" />
@@ -78,28 +102,6 @@ export default async function AboutPage() {
 
         {/* Bottom fade effect */}
         <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-bg-light dark:from-bg-dark to-transparent" />
-      </div>
-
-      {/* Quick Stats */}
-      <div className="container-width px-4">
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 p-6 md:p-8 relative -mt-24 border border-rugby-teal/20">
-          <div className="text-center">
-            <div className="text-2xl md:text-3xl font-bold text-rugby-teal mb-2">28</div>
-            <div className="text-sm text-muted-foreground">Years of Legacy</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl md:text-3xl font-bold text-rugby-teal mb-2">150+</div>
-            <div className="text-sm text-muted-foreground">Active Members</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl md:text-3xl font-bold text-rugby-teal mb-2">20+</div>
-            <div className="text-sm text-muted-foreground">Expert Coaches</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl md:text-3xl font-bold text-rugby-teal mb-2">10+</div>
-            <div className="text-sm text-muted-foreground">Championships</div>
-          </div>
-        </div>
       </div>
 
       {/* Main Content */}

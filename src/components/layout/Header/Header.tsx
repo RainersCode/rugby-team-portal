@@ -30,6 +30,7 @@ type MainNavItem = NavItem | DropdownNavItem;
 const mainNavItems: MainNavItem[] = [
   { href: "/", label: "Home" },
   { href: "/team", label: "Team" },
+  { href: "/activities", label: "Activities" },
   { href: "/matches", label: "Matches" },
   { href: "/training", label: "Training" },
   { href: "/tournaments", label: "Tournaments" },

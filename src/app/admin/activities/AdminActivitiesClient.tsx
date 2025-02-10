@@ -348,7 +348,7 @@ export default function AdminActivitiesClient({
         open={!!selectedActivity}
         onOpenChange={() => setSelectedActivity(null)}
       >
-        <DialogContent>
+        <DialogContent className="bg-bg-light dark:bg-bg-dark border border-border">
           <DialogHeader>
             <DialogTitle>Activity Participants</DialogTitle>
           </DialogHeader>
