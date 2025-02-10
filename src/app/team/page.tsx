@@ -129,8 +129,33 @@ export default function TeamPage() {
       {/* Hero Section */}
       <div className="relative py-20 bg-rugby-teal overflow-hidden">
         <div className="absolute inset-0 opacity-10">
-          <div className="absolute transform rotate-45 left-1/4 top-1/4">
-            <div className="w-96 h-96 rounded-full bg-rugby-yellow"></div>
+          {/* Main large rugby ball */}
+          <div className="absolute transform -rotate-45 left-1/4 top-1/4">
+            <div className="w-[90px] h-[40px] md:w-[120px] md:h-[50px] rounded-[50%] bg-rugby-yellow"></div>
+          </div>
+          {/* Smaller rugby ball top right */}
+          <div className="absolute transform rotate-12 right-1/4 top-8">
+            <div className="w-[70px] h-[30px] md:w-[90px] md:h-[35px] rounded-[50%] bg-rugby-yellow"></div>
+          </div>
+          {/* Small rugby ball bottom left */}
+          <div className="absolute transform -rotate-20 left-16 bottom-8">
+            <div className="w-[50px] h-[22px] md:w-[60px] md:h-[25px] rounded-[50%] bg-rugby-yellow"></div>
+          </div>
+          {/* Extra small ball top left */}
+          <div className="absolute transform rotate-45 hidden md:block left-16 top-12">
+            <div className="w-[40px] h-[18px] rounded-[50%] bg-rugby-yellow"></div>
+          </div>
+          {/* Medium ball bottom right */}
+          <div className="absolute transform -rotate-12 hidden md:block right-20 bottom-16">
+            <div className="w-[100px] h-[40px] rounded-[50%] bg-rugby-yellow"></div>
+          </div>
+          {/* Small ball center right */}
+          <div className="absolute transform rotate-30 hidden lg:block right-1/3 top-1/3">
+            <div className="w-[70px] h-[28px] rounded-[50%] bg-rugby-yellow"></div>
+          </div>
+          {/* Tiny ball top center */}
+          <div className="absolute transform -rotate-15 hidden lg:block left-1/2 top-8">
+            <div className="w-[45px] h-[20px] rounded-[50%] bg-rugby-yellow"></div>
           </div>
         </div>
         <div className="relative container-width mx-auto text-center">
@@ -145,34 +170,6 @@ export default function TeamPage() {
 
       {/* Content Section */}
       <div className="container-width py-12">
-        {/* Team Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
-          <div className="bg-card rounded-xl p-6 shadow-lg border border-rugby-teal/20">
-            <div className="text-3xl font-bold text-rugby-teal mb-2">25</div>
-            <div className="text-sm text-muted-foreground">
-              Squad Players
-            </div>
-          </div>
-          <div className="bg-card rounded-xl p-6 shadow-lg border border-rugby-teal/20">
-            <div className="text-3xl font-bold text-rugby-teal mb-2">12</div>
-            <div className="text-sm text-muted-foreground">
-              International Players
-            </div>
-          </div>
-          <div className="bg-card rounded-xl p-6 shadow-lg border border-rugby-teal/20">
-            <div className="text-3xl font-bold text-rugby-teal mb-2">5</div>
-            <div className="text-sm text-muted-foreground">
-              Trophies Won
-            </div>
-          </div>
-          <div className="bg-card rounded-xl p-6 shadow-lg border border-rugby-teal/20">
-            <div className="text-3xl font-bold text-rugby-teal mb-2">85%</div>
-            <div className="text-sm text-muted-foreground">
-              Win Rate
-            </div>
-          </div>
-        </div>
-
         {/* Position Filter */}
         <div className="flex flex-wrap gap-2 mb-8">
           {positions.map((position) => (
