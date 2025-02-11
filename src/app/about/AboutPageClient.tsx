@@ -176,7 +176,7 @@ export default function AboutPageClient({ aboutData, isAdmin }: AboutPageClientP
                   href="/activities"
                   variant="outline"
                   size="lg"
-                  className="border-white text-white hover:text-rugby-teal"
+                  className="border-white text-white hover:bg-white hover:text-rugby-teal"
                 >
                   View Schedule
                 </Button>
