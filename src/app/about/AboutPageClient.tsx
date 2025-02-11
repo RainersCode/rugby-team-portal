@@ -173,33 +173,13 @@ export default function AboutPageClient({ aboutData, isAdmin }: AboutPageClientP
                   Get Started
                 </Button>
                 <Button 
-                  href="/training"
+                  href="/activities"
                   variant="outline"
                   size="lg"
-                  className="border-white text-white hover:bg-white hover:text-rugby-teal"
+                  className="border-white text-white hover:text-rugby-teal"
                 >
                   View Schedule
                 </Button>
-              </div>
-            </div>
-
-            {/* Stats Grid */}
-            <div className="flex-1 grid grid-cols-2 gap-4 w-full max-w-lg">
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 text-white text-center transform hover:-translate-y-1 transition-transform duration-300 border border-white/20">
-                <div className="text-4xl font-bold mb-2">15+</div>
-                <div className="text-sm opacity-90">Years of Excellence</div>
-              </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 text-white text-center transform hover:-translate-y-1 transition-transform duration-300 border border-white/20">
-                <div className="text-4xl font-bold mb-2">200+</div>
-                <div className="text-sm opacity-90">Active Members</div>
-              </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 text-white text-center transform hover:-translate-y-1 transition-transform duration-300 border border-white/20">
-                <div className="text-4xl font-bold mb-2">50+</div>
-                <div className="text-sm opacity-90">Annual Matches</div>
-              </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 text-white text-center transform hover:-translate-y-1 transition-transform duration-300 border border-white/20">
-                <div className="text-4xl font-bold mb-2">30+</div>
-                <div className="text-sm opacity-90">Trophies Won</div>
               </div>
             </div>
           </div>
