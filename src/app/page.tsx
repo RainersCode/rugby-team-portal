@@ -246,38 +246,42 @@ export default async function Home() {
       {/* Latest Matches Section */}
       {(upcomingMatches?.length ?? 0) > 0 ||
       (completedMatches?.length ?? 0) > 0 ? (
-        <LatestMatches
-          upcomingMatches={upcomingMatches || []}
-          completedMatches={completedMatches || []}
-        />
+        <section className="w-full bg-white dark:bg-gray-800/50 py-16">
+          <div className="container-width">
+            <LatestMatches
+              upcomingMatches={upcomingMatches || []}
+              completedMatches={completedMatches || []}
+            />
+          </div>
+        </section>
       ) : null}
 
       {/* Sponsors Section */}
-      <section className="container-width bg-gray-50 dark:bg-gray-900 py-16">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-            Our Sponsors
-          </h2>
-          <p className="text-gray-600 dark:text-gray-400">
-            Proud partners who support our rugby community
-          </p>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 items-center justify-items-center">
-          {[1, 2, 3, 4, 5, 6, 7].map((num) => (
-            <div
-              key={num}
-              className="relative w-48 h-24 bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm hover:shadow-md transition-all duration-300 border border-rugby-teal/20"
-            >
-              <Image
-                src={`/logo/${num === 1 ? "Sponsor" : "Sponsoru"}${
-                  num === 3 ? "_logo" : " logo"
-                } ${num}.png`}
-                alt={`Sponsor ${num}`}
-                fill
-                className="object-contain filter hover:brightness-110 transition-all duration-300"
-              />
-            </div>
-          ))}
+      <section className="w-full bg-gray-50 dark:bg-gray-900 py-16">
+        <div className="container-width">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+              Our Sponsors
+            </h2>
+            <p className="text-gray-600 dark:text-gray-400">
+              Proud partners who support our rugby community
+            </p>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 items-center justify-items-center">
+            {[1, 2, 3, 4, 5, 6, 7].map((num) => (
+              <div
+                key={num}
+                className="relative w-48 h-24 bg-rugby-teal/40 dark:bg-rugby-teal/50 rounded-lg p-4 shadow-sm hover:shadow-md transition-all duration-300 border border-rugby-teal/30 hover:bg-rugby-teal/50 dark:hover:bg-rugby-teal/60"
+              >
+                <Image
+                  src={`/logo/${num === 1 ? "Sponsor" : "Sponsoru"}_logo_${num}-removebg-preview.png`}
+                  alt={`Sponsor ${num}`}
+                  fill
+                  className="object-contain filter hover:brightness-110 transition-all duration-300"
+                />
+              </div>
+            ))}
+          </div>
         </div>
       </section>
     </div>

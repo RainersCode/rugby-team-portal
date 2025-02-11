@@ -14,7 +14,7 @@ interface LatestMatchesProps {
 
 export default function LatestMatches({ upcomingMatches, completedMatches }: LatestMatchesProps) {
   return (
-    <section className="bg-gray-50 dark:bg-gray-800/50">
+    <section className="bg-white dark:bg-gray-800/50">
       <div className="container-width py-12">
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100">

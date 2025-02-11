@@ -22,7 +22,6 @@ import {
   Dumbbell,
   Image,
   Play,
-  Settings,
   Trophy,
 } from "lucide-react";
 
@@ -82,14 +81,6 @@ export default function UserNav({ user, isAdmin }: UserNavProps) {
               <Users className="w-4 h-4 text-rugby-teal" />
             </div>
             <span className="font-medium">Profile</span>
-          </DropdownMenuItem>
-        </Link>
-        <Link href="/settings">
-          <DropdownMenuItem className="cursor-pointer flex items-center gap-2 px-3 py-2.5 hover:bg-rugby-teal/10 rounded-md transition-colors duration-200">
-            <div className="p-1.5 rounded-full bg-rugby-yellow/10">
-              <Settings className="w-4 h-4 text-rugby-yellow" />
-            </div>
-            <span className="font-medium">Settings</span>
           </DropdownMenuItem>
         </Link>
         {isAdmin && (

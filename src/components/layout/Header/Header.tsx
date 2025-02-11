@@ -14,6 +14,7 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { ChevronDown } from "lucide-react";
+import Image from "next/image";
 
 type NavItem = {
   href: string;
@@ -186,19 +187,13 @@ export function Header() {
               href="/"
               className="group flex items-center hover:opacity-90 transition-all duration-200"
             >
-              <span
-                className="text-xl font-bold relative"
-                style={{
-                  background:
-                    "linear-gradient(135deg, #00796B 0%, #009688 50%, #4DB6AC 100%)",
-                  backgroundClip: "text",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  textShadow: "0 1px 2px rgba(0,0,0,0.1)",
-                }}
-              >
-                Rugby Club
-              </span>
+              <Image
+                src="/fnx-logo/fēniks_logo-removebg-preview.png"
+                alt="Rugby Club Logo"
+                width={50}
+                height={20}
+                className="object-contain mb-1"
+              />
             </Link>
           </div>
           <MobileNav />
@@ -211,20 +206,13 @@ export function Header() {
               href="/"
               className="group flex items-center hover:opacity-90 transition-all duration-200"
             >
-              <span
-                className="text-xl font-bold relative"
-                style={{
-                  background:
-                    "linear-gradient(135deg, #00796B 0%, #009688 50%, #4DB6AC 100%)",
-                  backgroundClip: "text",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  textShadow: "0 1px 2px rgba(0,0,0,0.1)",
-                }}
-              >
-                Rugby Club
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-rugby-teal to-rugby-teal/60 transition-all duration-300 group-hover:w-full" />
-              </span>
+              <Image
+                src="/fnx-logo/fēniks_logo-removebg-preview.png"
+                alt="Rugby Club Logo"
+                width={70}
+                height={25}
+                className="object-contain mb-1"
+              />
             </Link>
           </div>
           <nav className="flex items-center space-x-2">
