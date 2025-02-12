@@ -12,35 +12,20 @@ export interface ArticleBlock {
 
 export interface Article {
   id: string;
-  slug: string;
   title: string;
+  slug: string;
   content: string;
-  blocks: ArticleBlock[];
-  image: string;
+  image_url?: string;
   created_at: string;
   updated_at: string;
-  author_id: string;
-  user: {
-    email: string;
-  } | null;
 }
 
 export interface Player {
-  id: number;
+  id: string;
   name: string;
-  position: string;
-  number: number;
-  image: string;
-  nationality: string;
-  height: string;
-  weight: string;
-  age: number;
-  stats: {
-    matches: number;
-    tries: number;
-    assists: number;
-    tackles: number;
-  };
+  position?: string;
+  number?: number;
+  image_url?: string;
 }
 
 export interface MatchEvent {
@@ -63,17 +48,12 @@ export interface Match {
   id: string;
   home_team: string;
   away_team: string;
-  home_team_image: string;
-  away_team_image: string;
-  match_date: string;
-  venue: string;
-  competition: string;
-  home_score?: number;
-  away_score?: number;
-  status: 'upcoming' | 'live' | 'completed';
-  description?: string;
-  match_events?: MatchEvent[];
-  player_cards?: PlayerCard[];
+  date: string;
+  venue?: string;
+  competition?: string;
+  score_home?: number;
+  score_away?: number;
+  status: 'upcoming' | 'completed' | 'live';
 }
 
 export interface Product {
@@ -128,16 +108,9 @@ export interface TrainingProgram {
   id: string;
   title: string;
   description: string;
-  difficulty: DifficultyLevel;
-  duration_weeks: number;
-  target_audience: string;
+  duration: string;
+  difficulty: 'beginner' | 'intermediate' | 'advanced';
   image_url?: string;
-  created_at: string;
-  updated_at: string;
-  author_id: string;
-  author?: {
-    email: string;
-  };
 }
 
 export interface ProgramWorkout {
@@ -181,4 +154,12 @@ export interface Activity {
     email: string;
     full_name: string | null;
   }[];
+}
+
+export interface GalleryItem {
+  id: string;
+  title: string;
+  description?: string;
+  image_url: string;
+  created_at: string;
 } 

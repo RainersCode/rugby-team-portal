@@ -10,6 +10,16 @@ export async function middleware(request: NextRequest) {
   const res = NextResponse.next();
   const supabase = createMiddlewareClient({ req: request, res });
 
+  // Add caching headers for static assets
+  if (request.nextUrl.pathname.match(/\.(jpg|jpeg|png|webp|gif|css|js)$/)) {
+    res.headers.set('Cache-Control', 'public, max-age=31536000, immutable');
+  }
+
+  // Add caching headers for API routes
+  if (request.nextUrl.pathname.startsWith('/api/')) {
+    res.headers.set('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
+  }
+
   // Refresh session if expired
   const { data: { session } } = await supabase.auth.getSession();
 
