@@ -31,11 +31,12 @@ export default async function AboutPage() {
     .select('*')
     .single()
 
-  // Fetch team members or any other data needed for the about page
   // Get hero image URL
-  const { data } = supabase.storage
-    .from('public')
-    .getPublicUrl('images/rugby-hero.jpg')
+  const { data } = aboutData?.hero_image
+    ? supabase.storage
+        .from('public')
+        .getPublicUrl(aboutData.hero_image)
+    : { data: null }
 
   const heroImageUrl = data?.publicUrl
 
