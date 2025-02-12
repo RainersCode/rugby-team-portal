@@ -37,12 +37,8 @@ const nextConfig = {
     // Temporarily ignore ESLint errors during build for deployment
     ignoreDuringBuilds: true,
   },
-  swcMinify: true,
   compiler: {
     removeConsole: process.env.NODE_ENV === "production",
-  },
-  experimental: {
-    optimizeCss: true,
   }
 };
 
