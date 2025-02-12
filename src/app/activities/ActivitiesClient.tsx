@@ -17,6 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Activity as BaseActivity } from "@/types";
 import CustomCalendar from "@/components/features/Calendar/CustomCalendar";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface ActivityWithParticipation extends BaseActivity {
   participant_count: number;
@@ -29,6 +30,49 @@ interface Props {
   isAdmin?: boolean;
 }
 
+const activityTranslations = {
+  en: {
+    title: "Team Activities",
+    subtitle: "Join our team activities and events. Stay active and connected with the community.",
+    noActivities: {
+      title: "No Upcoming Activities",
+      description: "Check back later for new activities or contact the team for more information."
+    },
+    participation: {
+      youreIn: "You're In!",
+      full: "Full",
+      spotsAvailable: "Spots Available",
+      joinActivity: "Join Activity",
+      cancelParticipation: "Cancel Participation",
+      activityFull: "Activity Full"
+    },
+    views: {
+      cardView: "Card View",
+      calendarView: "Calendar View"
+    }
+  },
+  lv: {
+    title: "Komandas Aktivitātes",
+    subtitle: "Pievienojieties mūsu komandas aktivitātēm un pasākumiem. Palieciet aktīvi un saistīti ar kopienu.",
+    noActivities: {
+      title: "Nav Gaidāmo Aktivitāšu",
+      description: "Pārbaudiet vēlāk jaunas aktivitātes vai sazinieties ar komandu, lai iegūtu vairāk informācijas."
+    },
+    participation: {
+      youreIn: "Tu Piedalies!",
+      full: "Pilns",
+      spotsAvailable: "Ir Brīvas Vietas",
+      joinActivity: "Pievienoties",
+      cancelParticipation: "Atcelt Dalību",
+      activityFull: "Aktivitāte Pilna"
+    },
+    views: {
+      cardView: "Kartes Skats",
+      calendarView: "Kalendāra Skats"
+    }
+  }
+};
+
 export default function ActivitiesClient({
   activities: initialActivities,
   userId,
@@ -37,6 +81,7 @@ export default function ActivitiesClient({
   const [activities, setActivities] = useState(initialActivities);
   const router = useRouter();
   const supabase = createClientComponentClient();
+  const { language } = useLanguage();
 
   const handleParticipation = async (
     activityId: string,
@@ -97,21 +142,21 @@ export default function ActivitiesClient({
       return {
         badge: (
           <Badge className="bg-rugby-teal/10 text-rugby-teal hover:bg-rugby-teal/20 transition-colors">
-            You're In!
+            {activityTranslations[language].participation.youreIn}
           </Badge>
         ),
         button: {
           variant: "destructive" as const,
-          text: "Cancel Participation",
+          text: activityTranslations[language].participation.cancelParticipation,
         },
       };
     }
     if (isActivityFull(activity)) {
       return {
-        badge: <Badge variant="destructive">Full</Badge>,
+        badge: <Badge variant="destructive">{activityTranslations[language].participation.full}</Badge>,
         button: {
           variant: "outline" as const,
-          text: "Activity Full",
+          text: activityTranslations[language].participation.activityFull,
           disabled: true,
         },
       };
@@ -119,12 +164,12 @@ export default function ActivitiesClient({
     return {
       badge: (
         <Badge className="bg-rugby-yellow/10 text-rugby-yellow hover:bg-rugby-yellow/20 transition-colors">
-          Spots Available
+          {activityTranslations[language].participation.spotsAvailable}
         </Badge>
       ),
       button: {
         variant: "default" as const,
-        text: "Join Activity",
+        text: activityTranslations[language].participation.joinActivity,
       },
     };
   };
@@ -141,11 +186,10 @@ export default function ActivitiesClient({
           </div>
           <div className="relative container-width text-center">
             <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-              Team Activities
+              {activityTranslations[language].title}
             </h1>
             <p className="text-xl text-white/90 max-w-2xl mx-auto">
-              Join our team activities and events. Stay active and connected
-              with the community.
+              {activityTranslations[language].subtitle}
             </p>
           </div>
         </div>
@@ -156,11 +200,10 @@ export default function ActivitiesClient({
             <CardContent>
               <Calendar className="w-12 h-12 mx-auto mb-4 text-rugby-teal" />
               <h3 className="text-lg font-semibold mb-2">
-                No Upcoming Activities
+                {activityTranslations[language].noActivities.title}
               </h3>
               <p className="text-muted-foreground">
-                Check back later for new activities or contact the team for more
-                information.
+                {activityTranslations[language].noActivities.description}
               </p>
             </CardContent>
           </Card>
@@ -205,11 +248,10 @@ export default function ActivitiesClient({
         </div>
         <div className="relative container-width text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-            Team Activities
+            {activityTranslations[language].title}
           </h1>
           <p className="text-xl text-white/90 max-w-2xl mx-auto">
-            Join our team activities and events. Stay active and connected with
-            the community.
+            {activityTranslations[language].subtitle}
           </p>
         </div>
       </div>
@@ -224,14 +266,14 @@ export default function ActivitiesClient({
                 className="flex items-center gap-2 data-[state=active]:bg-rugby-teal data-[state=active]:text-white"
               >
                 <Users className="w-4 h-4" />
-                Card View
+                {activityTranslations[language].views.cardView}
               </TabsTrigger>
               <TabsTrigger
                 value="calendar"
                 className="flex items-center gap-2 data-[state=active]:bg-rugby-teal data-[state=active]:text-white"
               >
                 <Calendar className="w-4 h-4" />
-                Calendar View
+                {activityTranslations[language].views.calendarView}
               </TabsTrigger>
             </TabsList>
           </div>

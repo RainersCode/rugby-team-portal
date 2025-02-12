@@ -9,6 +9,10 @@ const config: Config = {
   darkMode: 'class',
   theme: {
     extend: {
+      fontFamily: {
+        'roboto': ['var(--font-roboto)'],
+        'jockey': ['var(--font-jockey-one)'],
+      },
       colors: {
         // Rugby theme colors
         'rugby-red': 'rgb(225, 60, 50)',

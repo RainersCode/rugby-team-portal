@@ -22,6 +22,9 @@ interface AboutPageData {
   mission: string
   values: string
   team_highlights: TeamHighlight[]
+  hero_image: string | null
+  created_at: string
+  updated_at: string
 }
 
 export default function EditAboutPageClient({ aboutData }: { aboutData: AboutPageData }) {
@@ -48,6 +51,10 @@ export default function EditAboutPageClient({ aboutData }: { aboutData: AboutPag
     setFormData({ ...formData, team_highlights: newHighlights })
   }
 
+  const handleImageUpload = (imagePath: string) => {
+    setFormData({ ...formData, hero_image: imagePath })
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
@@ -59,7 +66,8 @@ export default function EditAboutPageClient({ aboutData }: { aboutData: AboutPag
           history: formData.history,
           mission: formData.mission,
           values: formData.values,
-          team_highlights: formData.team_highlights
+          team_highlights: formData.team_highlights,
+          hero_image: formData.hero_image
         })
         .eq('id', formData.id)
 
@@ -80,7 +88,7 @@ export default function EditAboutPageClient({ aboutData }: { aboutData: AboutPag
       <h1 className="text-3xl font-bold">Edit About Page</h1>
 
       {/* Hero Image Upload */}
-      <ImageUpload />
+      <ImageUpload onImageUpload={handleImageUpload} currentImage={formData.hero_image} />
       
       {/* Content Form */}
       <Card className="p-6">
@@ -139,7 +147,7 @@ export default function EditAboutPageClient({ aboutData }: { aboutData: AboutPag
                   <h3 className="font-medium">Highlight {index + 1}</h3>
                   <Button
                     type="button"
-                    variant="destructive"
+                    variant="ghost"
                     size="sm"
                     onClick={() => removeHighlight(index)}
                   >
@@ -170,7 +178,7 @@ export default function EditAboutPageClient({ aboutData }: { aboutData: AboutPag
             ))}
           </div>
 
-          <Button type="submit" disabled={loading} className="w-full">
+          <Button type="submit" variant="primary" disabled={loading} className="w-full">
             {loading ? 'Saving...' : 'Save Changes'}
           </Button>
         </form>

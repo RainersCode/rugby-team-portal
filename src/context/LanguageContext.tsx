@@ -90,6 +90,12 @@ export const translations = {
     beginner: 'Beginner',
     intermediate: 'Intermediate',
     advanced: 'Advanced',
+
+    // About Page
+    aboutSubheading: 'Learn about our history, mission, and the team that makes it all possible',
+    ourMission: 'Our Mission',
+    ourVision: 'Our Vision',
+    ourTeam: 'Our Team',
   },
   lv: {
     language: 'lv' as Language,
@@ -168,6 +174,12 @@ export const translations = {
     beginner: 'Iesācējs',
     intermediate: 'Vidējs',
     advanced: 'Augsts',
+
+    // About Page
+    aboutSubheading: 'Uzzini par mūsu vēsturi, misiju un komandu, kas to visu padara iespējamu',
+    ourMission: 'Mūsu Misija',
+    ourVision: 'Mūsu Vīzija',
+    ourTeam: 'Mūsu Komanda',
   },
 };
 

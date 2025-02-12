@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Jockey_One } from "next/font/google";
+import { Jockey_One, Roboto } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/layout/Header/Header";
 import Footer from "@/components/layout/Footer/Footer";
@@ -11,6 +11,12 @@ const jockeyOne = Jockey_One({
   weight: '400',
   subsets: ["latin"],
   variable: '--font-jockey-one',
+});
+
+const roboto = Roboto({
+  weight: ['400', '500', '700'],
+  subsets: ["latin"],
+  variable: '--font-roboto',
 });
 
 export const metadata: Metadata = {
@@ -26,7 +32,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${jockeyOne.variable} bg-bg-light dark:bg-bg-dark text-content-light dark:text-content-dark`}
+        className={`${jockeyOne.variable} ${roboto.variable} font-roboto bg-bg-light dark:bg-bg-dark text-content-light dark:text-content-dark`}
       >
         <ThemeProvider>
           <LanguageProvider>

@@ -8,7 +8,12 @@ import { Label } from '@/components/ui/label'
 import Image from 'next/image'
 import { toast } from 'sonner'
 
-export default function ImageUpload() {
+interface ImageUploadProps {
+  onImageUpload?: (url: string) => void
+  currentImage?: string | null
+}
+
+export default function ImageUpload({ onImageUpload, currentImage }: ImageUploadProps) {
   const supabase = createClientComponentClient()
   const [uploading, setUploading] = useState(false)
   const [imagePath, setImagePath] = useState<string | null>(null)
@@ -16,26 +21,46 @@ export default function ImageUpload() {
   useEffect(() => {
     async function getImageUrl() {
       try {
+        // If we have a currentImage that's a full URL, use it directly
+        if (currentImage?.startsWith('http')) {
+          setImagePath(currentImage)
+          return
+        }
+
+        // If we have a currentImage that's a storage path, get its URL
+        if (currentImage) {
+          const { data } = supabase.storage
+            .from('public')
+            .getPublicUrl(currentImage)
+          
+          if (data?.publicUrl) {
+            setImagePath(data.publicUrl)
+            return
+          }
+        }
+
+        // Fallback to default image
         const { data } = supabase.storage
           .from('public')
-          .getPublicUrl('images/rugby-hero.jpg')
+          .getPublicUrl('images/about-hero.jpg')
         
         if (data?.publicUrl) {
           const response = await fetch(data.publicUrl, { method: 'HEAD' })
           if (response.ok) {
             setImagePath(data.publicUrl)
+            onImageUpload?.(data.publicUrl)
           } else {
-            setImagePath(null)
+            setImagePath('/images/about-hero.jpg') // Local fallback
           }
         }
       } catch (error) {
         console.error('Error checking image:', error)
-        setImagePath(null)
+        setImagePath('/images/about-hero.jpg') // Local fallback
       }
     }
 
     getImageUrl()
-  }, [supabase])
+  }, [currentImage, onImageUpload, supabase])
 
   const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     try {
@@ -47,7 +72,7 @@ export default function ImageUpload() {
 
       const file = event.target.files[0]
       const fileExt = file.name.split('.').pop()
-      const filePath = `images/rugby-hero.${fileExt}`
+      const filePath = `images/about-hero.${fileExt}`
 
       // Upload file to public bucket
       const { error: uploadError } = await supabase.storage
@@ -67,7 +92,9 @@ export default function ImageUpload() {
         .getPublicUrl(filePath)
 
       if (data?.publicUrl) {
-        setImagePath(data.publicUrl + '?v=' + new Date().getTime())
+        const newUrl = data.publicUrl + '?v=' + new Date().getTime()
+        setImagePath(newUrl)
+        onImageUpload?.(filePath) // Store the path instead of the full URL
         toast.success('Hero image updated successfully')
       }
     } catch (error) {
@@ -90,6 +117,7 @@ export default function ImageUpload() {
             fill
             className="object-cover"
             priority
+            unoptimized // Add this to bypass Next.js image optimization for external URLs
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">

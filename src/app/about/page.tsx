@@ -3,6 +3,7 @@ import { cookies } from 'next/headers'
 import AboutPageClient from './AboutPageClient'
 import Image from 'next/image'
 
+export const revalidate = 3600
 export const dynamic = 'force-dynamic'
 
 export default async function AboutPage() {
@@ -30,6 +31,7 @@ export default async function AboutPage() {
     .select('*')
     .single()
 
+  // Fetch team members or any other data needed for the about page
   // Get hero image URL
   const { data } = supabase.storage
     .from('public')

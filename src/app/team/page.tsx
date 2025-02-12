@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import type { Player } from "@/types";
 import PlayerCard from "@/components/features/Team/PlayerCard";
+import { useLanguage } from "@/context/LanguageContext";
 
 // Sample data for development
 const samplePlayers: Player[] = [
@@ -63,7 +64,9 @@ const samplePlayers: Player[] = [
   // Add more sample players as needed
 ];
 
-const positions = [
+type Position = "All" | "Prop" | "Hooker" | "Lock" | "Flanker" | "Number 8" | "Scrum-half" | "Fly-half" | "Center" | "Wing" | "Full-back";
+
+const positions: Position[] = [
   "All",
   "Prop",
   "Hooker",
@@ -77,11 +80,49 @@ const positions = [
   "Full-back",
 ];
 
+const teamTranslations = {
+  en: {
+    title: "Our Team",
+    subtitle: "Meet the warriors who represent our club with pride and passion.",
+    positions: {
+      "All": "All",
+      "Prop": "Prop",
+      "Hooker": "Hooker",
+      "Lock": "Lock",
+      "Flanker": "Flanker",
+      "Number 8": "Number 8",
+      "Scrum-half": "Scrum-half",
+      "Fly-half": "Fly-half",
+      "Center": "Center",
+      "Wing": "Wing",
+      "Full-back": "Full-back"
+    } as Record<Position, string>
+  },
+  lv: {
+    title: "Mūsu Komanda",
+    subtitle: "Iepazīstieties ar mūsu kluba karotājiem, kuri pārstāv mūs ar lepnumu un aizrautību.",
+    positions: {
+      "All": "Visi",
+      "Prop": "Pirmā līnija",
+      "Hooker": "Otrā līnija",
+      "Lock": "Otrā līnija",
+      "Flanker": "Trešā līnija",
+      "Number 8": "Astotais numurs",
+      "Scrum-half": "Serves pusaizsargs",
+      "Fly-half": "Spēles vadītājs",
+      "Center": "Centrs",
+      "Wing": "Spārns",
+      "Full-back": "Pēdējais aizsargs"
+    } as Record<Position, string>
+  }
+};
+
 export default function TeamPage() {
-  const [selectedPosition, setSelectedPosition] = useState("All");
+  const [selectedPosition, setSelectedPosition] = useState<Position>("All");
   const [selectedPlayer, setSelectedPlayer] = useState<number | null>(null);
-  const [players, setPlayers] = useState<Player[]>(samplePlayers); // Initialize with sample data
-  const [loading, setLoading] = useState(false); // Start with false since we have sample data
+  const [players, setPlayers] = useState<Player[]>(samplePlayers);
+  const [loading, setLoading] = useState(false);
+  const { language } = useLanguage();
   const supabase = createClientComponentClient();
 
   useEffect(() => {
@@ -160,10 +201,10 @@ export default function TeamPage() {
         </div>
         <div className="relative container-width mx-auto text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-            Our Team
+            {teamTranslations[language].title}
           </h1>
           <p className="text-xl text-white/90 max-w-2xl mx-auto">
-            Meet the warriors who represent our club with pride and passion.
+            {teamTranslations[language].subtitle}
           </p>
         </div>
       </div>
@@ -182,7 +223,7 @@ export default function TeamPage() {
                   : "bg-card text-muted-foreground hover:bg-rugby-yellow/10"
               }`}
             >
-              {position}
+              {teamTranslations[language].positions[position]}
             </button>
           ))}
         </div>

@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown, Globe } from "lucide-react";
+import { ChevronDown, Globe, Check } from "lucide-react";
 import Image from "next/image";
 
 type NavItem = {
@@ -186,22 +186,30 @@ export function Header() {
 
     return (
       <DropdownMenu>
-        <DropdownMenuTrigger className="flex items-center px-3 py-2 text-sm font-medium text-foreground/60 hover:text-foreground transition-colors">
-          <Globe className="w-4 h-4 mr-1" />
-          {language.toUpperCase()}
+        <DropdownMenuTrigger className="flex items-center px-3 py-2 text-sm font-medium text-foreground/60 hover:text-foreground transition-colors rounded-full hover:bg-gray-100 dark:hover:bg-gray-800">
+          <Globe className="w-4 h-4 mr-1.5" />
+          <span className="font-medium">{language === 'en' ? 'EN' : 'LV'}</span>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-24 bg-rugby-teal/95 border-none shadow-lg backdrop-blur-sm">
+        <DropdownMenuContent align="end" className="w-[140px] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-lg rounded-lg p-1">
           <DropdownMenuItem
             onClick={() => handleLanguageChange('en')}
-            className={`cursor-pointer text-white hover:bg-white/10 transition-colors ${language === 'en' ? 'bg-white/20' : ''}`}
+            className="flex items-center justify-between px-3 py-2 text-sm rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
           >
-            English
+            <div className="flex items-center">
+              <span className="mr-2">🇬🇧</span>
+              <span>English</span>
+            </div>
+            {language === 'en' && <Check className="w-4 h-4 text-rugby-teal" />}
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => handleLanguageChange('lv')}
-            className={`cursor-pointer text-white hover:bg-white/10 transition-colors ${language === 'lv' ? 'bg-white/20' : ''}`}
+            className="flex items-center justify-between px-3 py-2 text-sm rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
           >
-            Latviešu
+            <div className="flex items-center">
+              <span className="mr-2">🇱🇻</span>
+              <span>Latviešu</span>
+            </div>
+            {language === 'lv' && <Check className="w-4 h-4 text-rugby-teal" />}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
