@@ -141,10 +141,22 @@ export default function AboutPageClient({ aboutData, isAdmin }: AboutPageClientP
       </div>
 
       {/* Join Section - Full Width */}
-      <div className="w-screen relative left-1/2 right-1/2 -mx-[50vw] bg-rugby-teal">
+      <div className="w-screen relative left-1/2 right-1/2 -mx-[50vw] bg-rugby-teal/60">
         <section className="relative py-24 overflow-hidden">
+          {/* Background Image */}
+          <div 
+            className="absolute inset-0 z-0"
+            style={{
+              backgroundImage: 'url("/fnx banner png.png")',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+              opacity: 0.9
+            }}
+          />
+
           {/* Background Pattern */}
-          <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0 opacity-5 z-0 bg-black/20">
             <div className="absolute transform -rotate-45 -left-1/4 -top-1/4">
               <div className="w-96 h-96 rounded-full bg-rugby-yellow"></div>
             </div>
@@ -153,13 +165,13 @@ export default function AboutPageClient({ aboutData, isAdmin }: AboutPageClientP
             </div>
           </div>
 
-          <div className="relative container mx-auto px-4 flex flex-col lg:flex-row items-center justify-between gap-12">
+          <div className="relative container mx-auto px-4 flex flex-col lg:flex-row items-center justify-between gap-12 z-10">
             {/* Text Content */}
             <div className="flex-1 text-white text-center lg:text-left">
-              <h2 className="text-4xl lg:text-5xl font-bold mb-6">
+              <h2 className="text-4xl lg:text-5xl font-bold mb-6 drop-shadow-lg">
                 Join Our Rugby Family
               </h2>
-              <p className="text-xl lg:text-2xl mb-8 opacity-90">
+              <p className="text-xl lg:text-2xl mb-8 opacity-90 drop-shadow-lg">
                 Be part of something special. Train with the best, play with
                 passion, and create lasting memories.
               </p>
