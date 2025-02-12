@@ -227,10 +227,14 @@ export function MobileNav() {
                 ) : (
                   <Link
                     href="/auth/signin"
-                    className="text-sm font-medium text-rugby-teal hover:text-rugby-teal/80"
-                    onClick={() => setIsOpen(false)}
+                    className="inline-flex items-center justify-center rounded-md text-sm font-medium text-white bg-rugby-teal hover:bg-rugby-teal/90 h-9 px-4 py-2 transition-colors"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setIsOpen(false);
+                      window.location.href = '/auth/signin';
+                    }}
                   >
-                    Sign In
+                    {translations.signIn || 'Sign In'}
                   </Link>
                 )}
               </div>
