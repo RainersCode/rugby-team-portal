@@ -9,6 +9,7 @@ import { Match } from '@/types';
 import { useState } from 'react';
 import Link from 'next/link';
 import { MatchEventList, PlayerCardList } from './MatchDetails';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface MatchCardProps {
   match: Match;
@@ -21,6 +22,20 @@ export default function MatchCard({ match, isLocalMatch, variant = 'default' }: 
   const isCompleted = match.status === 'completed';
   const isLive = match.status === 'live';
   const hasDetails = isLocalMatch && isCompleted && (match.description || match.match_events?.length || match.player_cards?.length);
+  const { translations } = useLanguage();
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'live':
+        return variant === 'compact' ? 'LIVE' : translations.liveNow || 'LIVE NOW';
+      case 'completed':
+        return translations.completed || 'Completed';
+      case 'scheduled':
+        return translations.scheduled || 'Scheduled';
+      default:
+        return status.charAt(0).toUpperCase() + status.slice(1);
+    }
+  };
 
   const cardContent = (
     <>
@@ -39,7 +54,7 @@ export default function MatchCard({ match, isLocalMatch, variant = 'default' }: 
                 : 'bg-rugby-teal/10 text-rugby-teal hover:bg-rugby-teal/20 font-medium'
           }`}
         >
-          {isLive ? (variant === 'compact' ? 'LIVE' : 'LIVE NOW') : match.status.charAt(0).toUpperCase() + match.status.slice(1)}
+          {getStatusText(match.status)}
         </Badge>
       </div>
 
@@ -77,7 +92,7 @@ export default function MatchCard({ match, isLocalMatch, variant = 'default' }: 
                   {match.home_score} - {match.away_score}
                 </div>
                 <span className="text-xs font-bold text-rugby-red bg-rugby-red/10 px-3 py-1 rounded-full animate-pulse tracking-wider">
-                  LIVE NOW
+                  {translations.liveNow || 'LIVE NOW'}
                 </span>
               </div>
             )
@@ -128,11 +143,11 @@ export default function MatchCard({ match, isLocalMatch, variant = 'default' }: 
           >
             {isExpanded ? (
               <>
-                Show Less <ChevronUp className="w-4 h-4" />
+                {translations.showLess || 'Show Less'} <ChevronUp className="w-4 h-4" />
               </>
             ) : (
               <>
-                Show Details <ChevronDown className="w-4 h-4" />
+                {translations.showDetails || 'Show Details'} <ChevronDown className="w-4 h-4" />
               </>
             )}
           </button>
@@ -142,7 +157,9 @@ export default function MatchCard({ match, isLocalMatch, variant = 'default' }: 
               {match.description && (
                 <div className="space-y-2">
                   <h4 className="font-semibold text-sm text-rugby-teal flex items-center gap-2">
-                    <span className="bg-rugby-teal/10 px-2 py-1 rounded-md">Match Summary</span>
+                    <span className="bg-rugby-teal/10 px-2 py-1 rounded-md">
+                      {translations.matchSummary || 'Match Summary'}
+                    </span>
                   </h4>
                   <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
                     {match.description}

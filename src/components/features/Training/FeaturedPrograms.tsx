@@ -1,15 +1,20 @@
+'use client';
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Clock, Users, Dumbbell, ChevronRight } from 'lucide-react';
 import { TrainingProgram } from '@/types';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface FeaturedProgramsProps {
   programs: TrainingProgram[];
 }
 
 export default function FeaturedPrograms({ programs }: FeaturedProgramsProps) {
+  const { translations } = useLanguage();
+
   const getDifficultyStyle = (difficulty: string) => {
     switch (difficulty) {
       case 'beginner':
@@ -20,6 +25,19 @@ export default function FeaturedPrograms({ programs }: FeaturedProgramsProps) {
         return 'bg-rugby-red/10 text-rugby-red hover:bg-rugby-red/20';
       default:
         return 'bg-gray-100 text-gray-800 hover:bg-gray-200';
+    }
+  };
+
+  const getDifficultyTranslation = (difficulty: string) => {
+    switch (difficulty) {
+      case 'beginner':
+        return translations.beginner;
+      case 'intermediate':
+        return translations.intermediate;
+      case 'advanced':
+        return translations.advanced;
+      default:
+        return difficulty;
     }
   };
 
@@ -57,7 +75,7 @@ export default function FeaturedPrograms({ programs }: FeaturedProgramsProps) {
                     <Badge 
                       className={`absolute top-4 right-4 capitalize ${getDifficultyStyle(program.difficulty)}`}
                     >
-                      {program.difficulty}
+                      {getDifficultyTranslation(program.difficulty)}
                     </Badge>
                   </div>
                 </div>
@@ -75,7 +93,9 @@ export default function FeaturedPrograms({ programs }: FeaturedProgramsProps) {
                   <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
                     <div className="flex items-center gap-1">
                       <Clock className="w-4 h-4 text-rugby-teal" />
-                      <span>{program.duration_weeks} weeks</span>
+                      <span>
+                        {program.duration_weeks} {translations.weeks}
+                      </span>
                     </div>
                     <div className="flex items-center gap-1">
                       <Users className="w-4 h-4 text-rugby-red" />
@@ -86,7 +106,7 @@ export default function FeaturedPrograms({ programs }: FeaturedProgramsProps) {
                   {/* View Program Button */}
                   <div className="mt-4 flex justify-end">
                     <div className="group inline-flex items-center gap-1 text-rugby-teal hover:text-rugby-teal/80 font-medium">
-                      View Program
+                      {translations.viewProgram}
                       <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
                     </div>
                   </div>

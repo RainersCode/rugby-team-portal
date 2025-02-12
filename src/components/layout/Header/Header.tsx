@@ -7,13 +7,14 @@ import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import type { User } from "@supabase/auth-helpers-nextjs";
 import { MobileNav } from "@/components/mobile-nav";
 import UserNav from "./UserNav";
+import { useLanguage } from "@/context/LanguageContext";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Globe } from "lucide-react";
 import Image from "next/image";
 
 type NavItem = {
@@ -28,36 +29,12 @@ type DropdownNavItem = {
 
 type MainNavItem = NavItem | DropdownNavItem;
 
-const mainNavItems: MainNavItem[] = [
-  { href: "/", label: "Home" },
-  { href: "/team", label: "Team" },
-  { href: "/activities", label: "Activities" },
-  { href: "/matches", label: "Matches" },
-  { href: "/training", label: "Training" },
-  { href: "/tournaments", label: "Tournaments" },
-  {
-    label: "Media",
-    items: [
-      { href: "/gallery", label: "Gallery" },
-      { href: "/news", label: "News" },
-      { href: "/live", label: "Live" },
-      { href: "/videos", label: "Videos" },
-    ],
-  },
-  {
-    label: "Info",
-    items: [
-      { href: "/about", label: "About" },
-      { href: "/contact", label: "Contact" },
-    ],
-  },
-];
-
 export function Header() {
   const pathname = usePathname();
   const [user, setUser] = useState<User | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const supabase = createClientComponentClient();
+  const { language, setLanguage, translations } = useLanguage();
 
   useEffect(() => {
     const getUser = async () => {
@@ -105,6 +82,31 @@ export function Header() {
 
   const isDropdownActive = (items: { href: string }[]) =>
     items.some((item) => isLinkActive(item.href));
+
+  const mainNavItems: MainNavItem[] = [
+    { href: "/", label: translations.home },
+    { href: "/team", label: translations.team },
+    { href: "/activities", label: translations.activities },
+    { href: "/matches", label: translations.matches },
+    { href: "/training", label: translations.training },
+    { href: "/tournaments", label: translations.tournaments },
+    {
+      label: translations.media,
+      items: [
+        { href: "/gallery", label: translations.gallery },
+        { href: "/news", label: translations.news },
+        { href: "/live", label: translations.live },
+        { href: "/videos", label: translations.videos },
+      ],
+    },
+    {
+      label: translations.info,
+      items: [
+        { href: "/about", label: translations.about },
+        { href: "/contact", label: translations.contact },
+      ],
+    },
+  ];
 
   const renderNavItem = (item: MainNavItem) => {
     if ("items" in item) {
@@ -176,6 +178,36 @@ export function Header() {
     );
   };
 
+  const LanguageSwitcher = () => {
+    const handleLanguageChange = (newLang: 'en' | 'lv') => {
+      console.log('Language switcher: changing to', newLang);
+      setLanguage(newLang);
+    };
+
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger className="flex items-center px-3 py-2 text-sm font-medium text-foreground/60 hover:text-foreground transition-colors">
+          <Globe className="w-4 h-4 mr-1" />
+          {language.toUpperCase()}
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-24 bg-rugby-teal/95 border-none shadow-lg backdrop-blur-sm">
+          <DropdownMenuItem
+            onClick={() => handleLanguageChange('en')}
+            className={`cursor-pointer text-white hover:bg-white/10 transition-colors ${language === 'en' ? 'bg-white/20' : ''}`}
+          >
+            English
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() => handleLanguageChange('lv')}
+            className={`cursor-pointer text-white hover:bg-white/10 transition-colors ${language === 'lv' ? 'bg-white/20' : ''}`}
+          >
+            Latviešu
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  };
+
   return (
     <header className="sticky top-0 z-50">
       <div className="absolute inset-0 bg-card-bg-light/75 dark:bg-card-bg-dark/75 backdrop-blur-md border-b border-gray-200/20 dark:border-gray-800/20" />
@@ -196,7 +228,10 @@ export function Header() {
               />
             </Link>
           </div>
-          <MobileNav />
+          <div className="flex items-center gap-2">
+            <LanguageSwitcher />
+            <MobileNav />
+          </div>
         </div>
 
         {/* Desktop Layout */}
@@ -219,6 +254,7 @@ export function Header() {
             {mainNavItems.map(renderNavItem)}
           </nav>
           <div className="flex items-center space-x-6 flex-shrink-0">
+            <LanguageSwitcher />
             {user ? (
               <UserNav user={user} isAdmin={isAdmin} />
             ) : (
@@ -228,7 +264,7 @@ export function Header() {
               >
                 <span className="absolute inset-0 bg-gradient-to-r from-rugby-teal via-rugby-teal/80 to-rugby-teal opacity-0 transition-opacity group-hover:opacity-100" />
                 <span className="relative font-semibold tracking-wide">
-                  Sign In
+                  {translations.signIn || 'Sign In'}
                 </span>
               </Link>
             )}
