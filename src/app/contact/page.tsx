@@ -2,8 +2,45 @@
 
 import { useState } from "react";
 import { Phone, Mail, MapPin, Send } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext"
+
+const contactTranslations = {
+  en: {
+    getInTouch: "Get in Touch",
+    getInTouchDesc: "Have questions about joining our rugby club? We'd love to hear from you. Reach out to us and we'll respond as soon as possible.",
+    contactInfo: "Contact Information",
+    phone: "Phone",
+    email: "Email",
+    location: "Location",
+    trainingGround: "Training Ground",
+    trainingGroundDesc: "Visit us during training hours to learn more about our club and watch the team in action.",
+    sendMessage: "Send us a Message",
+    yourName: "Your Name",
+    emailAddress: "Email Address",
+    subject: "Subject",
+    message: "Message",
+    send: "Send Message"
+  },
+  lv: {
+    getInTouch: "Sazinies ar Mums",
+    getInTouchDesc: "Vai tev ir jautājumi par pievienošanos mūsu regbija klubam? Mēs priecāsimies no tevis dzirdēt. Sazinies ar mums, un mēs atbildēsim, cik ātri vien iespējams.",
+    contactInfo: "Kontaktinformācija",
+    phone: "Tālrunis",
+    email: "E-pasts",
+    location: "Atrašanās vieta",
+    trainingGround: "Treniņu Laukums",
+    trainingGroundDesc: "Apmeklē mūs treniņu laikā, lai uzzinātu vairāk par mūsu klubu un vērotu komandu darbībā.",
+    sendMessage: "Sūti mums Ziņu",
+    yourName: "Tavs Vārds",
+    emailAddress: "E-pasta Adrese",
+    subject: "Temats",
+    message: "Ziņa",
+    send: "Sūtīt Ziņu"
+  }
+};
 
 export default function ContactPage() {
+  const { language } = useLanguage();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -63,11 +100,10 @@ export default function ContactPage() {
         </div>
         <div className="relative container-width mx-auto text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-            Get in Touch
+            {contactTranslations[language].getInTouch}
           </h1>
           <p className="text-xl text-white/90 max-w-2xl mx-auto">
-            Have questions about joining our rugby club? We'd love to hear from
-            you. Reach out to us and we'll respond as soon as possible.
+            {contactTranslations[language].getInTouchDesc}
           </p>
         </div>
       </div>
@@ -79,7 +115,7 @@ export default function ContactPage() {
           <div className="space-y-8">
             <div className="bg-card rounded-2xl p-8 shadow-lg border border-rugby-teal/20">
               <h2 className="text-2xl font-bold mb-6 text-rugby-teal">
-                Contact Information
+                {contactTranslations[language].contactInfo}
               </h2>
               <div className="space-y-6">
                 <div className="flex items-start space-x-4">
@@ -88,7 +124,7 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-rugby-teal/90">
-                      Phone
+                      {contactTranslations[language].phone}
                     </h3>
                     <p className="text-muted-foreground">
                       +1 (555) 123-4567
@@ -101,7 +137,7 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-rugby-teal/90">
-                      Email
+                      {contactTranslations[language].email}
                     </h3>
                     <p className="text-muted-foreground">
                       info@rugbyteam.com
@@ -114,7 +150,7 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-rugby-teal/90">
-                      Location
+                      {contactTranslations[language].location}
                     </h3>
                     <p className="text-muted-foreground">
                       123 Rugby Street, Sports City, SC 12345
@@ -127,10 +163,10 @@ export default function ContactPage() {
             {/* Map or Additional Info */}
             <div className="bg-card rounded-2xl p-8 shadow-lg border border-rugby-teal/20">
               <h2 className="text-2xl font-bold mb-6 text-rugby-teal">
-                Training Ground
+                {contactTranslations[language].trainingGround}
               </h2>
               <p className="text-muted-foreground mb-4">
-                Visit us during training hours to learn more about our club and watch the team in action.
+                {contactTranslations[language].trainingGroundDesc}
               </p>
               <div className="aspect-video bg-muted rounded-lg">
                 {/* Add map or image here */}
@@ -141,7 +177,7 @@ export default function ContactPage() {
           {/* Contact Form */}
           <div className="bg-card rounded-2xl p-8 shadow-lg border border-rugby-teal/20">
             <h2 className="text-2xl font-bold mb-6 text-rugby-teal">
-              Send us a Message
+              {contactTranslations[language].sendMessage}
             </h2>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
@@ -149,7 +185,7 @@ export default function ContactPage() {
                   htmlFor="name"
                   className="block text-sm font-medium mb-2 text-rugby-teal/90"
                 >
-                  Your Name
+                  {contactTranslations[language].yourName}
                 </label>
                 <input
                   type="text"
@@ -166,7 +202,7 @@ export default function ContactPage() {
                   htmlFor="email"
                   className="block text-sm font-medium mb-2 text-rugby-teal/90"
                 >
-                  Email Address
+                  {contactTranslations[language].emailAddress}
                 </label>
                 <input
                   type="email"
@@ -183,7 +219,7 @@ export default function ContactPage() {
                   htmlFor="subject"
                   className="block text-sm font-medium mb-2 text-rugby-teal/90"
                 >
-                  Subject
+                  {contactTranslations[language].subject}
                 </label>
                 <input
                   type="text"
@@ -200,7 +236,7 @@ export default function ContactPage() {
                   htmlFor="message"
                   className="block text-sm font-medium mb-2 text-rugby-teal/90"
                 >
-                  Message
+                  {contactTranslations[language].message}
                 </label>
                 <textarea
                   id="message"
@@ -217,7 +253,7 @@ export default function ContactPage() {
                 className="w-full flex items-center justify-center gap-2 bg-rugby-teal hover:bg-rugby-teal/90 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
               >
                 <Send className="w-5 h-5" />
-                Send Message
+                {contactTranslations[language].send}
               </button>
             </form>
           </div>
