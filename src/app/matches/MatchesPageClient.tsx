@@ -7,7 +7,6 @@ import { useLanguage } from "@/context/LanguageContext";
 const matchTranslations = {
   en: {
     title: "Match Schedule",
-    subtitle: "Follow our team's journey through the season. View upcoming fixtures and past results.",
     error: "Error fetching matches. Please try again later.",
     upcomingMatches: "Upcoming Matches",
     noUpcomingMatches: "No upcoming matches scheduled.",
@@ -16,7 +15,6 @@ const matchTranslations = {
   },
   lv: {
     title: "Spēļu Grafiks",
-    subtitle: "Sekojiet līdzi mūsu komandas ceļojumam sezonas laikā. Skatiet gaidāmās spēles un iepriekšējos rezultātus.",
     error: "Kļūda ielādējot spēles. Lūdzu, mēģiniet vēlāk.",
     upcomingMatches: "Gaidāmās Spēles",
     noUpcomingMatches: "Nav ieplānotu gaidāmo spēļu.",
@@ -76,9 +74,6 @@ export default function MatchesPageClient({
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
             {matchTranslations[language].title}
           </h1>
-          <p className="text-xl text-white/90 max-w-2xl mx-auto">
-            {matchTranslations[language].subtitle}
-          </p>
         </div>
       </div>
 

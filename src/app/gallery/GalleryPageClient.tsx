@@ -11,7 +11,6 @@ import { useLanguage } from "@/context/LanguageContext";
 const galleryTranslations = {
   en: {
     title: "Gallery",
-    subtitle: "Explore our photo gallery to see the best moments from our games and events",
     loading: "Loading galleries...",
     photoCount: (count: number) => `${count} photos`,
     viewGallery: "View Gallery",
@@ -22,7 +21,6 @@ const galleryTranslations = {
   },
   lv: {
     title: "Galerija",
-    subtitle: "Apskatiet mūsu foto galeriju, lai redzētu labākos mirkļus no mūsu spēlēm un pasākumiem",
     loading: "Ielādē galerijas...",
     photoCount: (count: number) => `${count} foto`,
     viewGallery: "Skatīt galeriju",
@@ -139,9 +137,6 @@ export default function GalleryPageClient() {
             <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
               {t.title}
             </h1>
-            <p className="text-xl text-white/90 max-w-2xl mx-auto">
-              {t.subtitle}
-            </p>
           </div>
         </div>
 
@@ -202,13 +197,10 @@ export default function GalleryPageClient() {
             <div className="w-[45px] h-[20px] rounded-[50%] bg-rugby-yellow"></div>
           </div>
         </div>
-        <div className="relative container-width text-center">
+        <div className="relative container-width mx-auto text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
             {t.title}
           </h1>
-          <p className="text-xl text-white/90 max-w-2xl mx-auto">
-            {t.subtitle}
-          </p>
         </div>
       </div>
 

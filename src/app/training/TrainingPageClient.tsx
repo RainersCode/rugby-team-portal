@@ -11,7 +11,6 @@ import { useLanguage } from '@/context/LanguageContext';
 const trainingTranslations = {
   en: {
     title: "Training Programs",
-    subtitle: "Elevate your game with our structured training programs designed for all skill levels.",
     availablePrograms: "Available Programs",
     viewExerciseLibrary: "View Exercise Library",
     viewProgram: "View Program",
@@ -25,7 +24,6 @@ const trainingTranslations = {
   },
   lv: {
     title: "Treniņu Programmas",
-    subtitle: "Uzlabo savu spēli ar mūsu strukturētajām treniņu programmām, kas paredzētas visiem prasmju līmeņiem.",
     availablePrograms: "Pieejamās Programmas",
     viewExerciseLibrary: "Skatīt Vingrojumu Bibliotēku",
     viewProgram: "Skatīt Programmu",
@@ -85,9 +83,6 @@ export default function TrainingPageClient({ groupedPrograms }: TrainingPageClie
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
             {trainingTranslations[language].title}
           </h1>
-          <p className="text-xl text-white/90 max-w-2xl mx-auto">
-            {trainingTranslations[language].subtitle}
-          </p>
         </div>
       </div>
 

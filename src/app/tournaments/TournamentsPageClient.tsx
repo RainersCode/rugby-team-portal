@@ -11,7 +11,6 @@ import { useLanguage } from "@/context/LanguageContext";
 const tournamentTranslations = {
   en: {
     title: "Rugby Tournaments",
-    subtitle: "Follow all our exciting rugby competitions",
     season: "Season",
     seasonDescription: "Current season featuring Championship, Sevens, and Cup competitions.",
     upcomingMatches: "Upcoming Matches",
@@ -38,7 +37,6 @@ const tournamentTranslations = {
   },
   lv: {
     title: "Regbija Turnīri",
-    subtitle: "Seko līdzi mūsu aizraujošajām regbija sacensībām",
     season: "Sezona",
     seasonDescription: "Pašreizējā sezona, kurā ietilpst Čempionāts, Septiņi un Kauss.",
     upcomingMatches: "Gaidāmās Spēles",
@@ -121,9 +119,6 @@ export default function TournamentsPageClient({
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
             {t.title}
           </h1>
-          <p className="text-xl text-white/90 max-w-2xl mx-auto">
-            {t.subtitle}
-          </p>
         </div>
       </div>
 

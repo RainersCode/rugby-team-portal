@@ -33,7 +33,6 @@ interface Props {
 const activityTranslations = {
   en: {
     title: "Team Activities",
-    subtitle: "Join our team activities and events. Stay active and connected with the community.",
     noActivities: {
       title: "No Upcoming Activities",
       description: "Check back later for new activities or contact the team for more information."
@@ -53,7 +52,6 @@ const activityTranslations = {
   },
   lv: {
     title: "Komandas Aktivitātes",
-    subtitle: "Pievienojieties mūsu komandas aktivitātēm un pasākumiem. Palieciet aktīvi un saistīti ar kopienu.",
     noActivities: {
       title: "Nav Gaidāmo Aktivitāšu",
       description: "Pārbaudiet vēlāk jaunas aktivitātes vai sazinieties ar komandu, lai iegūtu vairāk informācijas."
@@ -188,9 +186,6 @@ export default function ActivitiesClient({
             <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
               {activityTranslations[language].title}
             </h1>
-            <p className="text-xl text-white/90 max-w-2xl mx-auto">
-              {activityTranslations[language].subtitle}
-            </p>
           </div>
         </div>
 
@@ -246,13 +241,10 @@ export default function ActivitiesClient({
             <div className="w-[45px] h-[20px] rounded-[50%] bg-rugby-yellow"></div>
           </div>
         </div>
-        <div className="relative container-width text-center">
+        <div className="relative container-width mx-auto text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
             {activityTranslations[language].title}
           </h1>
-          <p className="text-xl text-white/90 max-w-2xl mx-auto">
-            {activityTranslations[language].subtitle}
-          </p>
         </div>
       </div>
 

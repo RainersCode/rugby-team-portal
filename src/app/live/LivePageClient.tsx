@@ -11,7 +11,6 @@ import { useLanguage } from "@/context/LanguageContext";
 const liveTranslations = {
   en: {
     title: "Live Rugby",
-    subtitle: "Watch our matches live or catch up on previous broadcasts",
     currentBroadcast: "Current Broadcast",
     liveStream: "Live Stream",
     noActiveStream: "No active stream at the moment.",
@@ -22,7 +21,6 @@ const liveTranslations = {
   },
   lv: {
     title: "Tiešraide",
-    subtitle: "Skaties mūsu spēles tiešraidē vai iepriekšējos ierakstus",
     currentBroadcast: "Pašreizējā Pārraide",
     liveStream: "Tiešraide",
     noActiveStream: "Šobrīd nav aktīvu tiešraižu.",
@@ -92,9 +90,6 @@ export default function LivePageClient({ activeStream, pastStreams }: LivePageCl
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
             {t.title}
           </h1>
-          <p className="text-xl text-white/90 max-w-2xl mx-auto">
-            {t.subtitle}
-          </p>
         </div>
       </div>
 

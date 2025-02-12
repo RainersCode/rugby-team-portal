@@ -2,12 +2,39 @@
 
 import { Player } from '@/types';
 import Image from 'next/image';
+import { useLanguage } from '@/context/LanguageContext';
+
+const playerCardTranslations = {
+  en: {
+    height: "Height",
+    weight: "Weight",
+    age: "Age",
+    nation: "Nation",
+    matches: "Matches",
+    tries: "Tries",
+    assists: "Assists",
+    tackles: "Tackles"
+  },
+  lv: {
+    height: "Augums",
+    weight: "Svars",
+    age: "Vecums",
+    nation: "Valsts",
+    matches: "Spēles",
+    tries: "Pielikumi",
+    assists: "Piespēles",
+    tackles: "Tackles"
+  }
+};
 
 interface PlayerCardProps {
   player: Player;
 }
 
 export default function PlayerCard({ player }: PlayerCardProps) {
+  const { language } = useLanguage();
+  const t = language === 'en' ? playerCardTranslations.en : playerCardTranslations.lv;
+
   return (
     <div className="group relative bg-gradient-to-br from-card-bg-light to-card-bg-light/95 dark:from-card-bg-dark dark:to-card-bg-dark/95 rounded-xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 border border-rugby-teal/10 hover:border-rugby-teal/30 cursor-pointer">
       {/* Background pattern */}
@@ -47,19 +74,19 @@ export default function PlayerCard({ player }: PlayerCardProps) {
         {/* Physical stats */}
         <div className="grid grid-cols-4 gap-2">
           <div className="text-center p-2 bg-rugby-teal/5 dark:bg-rugby-teal/10 rounded-lg">
-            <p className="text-xs text-gray-600 dark:text-gray-300 uppercase tracking-wider">Height</p>
+            <p className="text-xs text-gray-600 dark:text-gray-300 uppercase tracking-wider">{t.height}</p>
             <p className="font-semibold text-gray-900 dark:text-white">{player.height || '-'}</p>
           </div>
           <div className="text-center p-2 bg-rugby-teal/5 dark:bg-rugby-teal/10 rounded-lg">
-            <p className="text-xs text-gray-600 dark:text-gray-300 uppercase tracking-wider">Weight</p>
+            <p className="text-xs text-gray-600 dark:text-gray-300 uppercase tracking-wider">{t.weight}</p>
             <p className="font-semibold text-gray-900 dark:text-white">{player.weight || '-'}</p>
           </div>
           <div className="text-center p-2 bg-rugby-teal/5 dark:bg-rugby-teal/10 rounded-lg">
-            <p className="text-xs text-gray-600 dark:text-gray-300 uppercase tracking-wider">Age</p>
+            <p className="text-xs text-gray-600 dark:text-gray-300 uppercase tracking-wider">{t.age}</p>
             <p className="font-semibold text-gray-900 dark:text-white">{player.age || '-'}</p>
           </div>
           <div className="text-center p-2 bg-rugby-teal/5 dark:bg-rugby-teal/10 rounded-lg">
-            <p className="text-xs text-gray-600 dark:text-gray-300 uppercase tracking-wider">Nation</p>
+            <p className="text-xs text-gray-600 dark:text-gray-300 uppercase tracking-wider">{t.nation}</p>
             <p className="font-semibold text-gray-900 dark:text-white">{player.nationality || '-'}</p>
           </div>
         </div>
@@ -68,19 +95,19 @@ export default function PlayerCard({ player }: PlayerCardProps) {
         <div className="grid grid-cols-4 gap-3 pt-2">
           <div className="text-center">
             <p className="text-2xl font-bold text-rugby-teal">{player.stats?.matches || 0}</p>
-            <p className="text-xs uppercase tracking-wider text-gray-600 dark:text-gray-300">Matches</p>
+            <p className="text-xs uppercase tracking-wider text-gray-600 dark:text-gray-300">{t.matches}</p>
           </div>
           <div className="text-center">
             <p className="text-2xl font-bold text-rugby-yellow">{player.stats?.tries || 0}</p>
-            <p className="text-xs uppercase tracking-wider text-gray-600 dark:text-gray-300">Tries</p>
+            <p className="text-xs uppercase tracking-wider text-gray-600 dark:text-gray-300">{t.tries}</p>
           </div>
           <div className="text-center">
             <p className="text-2xl font-bold text-rugby-teal">{player.stats?.assists || 0}</p>
-            <p className="text-xs uppercase tracking-wider text-gray-600 dark:text-gray-300">Assists</p>
+            <p className="text-xs uppercase tracking-wider text-gray-600 dark:text-gray-300">{t.assists}</p>
           </div>
           <div className="text-center">
             <p className="text-2xl font-bold text-rugby-yellow">{player.stats?.tackles || 0}</p>
-            <p className="text-xs uppercase tracking-wider text-gray-600 dark:text-gray-300">Tackles</p>
+            <p className="text-xs uppercase tracking-wider text-gray-600 dark:text-gray-300">{t.tackles}</p>
           </div>
         </div>
       </div>

@@ -64,61 +64,16 @@ const samplePlayers: Player[] = [
   // Add more sample players as needed
 ];
 
-type Position = "All" | "Prop" | "Hooker" | "Lock" | "Flanker" | "Number 8" | "Scrum-half" | "Fly-half" | "Center" | "Wing" | "Full-back";
-
-const positions: Position[] = [
-  "All",
-  "Prop",
-  "Hooker",
-  "Lock",
-  "Flanker",
-  "Number 8",
-  "Scrum-half",
-  "Fly-half",
-  "Center",
-  "Wing",
-  "Full-back",
-];
-
 const teamTranslations = {
   en: {
-    title: "Our Team",
-    subtitle: "Meet the warriors who represent our club with pride and passion.",
-    positions: {
-      "All": "All",
-      "Prop": "Prop",
-      "Hooker": "Hooker",
-      "Lock": "Lock",
-      "Flanker": "Flanker",
-      "Number 8": "Number 8",
-      "Scrum-half": "Scrum-half",
-      "Fly-half": "Fly-half",
-      "Center": "Center",
-      "Wing": "Wing",
-      "Full-back": "Full-back"
-    } as Record<Position, string>
+    title: "Our Team"
   },
   lv: {
-    title: "Mūsu Komanda",
-    subtitle: "Iepazīstieties ar mūsu kluba karotājiem, kuri pārstāv mūs ar lepnumu un aizrautību.",
-    positions: {
-      "All": "Visi",
-      "Prop": "Pirmā līnija",
-      "Hooker": "Otrā līnija",
-      "Lock": "Otrā līnija",
-      "Flanker": "Trešā līnija",
-      "Number 8": "Astotais numurs",
-      "Scrum-half": "Serves pusaizsargs",
-      "Fly-half": "Spēles vadītājs",
-      "Center": "Centrs",
-      "Wing": "Spārns",
-      "Full-back": "Pēdējais aizsargs"
-    } as Record<Position, string>
+    title: "Mūsu Komanda"
   }
 };
 
 export default function TeamPage() {
-  const [selectedPosition, setSelectedPosition] = useState<Position>("All");
   const [selectedPlayer, setSelectedPlayer] = useState<number | null>(null);
   const [players, setPlayers] = useState<Player[]>(samplePlayers);
   const [loading, setLoading] = useState(false);
@@ -142,20 +97,14 @@ export default function TeamPage() {
       }
 
       if (data && data.length > 0) {
-        setPlayers(data); // Only update if we got data from Supabase
+        setPlayers(data);
       }
     } catch (error) {
       console.error("Error fetching players:", error);
-      // Keep using sample data if there's an error
     } finally {
       setLoading(false);
     }
   };
-
-  const filteredPlayers =
-    selectedPosition === "All"
-      ? players
-      : players.filter((player) => player.position === selectedPosition);
 
   if (loading) {
     return (
@@ -201,36 +150,16 @@ export default function TeamPage() {
         </div>
         <div className="relative container-width mx-auto text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-            {teamTranslations[language].title}
+            {language === 'en' ? teamTranslations.en.title : teamTranslations.lv.title}
           </h1>
-          <p className="text-xl text-white/90 max-w-2xl mx-auto">
-            {teamTranslations[language].subtitle}
-          </p>
         </div>
       </div>
 
       {/* Content Section */}
       <div className="container-width py-12">
-        {/* Position Filter */}
-        <div className="flex flex-wrap gap-2 mb-8">
-          {positions.map((position) => (
-            <button
-              key={position}
-              onClick={() => setSelectedPosition(position)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200 ${
-                selectedPosition === position
-                  ? "bg-rugby-teal text-white"
-                  : "bg-card text-muted-foreground hover:bg-rugby-yellow/10"
-              }`}
-            >
-              {teamTranslations[language].positions[position]}
-            </button>
-          ))}
-        </div>
-
         {/* Players Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredPlayers.map((player) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {players.map((player) => (
             <motion.div
               key={player.id}
               layout

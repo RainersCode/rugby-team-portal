@@ -7,13 +7,11 @@ import { useLanguage } from "@/context/LanguageContext";
 const newsTranslations = {
   en: {
     title: "Latest News",
-    subtitle: "Stay updated with the latest news, match reports, and club announcements.",
     noArticles: "No articles found.",
     error: "Failed to load articles. Please try again later."
   },
   lv: {
     title: "Jaunākās Ziņas",
-    subtitle: "Sekojiet līdzi jaunākajām ziņām, spēļu reportāžām un kluba paziņojumiem.",
     noArticles: "Nav atrasti raksti.",
     error: "Neizdevās ielādēt rakstus. Lūdzu, mēģiniet vēlāk."
   }
@@ -66,9 +64,6 @@ export default function NewsPageClient({ articles, error }: NewsPageClientProps)
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
             {t.title}
           </h1>
-          <p className="text-xl text-white/90 max-w-2xl mx-auto">
-            {t.subtitle}
-          </p>
         </div>
       </div>
 

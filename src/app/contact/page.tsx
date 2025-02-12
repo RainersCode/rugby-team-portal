@@ -7,7 +7,6 @@ import { useLanguage } from "@/context/LanguageContext"
 const contactTranslations = {
   en: {
     getInTouch: "Get in Touch",
-    getInTouchDesc: "Have questions about joining our rugby club? We'd love to hear from you. Reach out to us and we'll respond as soon as possible.",
     contactInfo: "Contact Information",
     phone: "Phone",
     email: "Email",
@@ -23,7 +22,6 @@ const contactTranslations = {
   },
   lv: {
     getInTouch: "Sazinies ar Mums",
-    getInTouchDesc: "Vai tev ir jautājumi par pievienošanos mūsu regbija klubam? Mēs priecāsimies no tevis dzirdēt. Sazinies ar mums, un mēs atbildēsim, cik ātri vien iespējams.",
     contactInfo: "Kontaktinformācija",
     phone: "Tālrunis",
     email: "E-pasts",
@@ -102,9 +100,6 @@ export default function ContactPage() {
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
             {contactTranslations[language].getInTouch}
           </h1>
-          <p className="text-xl text-white/90 max-w-2xl mx-auto">
-            {contactTranslations[language].getInTouchDesc}
-          </p>
         </div>
       </div>
 
