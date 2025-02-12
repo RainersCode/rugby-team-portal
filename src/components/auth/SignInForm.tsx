@@ -13,6 +13,7 @@ export default function SignInForm() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
+  const redirectTo = searchParams?.get('redirectTo') || '/';
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,8 +28,6 @@ export default function SignInForm() {
 
       if (error) throw error;
 
-      // Get the redirect URL from query params or default to home
-      const redirectTo = searchParams.get('redirectTo') || '/';
       router.push(redirectTo);
       router.refresh();
     } catch (error) {
