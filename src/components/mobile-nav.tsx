@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import type { User } from "@supabase/auth-helpers-nextjs";
 import UserNav from "@/components/layout/Header/UserNav";
@@ -89,6 +89,7 @@ export function MobileNav() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const pathname = usePathname();
+  const router = useRouter();
   const supabase = createClientComponentClient();
   const { language, setLanguage, translations } = useLanguage();
 
@@ -225,17 +226,15 @@ export function MobileNav() {
                 {user ? (
                   <UserNav user={user} />
                 ) : (
-                  <Link
-                    href="/auth/signin"
-                    className="inline-flex items-center justify-center rounded-md text-sm font-medium text-white bg-rugby-teal hover:bg-rugby-teal/90 h-9 px-4 py-2 transition-colors"
-                    onClick={(e) => {
-                      e.preventDefault();
+                  <Button
+                    onClick={() => {
                       setIsOpen(false);
-                      window.location.href = '/auth/signin';
+                      router.push('/auth/signin');
                     }}
+                    className="inline-flex items-center justify-center rounded-md text-sm font-medium text-white bg-rugby-teal hover:bg-rugby-teal/90 h-9 px-4 py-2 transition-colors"
                   >
                     {translations.signIn || 'Sign In'}
-                  </Link>
+                  </Button>
                 )}
               </div>
             </div>

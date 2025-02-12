@@ -21,18 +21,22 @@ export default function SignInForm() {
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { error, data } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) throw error;
 
-      router.push(redirectTo);
+      // Wait for the session to be set
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Force a refresh and redirect
       router.refresh();
+      router.push(redirectTo);
+      router.refresh(); // Double refresh to ensure state is updated
     } catch (error) {
       setError(error instanceof Error ? error.message : 'An error occurred');
-    } finally {
       setLoading(false);
     }
   };
