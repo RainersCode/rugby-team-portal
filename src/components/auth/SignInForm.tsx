@@ -21,20 +21,23 @@ export default function SignInForm() {
     setLoading(true);
 
     try {
-      const { error, data } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) throw error;
 
-      // Wait for the session to be set
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      // Force a refresh and redirect
-      router.refresh();
-      router.push(redirectTo);
-      router.refresh(); // Double refresh to ensure state is updated
+      // Reset loading state since we're about to navigate
+      setLoading(false);
+      
+      // Navigate to the redirect URL
+      if (redirectTo === window.location.pathname) {
+        // If we're already on the redirect page, just refresh
+        router.refresh();
+      } else {
+        router.push(redirectTo);
+      }
     } catch (error) {
       setError(error instanceof Error ? error.message : 'An error occurred');
       setLoading(false);
