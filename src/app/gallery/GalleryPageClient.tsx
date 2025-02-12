@@ -84,17 +84,15 @@ export default function GalleryPageClient() {
     setSelectedPhotoIndex(0);
   };
 
-  const handleNextPhoto = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (selectedGallery && selectedPhotoIndex < selectedGallery.photos.length - 1) {
-      setSelectedPhotoIndex(prev => prev + 1);
-    }
-  };
+  const handleDragEnd = (e: any, { offset, velocity }: { offset: { x: number }, velocity: { x: number } }) => {
+    const swipe = offset.x;
 
-  const handlePrevPhoto = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (selectedGallery && selectedPhotoIndex > 0) {
-      setSelectedPhotoIndex(prev => prev - 1);
+    if (Math.abs(velocity.x) > 0.2 || Math.abs(swipe) > 100) {
+      if (swipe < 0 && selectedGallery && selectedPhotoIndex < selectedGallery.photos.length - 1) {
+        setSelectedPhotoIndex(prev => prev + 1);
+      } else if (swipe > 0 && selectedGallery && selectedPhotoIndex > 0) {
+        setSelectedPhotoIndex(prev => prev - 1);
+      }
     }
   };
 
@@ -301,7 +299,7 @@ export default function GalleryPageClient() {
 
               <button
                 className="absolute left-4 top-1/2 -translate-y-1/2 text-white hover:text-rugby-teal transition-colors disabled:opacity-50 disabled:hover:text-white"
-                onClick={handlePrevPhoto}
+                onClick={() => setSelectedPhotoIndex(prev => prev - 1)}
                 disabled={selectedPhotoIndex === 0}
                 aria-label={t.previousPhoto}
               >
@@ -310,7 +308,7 @@ export default function GalleryPageClient() {
 
               <button
                 className="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:text-rugby-teal transition-colors disabled:opacity-50 disabled:hover:text-white"
-                onClick={handleNextPhoto}
+                onClick={() => setSelectedPhotoIndex(prev => prev + 1)}
                 disabled={selectedPhotoIndex === selectedGallery.photos.length - 1}
                 aria-label={t.nextPhoto}
               >
@@ -324,6 +322,10 @@ export default function GalleryPageClient() {
                 exit={{ opacity: 0, scale: 0.9 }}
                 className="relative w-full max-w-5xl h-[80vh]"
                 onClick={(e) => e.stopPropagation()}
+                drag="x"
+                dragConstraints={{ left: 0, right: 0 }}
+                dragElastic={0.7}
+                onDragEnd={handleDragEnd}
               >
                 <Image
                   src={selectedGallery.photos[selectedPhotoIndex].image_url}
@@ -331,6 +333,7 @@ export default function GalleryPageClient() {
                   fill
                   className="object-contain"
                   sizes="(max-width: 1024px) 100vw, 75vw"
+                  draggable={false}
                 />
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6">
                   <h3 className="text-white text-xl font-semibold mb-2">
