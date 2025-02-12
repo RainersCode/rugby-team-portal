@@ -37,7 +37,7 @@ export default function LatestNews({ articles }: LatestNewsProps) {
   };
 
   return (
-    <section className="container-width">
+    <section className="container-width px-2 sm:px-0">
       <div className="flex justify-between items-center mb-8">
         <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
           {translations.latestNews}
@@ -49,11 +49,11 @@ export default function LatestNews({ articles }: LatestNewsProps) {
           {translations.viewAllNews} →
         </Link>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-4 auto-rows-[250px]">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
         {articles?.slice(0, 6).map((article, index) => (
           <article
             key={article.id}
-            className={`group relative bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden border border-rugby-teal/20 hover:border-rugby-teal transition-all duration-300 ${
+            className={`group relative bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden border border-rugby-teal/20 hover:border-rugby-teal transition-all duration-300 w-[95vw] sm:w-auto mx-auto sm:mx-0 ${
               layouts[index as keyof typeof layouts]
             }`}
           >
