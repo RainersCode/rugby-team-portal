@@ -28,16 +28,11 @@ export default function SignInForm() {
 
       if (error) throw error;
 
-      // Reset loading state since we're about to navigate
-      setLoading(false);
+      // Force a refresh to update auth state
+      router.refresh();
       
-      // Navigate to the redirect URL
-      if (redirectTo === window.location.pathname) {
-        // If we're already on the redirect page, just refresh
-        router.refresh();
-      } else {
-        router.push(redirectTo);
-      }
+      // Use window.location for a hard redirect to ensure complete page refresh
+      window.location.href = redirectTo;
     } catch (error) {
       setError(error instanceof Error ? error.message : 'An error occurred');
       setLoading(false);
