@@ -48,7 +48,8 @@ export default function HeroCarousel({
             key={article.id}
             className="relative w-full h-full flex-shrink-0"
           >
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent z-10" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent z-10" />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/30 via-transparent to-black/30 z-10" />
             <Image
               src={article.image}
               alt={article.title}
@@ -61,19 +62,19 @@ export default function HeroCarousel({
                 <span className="inline-block bg-gradient-to-r from-rugby-teal to-rugby-teal/80 text-white text-xs md:text-sm px-4 py-1.5 rounded-full mb-3 md:mb-4 shadow-lg backdrop-blur-sm">
                   Latest News
                 </span>
-                <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-3 md:mb-4 line-clamp-2 text-shadow-lg">
+                <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-3 md:mb-4 line-clamp-2 drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] [text-shadow:_2px_2px_4px_rgb(0_0_0_/_50%)]">
                   {article.title}
                 </h1>
-                <p className="text-base md:text-lg mb-6 md:mb-8 max-w-2xl line-clamp-2 text-white/90">
+                <p className="text-base md:text-lg mb-6 md:mb-8 max-w-2xl line-clamp-2 text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]">
                   {article.content}
                 </p>
                 <Button
                   href={`/news/${article.slug}`}
                   variant="ghost"
                   size="md"
-                  className="group"
+                  className="group bg-rugby-teal hover:bg-rugby-teal/90 text-white shadow-lg transition-all duration-300 border-none"
                 >
-                  <span>Read More</span>
+                  <span className="font-medium">Read More</span>
                   <ChevronRight className="w-4 h-4 ml-2 transform group-hover:translate-x-1 transition-transform" />
                 </Button>
               </div>

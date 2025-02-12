@@ -156,14 +156,7 @@ export default function AboutPageClient({ aboutData, isAdmin }: AboutPageClientP
           />
 
           {/* Background Pattern */}
-          <div className="absolute inset-0 opacity-5 z-0 bg-black/20">
-            <div className="absolute transform -rotate-45 -left-1/4 -top-1/4">
-              <div className="w-96 h-96 rounded-full bg-rugby-yellow"></div>
-            </div>
-            <div className="absolute transform -rotate-45 -right-1/4 -bottom-1/4">
-              <div className="w-96 h-96 rounded-full bg-rugby-yellow"></div>
-            </div>
-          </div>
+          <div className="absolute inset-0 opacity-5 z-0 bg-black/20"></div>
 
           <div className="relative container mx-auto px-4 flex flex-col lg:flex-row items-center justify-between gap-12 z-10">
             {/* Text Content */}

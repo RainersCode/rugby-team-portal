@@ -130,9 +130,13 @@ export function MobileNav() {
       <SheetTrigger asChild>
         <Button
           variant="ghost"
-          className="mr-2 px-0 text-base hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 md:hidden"
+          className="mr-2 px-2 text-base hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 md:hidden group"
         >
-          <Menu className="h-6 w-6" />
+          <div className="flex flex-col gap-1.5 items-center justify-center w-6">
+            <div className="w-6 h-[2px] bg-rugby-teal transition-all duration-200 group-hover:w-5" />
+            <div className="w-5 h-[2px] bg-rugby-teal transition-all duration-200 group-hover:w-4" />
+            <div className="w-4 h-[2px] bg-rugby-teal transition-all duration-200 group-hover:w-6" />
+          </div>
           <span className="sr-only">Toggle Menu</span>
         </Button>
       </SheetTrigger>

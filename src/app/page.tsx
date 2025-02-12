@@ -14,7 +14,7 @@ export const revalidate = 3600; // Revalidate every hour
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  const cookieStore = await cookies();
+  const cookieStore = cookies();
   const supabase = createServerComponentClient({ cookies: () => cookieStore });
 
   // Fetch latest articles from Supabase
@@ -132,6 +132,66 @@ export default async function Home() {
         </div>
       </section>
 
+      {/* Latest Matches Section */}
+      <LatestMatches
+        upcomingMatches={upcomingMatches || []}
+        completedMatches={completedMatches || []}
+      />
+
+      {/* Call to Action Section */}
+      <section className="relative py-24 bg-rugby-teal/60 overflow-hidden">
+        {/* Background Image */}
+        <div 
+          className="absolute inset-0 z-0"
+          style={{
+            backgroundImage: 'url("/fnx banner png.png")',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            opacity: 0.9
+          }}
+        />
+
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-5 z-0 bg-black/20"></div>
+
+        <div className="relative container mx-auto px-4 flex flex-col lg:flex-row items-center justify-between gap-12 z-10">
+          {/* Text Content */}
+          <div className="flex-1 text-white text-center lg:text-left">
+            <h2 className="text-4xl lg:text-5xl font-bold mb-6 drop-shadow-lg">
+              Join Our Rugby Family
+            </h2>
+            <p className="text-xl lg:text-2xl mb-8 opacity-90 drop-shadow-lg">
+              Be part of something special. Train with the best, play with
+              passion, and create lasting memories.
+            </p>
+            <div className="flex flex-wrap gap-4 justify-center lg:justify-start">
+              <Button 
+                href="/contact"
+                variant="primary"
+                size="lg"
+                className="bg-white text-rugby-teal hover:bg-white/90"
+              >
+                Get Started
+              </Button>
+              <Button 
+                href="/activities"
+                variant="outline"
+                size="lg"
+                className="border-white text-white hover:bg-white hover:text-rugby-teal"
+              >
+                View Schedule
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Featured Training Programs */}
+      {programs.length > 0 && (
+        <FeaturedPrograms programs={programs as TrainingProgram[]} />
+      )}
+
       {/* Twitter Feed Section */}
       <section className="container-width">
         <div className="flex flex-col mb-8">
@@ -173,62 +233,6 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Call to Action Section */}
-      <section className="relative py-24 bg-rugby-teal/60 overflow-hidden">
-        {/* Background Image */}
-        <div 
-          className="absolute inset-0 z-0"
-          style={{
-            backgroundImage: 'url("/fnx banner png.png")',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat',
-            opacity: 0.9
-          }}
-        />
-
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-5 z-0 bg-black/20">
-          <div className="absolute transform -rotate-45 -left-1/4 -top-1/4">
-            <div className="w-96 h-96 rounded-full bg-rugby-yellow"></div>
-          </div>
-          <div className="absolute transform -rotate-45 -right-1/4 -bottom-1/4">
-            <div className="w-96 h-96 rounded-full bg-rugby-yellow"></div>
-          </div>
-        </div>
-
-        <div className="relative container mx-auto px-4 flex flex-col lg:flex-row items-center justify-between gap-12 z-10">
-          {/* Text Content */}
-          <div className="flex-1 text-white text-center lg:text-left">
-            <h2 className="text-4xl lg:text-5xl font-bold mb-6 drop-shadow-lg">
-              Join Our Rugby Family
-            </h2>
-            <p className="text-xl lg:text-2xl mb-8 opacity-90 drop-shadow-lg">
-              Be part of something special. Train with the best, play with
-              passion, and create lasting memories.
-            </p>
-            <div className="flex flex-wrap gap-4 justify-center lg:justify-start">
-              <Button 
-                href="/contact"
-                variant="primary"
-                size="lg"
-                className="bg-white text-rugby-teal hover:bg-white/90"
-              >
-                Get Started
-              </Button>
-              <Button 
-                href="/activities"
-                variant="outline"
-                size="lg"
-                className="border-white text-white hover:bg-white hover:text-rugby-teal"
-              >
-                View Schedule
-              </Button>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Instagram Feed Section */}
       <section className="container-width">
         <div className="flex justify-between items-center mb-8">
@@ -249,24 +253,6 @@ export default async function Home() {
           limit={8}
         />
       </section>
-
-      {/* Featured Training Programs */}
-      {programs.length > 0 && (
-        <FeaturedPrograms programs={programs as TrainingProgram[]} />
-      )}
-
-      {/* Latest Matches Section */}
-      {(upcomingMatches?.length ?? 0) > 0 ||
-      (completedMatches?.length ?? 0) > 0 ? (
-        <section className="w-full bg-white dark:bg-gray-800/50 py-16">
-          <div className="container-width">
-            <LatestMatches
-              upcomingMatches={upcomingMatches || []}
-              completedMatches={completedMatches || []}
-            />
-          </div>
-        </section>
-      ) : null}
 
       {/* Sponsors Section */}
       <section className="w-full bg-gray-50 dark:bg-gray-900 py-16">
