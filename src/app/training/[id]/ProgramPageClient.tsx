@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Card } from '@/components/ui/card';
@@ -33,7 +34,9 @@ const programTranslations = {
       beginner: "Beginner",
       intermediate: "Intermediate",
       advanced: "Advanced"
-    }
+    },
+    showMore: "Show More",
+    showLess: "Show Less",
   },
   lv: {
     aboutProgram: "Par Šo Programmu",
@@ -51,7 +54,9 @@ const programTranslations = {
       beginner: "Iesācējs",
       intermediate: "Vidējs",
       advanced: "Augsts"
-    }
+    },
+    showMore: "Rādīt Vairāk",
+    showLess: "Rādīt Mazāk",
   }
 };
 
@@ -63,6 +68,14 @@ interface ProgramPageClientProps {
 export default function ProgramPageClient({ program, workouts }: ProgramPageClientProps) {
   const { language } = useLanguage();
   const t = programTranslations[language];
+  const [expandedDescriptions, setExpandedDescriptions] = useState<Record<string, boolean>>({});
+
+  const toggleDescription = (exerciseId: string) => {
+    setExpandedDescriptions(prev => ({
+      ...prev,
+      [exerciseId]: !prev[exerciseId]
+    }));
+  };
 
   // Group workouts by week
   const workoutsByWeek = workouts.reduce<Record<number, ProgramWorkout[]>>((acc, workout) => {
@@ -198,33 +211,41 @@ export default function ProgramPageClient({ program, workouts }: ProgramPageClie
                               <h4 className="font-medium text-gray-900 dark:text-gray-100 text-lg">
                                 {workoutExercise.exercise?.name}
                               </h4>
-                              <div className="flex items-center flex-wrap gap-3 text-sm mt-2">
+                              <div className="flex items-center flex-wrap gap-2 text-sm mt-2">
                                 {workoutExercise.sets && (
-                                  <Badge className="bg-rugby-teal text-white hover:bg-rugby-teal/90 px-3 py-1 text-base">
+                                  <Badge className="bg-rugby-teal text-white hover:bg-rugby-teal/90 px-2 py-0.5 text-sm sm:text-base sm:px-3 sm:py-1">
                                     {workoutExercise.sets} {t.sets}
                                   </Badge>
                                 )}
                                 {workoutExercise.reps && (
-                                  <Badge className="bg-amber-500 text-white hover:bg-amber-600 px-3 py-1 text-base">
+                                  <Badge className="bg-amber-500 text-white hover:bg-amber-600 px-2 py-0.5 text-sm sm:text-base sm:px-3 sm:py-1">
                                     {workoutExercise.reps} {t.reps}
                                   </Badge>
                                 )}
                                 {workoutExercise.duration_seconds && (
-                                  <Badge className="bg-rugby-red text-white hover:bg-rugby-red/90 px-3 py-1 text-base">
+                                  <Badge className="bg-rugby-red text-white hover:bg-rugby-red/90 px-2 py-0.5 text-sm sm:text-base sm:px-3 sm:py-1">
                                     {workoutExercise.duration_seconds}s
                                   </Badge>
                                 )}
                                 {workoutExercise.rest_seconds && (
-                                  <Badge className="bg-gray-600 text-white hover:bg-gray-700 px-3 py-1 text-base">
+                                  <Badge className="bg-gray-600 text-white hover:bg-gray-700 px-2 py-0.5 text-sm sm:text-base sm:px-3 sm:py-1">
                                     {workoutExercise.rest_seconds}s {t.rest}
                                   </Badge>
                                 )}
                               </div>
                               
                               {workoutExercise.exercise?.description && (
-                                <p className="text-sm text-gray-600 dark:text-gray-300 mt-2 line-clamp-2">
-                                  {workoutExercise.exercise.description}
-                                </p>
+                                <div className="mt-2">
+                                  <p className={`text-sm text-gray-600 dark:text-gray-300 ${!expandedDescriptions[workoutExercise.id] ? 'line-clamp-2' : ''}`}>
+                                    {workoutExercise.exercise.description}
+                                  </p>
+                                  <button
+                                    onClick={() => toggleDescription(workoutExercise.id)}
+                                    className="text-rugby-teal hover:text-rugby-teal/80 text-sm mt-1 font-medium"
+                                  >
+                                    {expandedDescriptions[workoutExercise.id] ? t.showLess : t.showMore}
+                                  </button>
+                                </div>
                               )}
                             </div>
 

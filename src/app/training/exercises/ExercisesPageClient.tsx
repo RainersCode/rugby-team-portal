@@ -174,7 +174,7 @@ export default function ExercisesPageClient({ groupedExercises }: ExercisesPageC
                       <h3 className="text-xl font-semibold mb-2 group-hover:text-rugby-teal transition-colors">
                         {exercise.name}
                       </h3>
-                      <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-2">
+                      <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">
                         {exercise.description}
                       </p>
 
