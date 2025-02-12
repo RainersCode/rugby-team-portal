@@ -39,11 +39,7 @@ export default function HomePageClient({
       </div>
 
       {/* News Grid Section */}
-      <section className="w-full bg-rugby-teal/5 dark:bg-rugby-teal/10">
-        <div className="container-width py-16">
-          <LatestNews articles={articles} />
-        </div>
-      </section>
+      <LatestNews articles={articles} />
 
       {/* Latest Matches Section */}
       <Suspense fallback={<div className="h-48 flex items-center justify-center">Loading matches...</div>}>
@@ -55,7 +51,7 @@ export default function HomePageClient({
       {/* Training */}
       {programs.length > 0 && (
         <section className="w-full bg-rugby-teal/5 dark:bg-rugby-teal/10">
-          <div className="container-width py-16 px-2 sm:px-0">
+          <div className="container-width py-12 px-2 sm:px-0">
             <div className="flex justify-between items-center mb-8">
               <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
                 {translations.training}
@@ -69,7 +65,7 @@ export default function HomePageClient({
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {programs.map((program) => (
-                <Link key={program.id} href={`/training/${program.id}`} className="w-[95vw] sm:w-auto mx-auto sm:mx-0">
+                <Link key={program.id} href={`/training/${program.id}`}>
                   <Card className="group relative flex flex-col overflow-hidden hover:shadow-lg transition-all duration-300 border-rugby-teal/20 hover:border-rugby-teal bg-white dark:bg-gray-800">
                     {/* Program Image Container */}
                     <div className="relative w-full pt-[50%] overflow-hidden">
@@ -134,7 +130,7 @@ export default function HomePageClient({
       )}
 
       {/* Call to Action Section */}
-      <section className="relative py-24 bg-rugby-teal/60 overflow-hidden">
+      <section className="relative py-12 sm:py-24 bg-rugby-teal/60 overflow-hidden">
         {/* Background Image */}
         <div 
           className="absolute inset-0 z-0"
@@ -153,26 +149,26 @@ export default function HomePageClient({
           </div>
         </div>
 
-        <div className="relative container mx-auto px-4 flex flex-col lg:flex-row items-center justify-between gap-12 z-10">
+        <div className="relative container mx-auto px-4 flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-12 z-10">
           {/* Text Content */}
           <div className="flex-1 text-white text-center lg:text-left">
-            <h2 className="text-4xl lg:text-5xl font-bold mb-6 drop-shadow-lg">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 drop-shadow-lg">
               Join Our Rugby Family
             </h2>
-            <p className="text-xl lg:text-2xl mb-8 opacity-90 drop-shadow-lg">
+            <p className="text-lg sm:text-xl lg:text-2xl mb-6 sm:mb-8 opacity-90 drop-shadow-lg">
               Be part of something special. Train with the best, play with
               passion, and create lasting memories.
             </p>
-            <div className="flex flex-col sm:flex-row gap-6 justify-center lg:justify-start">
+            <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center lg:justify-start">
               <a
                 href="/join"
-                className="inline-flex items-center justify-center rounded-lg bg-white px-8 py-4 text-lg font-semibold text-rugby-teal transition-all hover:bg-white/90 hover:scale-105 min-w-[200px]"
+                className="inline-flex items-center justify-center rounded-lg bg-white px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-semibold text-rugby-teal transition-all hover:bg-white/90 hover:scale-105 min-w-[160px] sm:min-w-[200px]"
               >
                 Join Now
               </a>
               <a
                 href="/contact"
-                className="inline-flex items-center justify-center rounded-lg bg-transparent border-2 border-white px-8 py-4 text-lg font-semibold text-white transition-all hover:bg-white/10 hover:scale-105 min-w-[200px]"
+                className="inline-flex items-center justify-center rounded-lg bg-transparent border-2 border-white px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-semibold text-white transition-all hover:bg-white/10 hover:scale-105 min-w-[160px] sm:min-w-[200px]"
               >
                 Contact Us
               </a>

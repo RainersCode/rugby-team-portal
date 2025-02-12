@@ -41,13 +41,12 @@ export default function LatestMatches({ upcomingMatches, completedMatches }: Lat
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
               {upcomingMatches.map((match) => (
-                <div key={match.id} className="w-[95vw] sm:w-auto mx-auto sm:mx-0">
-                  <MatchCard 
-                    match={match} 
-                    isLocalMatch={true}
-                    variant="default"
-                  />
-                </div>
+                <MatchCard 
+                  key={match.id} 
+                  match={match} 
+                  isLocalMatch={true}
+                  variant="default"
+                />
               ))}
             </div>
           </>
