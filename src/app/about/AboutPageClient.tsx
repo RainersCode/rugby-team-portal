@@ -7,6 +7,35 @@ import { Button } from '@/components/ui/button'
 import { useLanguage } from "@/context/LanguageContext"
 import Image from "next/image"
 
+const aboutTranslations = {
+  en: {
+    editContent: "Edit About Page Content",
+    ourPurpose: "Our Purpose",
+    ourMission: "Our Mission",
+    whatWeStandFor: "What We Stand For",
+    ourValues: "Our Values",
+    ourJourney: "Our Journey",
+    ourHistory: "Our History",
+    keyAchievements: "Key Achievements",
+    teamHighlights: "Team Highlights",
+    ourTeam: "Our Team",
+    editTeam: "Edit Team"
+  },
+  lv: {
+    editContent: "Rediģēt Par Mums Saturu",
+    ourPurpose: "Mūsu Mērķis",
+    ourMission: "Mūsu Misija",
+    whatWeStandFor: "Mūsu Principi",
+    ourValues: "Mūsu Vērtības",
+    ourJourney: "Mūsu Ceļš",
+    ourHistory: "Mūsu Vēsture",
+    keyAchievements: "Galvenie Sasniegumi",
+    teamHighlights: "Komandas Sasniegumi",
+    ourTeam: "Mūsu Komanda",
+    editTeam: "Rediģēt Komandu"
+  }
+};
+
 interface TeamHighlight {
   title: string
   description: string
@@ -37,7 +66,7 @@ interface AboutPageClientProps {
 }
 
 export default function AboutPageClient({ aboutData, teamMembers = [], isAdmin }: AboutPageClientProps) {
-  const { translations } = useLanguage()
+  const { language } = useLanguage()
 
   const fadeInUp = {
     initial: { opacity: 0, y: 20 },
@@ -53,7 +82,7 @@ export default function AboutPageClient({ aboutData, teamMembers = [], isAdmin }
           <Link href="/admin/about/edit">
             <Button variant="primary" size="sm">
               <Edit className="w-4 h-4 mr-2" />
-              Edit About Page Content
+              {aboutTranslations[language].editContent}
             </Button>
           </Link>
         </div>
@@ -69,10 +98,10 @@ export default function AboutPageClient({ aboutData, teamMembers = [], isAdmin }
           >
             <div className="inline-flex items-center gap-2 bg-rugby-teal/10 text-rugby-teal rounded-full px-4 py-1">
               <Target className="w-4 h-4" />
-              <span className="text-sm font-medium">Our Purpose</span>
+              <span className="text-sm font-medium">{aboutTranslations[language].ourPurpose}</span>
             </div>
             <div>
-              <h2 className="text-3xl font-bold mb-6">{translations.ourMission}</h2>
+              <h2 className="text-3xl font-bold mb-6">{aboutTranslations[language].ourMission}</h2>
               <div className="prose prose-gray max-w-none">
                 <p className="text-gray-600 leading-relaxed text-lg">
                   {aboutData.mission}
@@ -87,10 +116,10 @@ export default function AboutPageClient({ aboutData, teamMembers = [], isAdmin }
           >
             <div className="inline-flex items-center gap-2 bg-rugby-teal/10 text-rugby-teal rounded-full px-4 py-1">
               <Heart className="w-4 h-4" />
-              <span className="text-sm font-medium">What We Stand For</span>
+              <span className="text-sm font-medium">{aboutTranslations[language].whatWeStandFor}</span>
             </div>
             <div>
-              <h2 className="text-3xl font-bold mb-6">{translations.ourValues}</h2>
+              <h2 className="text-3xl font-bold mb-6">{aboutTranslations[language].ourValues}</h2>
               <div className="prose prose-gray max-w-none">
                 <p className="text-gray-600 leading-relaxed text-lg">
                   {aboutData.values}
@@ -111,10 +140,10 @@ export default function AboutPageClient({ aboutData, teamMembers = [], isAdmin }
           >
             <div className="inline-flex items-center gap-2 bg-rugby-teal/10 text-rugby-teal rounded-full px-4 py-1">
               <Calendar className="w-4 h-4" />
-              <span className="text-sm font-medium">Our Journey</span>
+              <span className="text-sm font-medium">{aboutTranslations[language].ourJourney}</span>
             </div>
             <div>
-              <h2 className="text-3xl font-bold mb-6">Our History</h2>
+              <h2 className="text-3xl font-bold mb-6">{aboutTranslations[language].ourHistory}</h2>
               <div className="prose prose-gray max-w-none">
                 <p className="text-gray-600 leading-relaxed text-lg">
                   {aboutData.history}
@@ -129,9 +158,9 @@ export default function AboutPageClient({ aboutData, teamMembers = [], isAdmin }
           >
             <div className="inline-flex items-center gap-2 bg-rugby-teal/10 text-rugby-teal rounded-full px-4 py-1">
               <Star className="w-4 h-4" />
-              <span className="text-sm font-medium">Key Achievements</span>
+              <span className="text-sm font-medium">{aboutTranslations[language].keyAchievements}</span>
             </div>
-            <h2 className="text-3xl font-bold mb-6">Team Highlights</h2>
+            <h2 className="text-3xl font-bold mb-6">{aboutTranslations[language].teamHighlights}</h2>
             <div className="space-y-4">
               {aboutData.team_highlights?.map((highlight: TeamHighlight, index: number) => (
                 <motion.div 
@@ -154,12 +183,12 @@ export default function AboutPageClient({ aboutData, teamMembers = [], isAdmin }
       {teamMembers.length > 0 && (
         <section className="container-width">
           <div className="flex items-center justify-between mb-8">
-            <h2 className="text-3xl font-bold">{translations.ourTeam}</h2>
+            <h2 className="text-3xl font-bold">{aboutTranslations[language].ourTeam}</h2>
             {isAdmin && (
               <Link href="/admin/team">
                 <Button variant="outline" size="sm">
                   <Edit className="w-4 h-4 mr-2" />
-                  Edit Team
+                  {aboutTranslations[language].editTeam}
                 </Button>
               </Link>
             )}
