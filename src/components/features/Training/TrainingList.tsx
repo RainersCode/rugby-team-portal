@@ -18,14 +18,14 @@ interface TrainingListProps {
 
 function TrainingCard({ training }: { training: Training }) {
   return (
-    <Link href={`/training/${training.id}`} className="block h-[320px]">
-      <Card className="group relative overflow-hidden transition-all duration-300 border-rugby-teal/20 hover:border-rugby-teal hover:shadow-md h-full">
+    <Link href={`/training/${training.id}`} className="block h-[320px] relative">
+      <Card className="peer relative overflow-hidden transition-all duration-300 border-rugby-teal/20 hover:border-rugby-teal hover:shadow-md h-full">
         <div className="relative h-40 w-full overflow-hidden">
           <Image
             src={training.image || '/images/training-hero.jpg'}
             alt={training.title}
             fill
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
+            className="object-cover transition-transform duration-300 peer-hover:scale-105"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
         </div>
@@ -49,8 +49,8 @@ function TrainingCard({ training }: { training: Training }) {
             </div>
           </div>
         </div>
-        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-rugby-teal via-rugby-yellow to-rugby-teal transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-out" />
       </Card>
+      <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-rugby-teal via-rugby-yellow to-rugby-teal transform scale-x-0 peer-hover:scale-x-100 transition-transform duration-500 ease-out" />
     </Link>
   );
 }

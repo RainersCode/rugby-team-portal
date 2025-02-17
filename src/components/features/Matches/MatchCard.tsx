@@ -173,26 +173,28 @@ export default function MatchCard({ match, isLocalMatch, variant = 'default' }: 
   // Wrap the card in a link if it's a local match
   if (isLocalMatch) {
     return (
-      <Link href={`/matches/${match.id}`} className="block group">
+      <Link href={`/matches/${match.id}`} className="block relative">
         <Card 
-          className={`relative overflow-hidden transition-all duration-300 ${
+          className={`peer relative overflow-hidden transition-all duration-300 ${
             isLive ? 'ring-2 ring-rugby-red shadow-lg' : 'hover:shadow-lg border-rugby-teal/20'
-          } p-3 hover:border-rugby-teal backdrop-blur-sm`}
+          } p-3 hover:border-rugby-teal backdrop-blur-sm bg-white dark:bg-gray-800/90`}
         >
           {cardContent}
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-rugby-teal via-rugby-yellow to-rugby-teal transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-out" />
         </Card>
+        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-rugby-teal via-rugby-yellow to-rugby-teal transform scale-x-0 peer-hover:scale-x-100 transition-transform duration-500 ease-out" />
       </Link>
     );
   }
 
   // Return without link for non-local matches
   return (
-    <Card 
-      className="group relative overflow-hidden transition-all duration-300 border-rugby-teal/20 hover:border-rugby-teal hover:shadow-md p-3 backdrop-blur-sm"
-    >
-      {cardContent}
-      <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-rugby-teal via-rugby-yellow to-rugby-teal transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-out" />
-    </Card>
+    <div className="relative">
+      <Card 
+        className="peer relative overflow-hidden transition-all duration-300 border-rugby-teal/20 hover:border-rugby-teal hover:shadow-md p-3 backdrop-blur-sm bg-white dark:bg-gray-800/90"
+      >
+        {cardContent}
+      </Card>
+      <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-rugby-teal via-rugby-yellow to-rugby-teal transform scale-x-0 peer-hover:scale-x-100 transition-transform duration-500 ease-out" />
+    </div>
   );
 } 
