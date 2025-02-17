@@ -173,4 +173,13 @@ export interface GalleryItem {
   description?: string;
   image_url: string;
   created_at: string;
+}
+
+export interface Training {
+  id: string;
+  title: string;
+  description: string;
+  date: string;
+  location: string;
+  image?: string;
 } 
