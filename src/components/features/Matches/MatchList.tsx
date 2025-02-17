@@ -37,25 +37,29 @@ export default function MatchList({ matches, title, showViewAll = true }: MatchL
           </div>
         )}
 
-        {/* Mobile View (Swiper) */}
-        <div className="md:hidden">
-          <SwiperContainer
-            slidesPerView={1.2}
-            spaceBetween={16}
-          >
-            {matches.map((match) => (
-              <SwiperSlide key={match.id}>
-                <MatchCard match={match} isLocalMatch={true} />
-              </SwiperSlide>
-            ))}
-          </SwiperContainer>
-        </div>
-
-        {/* Desktop View (Grid) */}
-        <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {matches.map((match) => (
-            <MatchCard key={match.id} match={match} isLocalMatch={true} />
-          ))}
+        {/* Horizontal Scrollable List with contained overflow */}
+        <div className="relative -mx-5 px-5">
+          <div className="overflow-hidden">
+            <div className="-my-2">
+              <div className="py-2">
+                <SwiperContainer
+                  slidesPerView="auto"
+                  spaceBetween={16}
+                  navigation={true}
+                  pagination={false}
+                  className="!overflow-visible"
+                >
+                  {matches.map((match) => (
+                    <SwiperSlide key={match.id} className="!w-auto">
+                      <div className="w-[300px] sm:w-[320px] pt-2 pb-2 pr-2">
+                        <MatchCard match={match} isLocalMatch={true} />
+                      </div>
+                    </SwiperSlide>
+                  ))}
+                </SwiperContainer>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>

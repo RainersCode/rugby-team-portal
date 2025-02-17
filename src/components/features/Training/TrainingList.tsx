@@ -18,9 +18,9 @@ interface TrainingListProps {
 
 function TrainingCard({ training }: { training: Training }) {
   return (
-    <Link href={`/training/${training.id}`} className="block">
-      <Card className="group relative overflow-hidden transition-all duration-300 border-rugby-teal/20 hover:border-rugby-teal hover:shadow-md">
-        <div className="relative h-48 w-full overflow-hidden">
+    <Link href={`/training/${training.id}`} className="block h-[320px]">
+      <Card className="group relative overflow-hidden transition-all duration-300 border-rugby-teal/20 hover:border-rugby-teal hover:shadow-md h-full">
+        <div className="relative h-40 w-full overflow-hidden">
           <Image
             src={training.image || '/images/training-hero.jpg'}
             alt={training.title}
@@ -29,14 +29,14 @@ function TrainingCard({ training }: { training: Training }) {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
         </div>
-        <div className="p-4">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+        <div className="p-4 flex flex-col h-[calc(100%-160px)]">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1.5 line-clamp-1">
             {training.title}
           </h3>
-          <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-3">
+          <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-2">
             {training.description}
           </p>
-          <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+          <div className="mt-auto space-y-1.5 text-sm text-gray-600 dark:text-gray-400">
             <div className="flex items-center gap-1.5">
               <CalendarDays className="w-4 h-4 text-rugby-teal" />
               <span>
@@ -45,7 +45,7 @@ function TrainingCard({ training }: { training: Training }) {
             </div>
             <div className="flex items-center gap-1.5">
               <MapPin className="w-4 h-4 text-rugby-red" />
-              <span>{training.location}</span>
+              <span className="truncate">{training.location}</span>
             </div>
           </div>
         </div>
@@ -78,25 +78,29 @@ export default function TrainingList({ trainings, title, showViewAll = true }: T
           </div>
         )}
 
-        {/* Mobile View (Swiper) */}
-        <div className="md:hidden">
-          <SwiperContainer
-            slidesPerView={1.2}
-            spaceBetween={16}
-          >
-            {trainings.map((training) => (
-              <SwiperSlide key={training.id}>
-                <TrainingCard training={training} />
-              </SwiperSlide>
-            ))}
-          </SwiperContainer>
-        </div>
-
-        {/* Desktop View (Grid) */}
-        <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {trainings.map((training) => (
-            <TrainingCard key={training.id} training={training} />
-          ))}
+        {/* Horizontal Scrollable List with contained overflow */}
+        <div className="relative -mx-5 px-5">
+          <div className="overflow-hidden">
+            <div className="-my-2">
+              <div className="py-2">
+                <SwiperContainer
+                  slidesPerView="auto"
+                  spaceBetween={16}
+                  navigation={true}
+                  pagination={false}
+                  className="!overflow-visible"
+                >
+                  {trainings.map((training) => (
+                    <SwiperSlide key={training.id} className="!w-auto">
+                      <div className="w-[300px] sm:w-[320px] pt-2 pb-2 pr-2">
+                        <TrainingCard training={training} />
+                      </div>
+                    </SwiperSlide>
+                  ))}
+                </SwiperContainer>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>

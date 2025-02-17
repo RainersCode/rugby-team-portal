@@ -38,15 +38,15 @@ export default function MatchCard({ match, isLocalMatch, variant = 'default' }: 
   };
 
   const cardContent = (
-    <>
+    <div className="flex flex-col min-h-[200px]">
       {/* Competition & Status */}
-      <div className={`flex justify-between items-center ${variant === 'compact' ? 'mb-2' : 'mb-4'}`}>
-        <span className={`font-medium text-rugby-teal ${variant === 'compact' ? 'text-xs' : 'text-sm'} tracking-wide uppercase`}>
+      <div className="flex justify-between items-center mb-2">
+        <span className="font-medium text-rugby-teal text-xs tracking-wide uppercase">
           {match.competition}
         </span>
         <Badge 
           variant={isLive ? "destructive" : isCompleted ? "secondary" : "default"}
-          className={`${variant === 'compact' ? 'text-xs px-2 py-0.5' : 'px-3 py-1'} ${
+          className={`px-2 py-0.5 text-xs ${
             isLive 
               ? 'animate-pulse bg-rugby-red text-white font-semibold tracking-wider' 
               : isCompleted 
@@ -59,10 +59,10 @@ export default function MatchCard({ match, isLocalMatch, variant = 'default' }: 
       </div>
 
       {/* Teams & Score */}
-      <div className={`flex items-center justify-between ${variant === 'compact' ? 'gap-2' : 'gap-4'} mb-4`}>
+      <div className="flex items-center justify-between gap-3 mb-auto">
         {/* Home Team */}
-        <div className={`flex-1 flex ${variant === 'compact' ? 'items-center gap-2' : 'flex-col items-center text-center'}`}>
-          <div className={`relative ${variant === 'compact' ? 'w-8 h-8 flex-shrink-0' : 'w-20 h-20 mb-3'} transition-transform duration-300 hover:scale-105`}>
+        <div className="flex-1 flex flex-col items-center text-center min-h-[90px]">
+          <div className="relative w-12 h-12 mb-2 transition-transform duration-300 hover:scale-105">
             <Image
               src={match.home_team_image}
               alt={match.home_team}
@@ -70,40 +70,34 @@ export default function MatchCard({ match, isLocalMatch, variant = 'default' }: 
               className="object-contain drop-shadow-sm"
             />
           </div>
-          <span className={`${variant === 'compact' ? 'text-sm truncate' : 'text-base font-semibold text-gray-900 dark:text-gray-100'}`}>
+          <span className="text-xs font-medium text-gray-900 dark:text-gray-100 line-clamp-2">
             {match.home_team}
           </span>
         </div>
 
         {/* Score/VS */}
-        <div className="flex flex-col items-center justify-center">
+        <div className="flex flex-col items-center justify-center min-w-[60px]">
           {isCompleted ? (
-            <div className={`${variant === 'compact' ? 'text-base font-semibold' : 'text-2xl font-bold'} text-rugby-teal tracking-tight`}>
+            <div className="text-lg font-bold text-rugby-teal tracking-tight">
               {match.home_score} - {match.away_score}
             </div>
           ) : isLive ? (
-            variant === 'compact' ? (
-              <span className="text-base font-bold text-rugby-red">
+            <div className="flex flex-col items-center gap-0.5">
+              <div className="text-lg font-bold text-rugby-red tracking-tighter">
                 {match.home_score} - {match.away_score}
-              </span>
-            ) : (
-              <div className="flex flex-col items-center gap-1.5">
-                <div className="text-3xl font-bold text-rugby-red tracking-tighter">
-                  {match.home_score} - {match.away_score}
-                </div>
-                <span className="text-xs font-bold text-rugby-red bg-rugby-red/10 px-3 py-1 rounded-full animate-pulse tracking-wider">
-                  {translations.liveNow || 'LIVE NOW'}
-                </span>
               </div>
-            )
+              <span className="text-[10px] font-bold text-rugby-red bg-rugby-red/10 px-2 py-0.5 rounded-full animate-pulse tracking-wider">
+                {translations.liveNow || 'LIVE NOW'}
+              </span>
+            </div>
           ) : (
-            <div className={`text-rugby-yellow ${variant === 'compact' ? 'text-sm font-medium' : 'text-xl font-semibold tracking-widest'}`}>VS</div>
+            <div className="text-base font-semibold text-rugby-yellow tracking-widest">VS</div>
           )}
         </div>
 
         {/* Away Team */}
-        <div className={`flex-1 flex ${variant === 'compact' ? 'items-center gap-2' : 'flex-col items-center text-center'}`}>
-          <div className={`relative ${variant === 'compact' ? 'w-8 h-8 flex-shrink-0' : 'w-20 h-20 mb-3'} transition-transform duration-300 hover:scale-105`}>
+        <div className="flex-1 flex flex-col items-center text-center min-h-[90px]">
+          <div className="relative w-12 h-12 mb-2 transition-transform duration-300 hover:scale-105">
             <Image
               src={match.away_team_image}
               alt={match.away_team}
@@ -111,57 +105,57 @@ export default function MatchCard({ match, isLocalMatch, variant = 'default' }: 
               className="object-contain drop-shadow-sm"
             />
           </div>
-          <span className={`${variant === 'compact' ? 'text-sm truncate' : 'text-base font-semibold text-gray-900 dark:text-gray-100'}`}>
+          <span className="text-xs font-medium text-gray-900 dark:text-gray-100 line-clamp-2">
             {match.away_team}
           </span>
         </div>
       </div>
 
       {/* Match Details */}
-      <div className={`flex ${variant === 'compact' ? 'items-center justify-between text-xs' : 'flex-col gap-2 text-sm'} text-gray-600 dark:text-gray-400`}>
-        <div className="flex items-center gap-1.5">
-          <CalendarDays className={`${variant === 'compact' ? 'w-3.5 h-3.5' : 'w-4 h-4'} text-rugby-teal`} />
+      <div className="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400 mt-auto">
+        <div className="flex items-center gap-1">
+          <CalendarDays className="w-3.5 h-3.5 text-rugby-teal" />
           <span className="font-medium">
-            {format(new Date(match.match_date), variant === 'compact' ? 'MMM d, HH:mm' : 'MMM d, yyyy • HH:mm')}
+            {format(new Date(match.match_date), 'MMM d • HH:mm')}
           </span>
         </div>
-        <div className="flex items-center gap-1.5">
-          <MapPin className={`${variant === 'compact' ? 'w-3.5 h-3.5' : 'w-4 h-4'} text-rugby-red`} />
-          <span className={`font-medium ${variant === 'compact' ? 'truncate max-w-[150px]' : ''}`}>{match.venue}</span>
+        <div className="flex items-center gap-1">
+          <MapPin className="w-3.5 h-3.5 text-rugby-red" />
+          <span className="font-medium truncate max-w-[80px]">{match.venue}</span>
         </div>
       </div>
 
-      {/* Expandable Match Details (only for non-compact view) */}
-      {variant !== 'compact' && hasDetails && (
+      {/* Expandable Match Details */}
+      {hasDetails && (
         <>
           <button
             onClick={(e) => {
               e.preventDefault();
               setIsExpanded(!isExpanded);
             }}
-            className="mt-4 w-full flex items-center justify-center gap-1.5 text-sm font-medium text-rugby-teal hover:text-rugby-teal/80 transition-colors bg-rugby-teal/5 hover:bg-rugby-teal/10 py-2 rounded-md"
+            className="mt-2 w-full flex items-center justify-center gap-1 text-xs font-medium text-rugby-teal hover:text-rugby-teal/80 transition-colors bg-rugby-teal/5 hover:bg-rugby-teal/10 py-1 rounded-md"
           >
             {isExpanded ? (
               <>
-                {translations.showLess || 'Show Less'} <ChevronUp className="w-4 h-4" />
+                {translations.showLess || 'Show Less'} <ChevronUp className="w-3.5 h-3.5" />
               </>
             ) : (
               <>
-                {translations.showDetails || 'Show Details'} <ChevronDown className="w-4 h-4" />
+                {translations.showDetails || 'Show Details'} <ChevronDown className="w-3.5 h-3.5" />
               </>
             )}
           </button>
 
           {isExpanded && (
-            <div className="mt-4 pt-4 border-t border-rugby-teal/20 space-y-4">
+            <div className="mt-2 pt-2 border-t border-rugby-teal/20 space-y-2">
               {match.description && (
-                <div className="space-y-2">
-                  <h4 className="font-semibold text-sm text-rugby-teal flex items-center gap-2">
-                    <span className="bg-rugby-teal/10 px-2 py-1 rounded-md">
+                <div className="space-y-1">
+                  <h4 className="font-semibold text-xs text-rugby-teal flex items-center gap-1">
+                    <span className="bg-rugby-teal/10 px-2 py-0.5 rounded">
                       {translations.matchSummary || 'Match Summary'}
                     </span>
                   </h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+                  <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed line-clamp-2">
                     {match.description}
                   </p>
                 </div>
@@ -173,7 +167,7 @@ export default function MatchCard({ match, isLocalMatch, variant = 'default' }: 
           )}
         </>
       )}
-    </>
+    </div>
   );
 
   // Wrap the card in a link if it's a local match
@@ -183,7 +177,7 @@ export default function MatchCard({ match, isLocalMatch, variant = 'default' }: 
         <Card 
           className={`relative overflow-hidden transition-all duration-300 ${
             isLive ? 'ring-2 ring-rugby-red shadow-lg' : 'hover:shadow-lg border-rugby-teal/20'
-          } ${variant === 'compact' ? 'p-3' : 'p-4'} hover:border-rugby-teal backdrop-blur-sm`}
+          } p-3 hover:border-rugby-teal backdrop-blur-sm`}
         >
           {cardContent}
           <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-rugby-teal via-rugby-yellow to-rugby-teal transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-out" />
@@ -195,9 +189,7 @@ export default function MatchCard({ match, isLocalMatch, variant = 'default' }: 
   // Return without link for non-local matches
   return (
     <Card 
-      className={`group relative overflow-hidden transition-all duration-300 border-rugby-teal/20 hover:border-rugby-teal hover:shadow-md ${
-        variant === 'compact' ? 'p-3' : 'p-4'
-      } backdrop-blur-sm`}
+      className="group relative overflow-hidden transition-all duration-300 border-rugby-teal/20 hover:border-rugby-teal hover:shadow-md p-3 backdrop-blur-sm"
     >
       {cardContent}
       <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-rugby-teal via-rugby-yellow to-rugby-teal transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-out" />
