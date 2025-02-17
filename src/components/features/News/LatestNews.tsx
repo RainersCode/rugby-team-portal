@@ -97,7 +97,7 @@ export default function LatestNews({ articles }: LatestNewsProps) {
         <div className="md:hidden">
           <SwiperContainer
             slidesPerView={1.2}
-            spaceBetween={16}
+            spaceBetween={12}
           >
             {articles?.slice(0, 6).map((article) => (
               <SwiperSlide key={article.id}>
@@ -108,7 +108,7 @@ export default function LatestNews({ articles }: LatestNewsProps) {
         </div>
 
         {/* Desktop View (Grid) */}
-        <div className="hidden md:grid grid-cols-3 gap-6">
+        <div className="hidden md:grid grid-cols-3 gap-4">
           {articles?.slice(0, 6).map((article) => renderArticle(article))}
         </div>
       </div>
