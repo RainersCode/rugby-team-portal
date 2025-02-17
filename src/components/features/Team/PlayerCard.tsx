@@ -47,7 +47,7 @@ export default function PlayerCard({ player }: PlayerCardProps) {
         {/* Content wrapper with overflow handling */}
         <div className="relative overflow-hidden">
           {/* Image container with gradient overlay */}
-          <div className="relative h-[300px] sm:h-[280px]">
+          <div className="relative aspect-[3/4]">
             <Image
               src={player.image || 'https://picsum.photos/seed/player1/800/1200'} // Fallback image if none provided
               alt={player.name}
@@ -59,36 +59,36 @@ export default function PlayerCard({ player }: PlayerCardProps) {
             
             {/* Player name and position overlay */}
             <div className="absolute bottom-0 left-0 right-0 p-4">
-              <h3 className="text-xl font-bold text-white peer-hover:text-rugby-yellow transition-colors line-clamp-1">
+              <h3 className="text-lg sm:text-xl font-bold text-white peer-hover:text-rugby-yellow transition-colors line-clamp-1">
                 {player.name}
               </h3>
               <div className="flex items-center gap-2 text-white/90 mt-1">
-                <span className="text-sm uppercase tracking-wider">{player.position}</span>
+                <span className="text-xs sm:text-sm uppercase tracking-wider">{player.position}</span>
                 <span className="w-1.5 h-1.5 rounded-full bg-rugby-yellow/80" />
-                <span className="text-sm font-medium">#{player.number}</span>
+                <span className="text-xs sm:text-sm font-medium">#{player.number}</span>
               </div>
             </div>
           </div>
 
-          {/* Player info section - Only shown on larger screens */}
-          <div className="hidden sm:block p-4 bg-white dark:bg-gray-800">
+          {/* Player info section - Shown on all screens */}
+          <div className="p-2 sm:p-4 bg-white dark:bg-gray-800">
             {/* Stats grid */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="text-center p-2 bg-rugby-teal/5 dark:bg-rugby-teal/10 rounded-lg">
-                <p className="text-xl font-bold text-rugby-teal">{player.stats?.matches || 0}</p>
-                <p className="text-xs uppercase tracking-wider text-gray-600 dark:text-gray-300">{t.matches}</p>
+            <div className="grid grid-cols-2 gap-2 sm:gap-4">
+              <div className="text-center p-1.5 sm:p-2 bg-rugby-teal/5 dark:bg-rugby-teal/10 rounded-lg">
+                <p className="text-base sm:text-xl font-bold text-rugby-teal">{player.stats?.matches || 0}</p>
+                <p className="text-[10px] sm:text-xs uppercase tracking-wider text-gray-600 dark:text-gray-300">{t.matches}</p>
               </div>
-              <div className="text-center p-2 bg-rugby-yellow/5 dark:bg-rugby-yellow/10 rounded-lg">
-                <p className="text-xl font-bold text-rugby-yellow">{player.stats?.tries || 0}</p>
-                <p className="text-xs uppercase tracking-wider text-gray-600 dark:text-gray-300">{t.tries}</p>
+              <div className="text-center p-1.5 sm:p-2 bg-rugby-yellow/5 dark:bg-rugby-yellow/10 rounded-lg">
+                <p className="text-base sm:text-xl font-bold text-rugby-yellow">{player.stats?.tries || 0}</p>
+                <p className="text-[10px] sm:text-xs uppercase tracking-wider text-gray-600 dark:text-gray-300">{t.tries}</p>
               </div>
-              <div className="text-center p-2 bg-rugby-teal/5 dark:bg-rugby-teal/10 rounded-lg">
-                <p className="text-xl font-bold text-rugby-teal">{player.stats?.assists || 0}</p>
-                <p className="text-xs uppercase tracking-wider text-gray-600 dark:text-gray-300">{t.assists}</p>
+              <div className="text-center p-1.5 sm:p-2 bg-rugby-teal/5 dark:bg-rugby-teal/10 rounded-lg">
+                <p className="text-base sm:text-xl font-bold text-rugby-teal">{player.stats?.assists || 0}</p>
+                <p className="text-[10px] sm:text-xs uppercase tracking-wider text-gray-600 dark:text-gray-300">{t.assists}</p>
               </div>
-              <div className="text-center p-2 bg-rugby-yellow/5 dark:bg-rugby-yellow/10 rounded-lg">
-                <p className="text-xl font-bold text-rugby-yellow">{player.stats?.tackles || 0}</p>
-                <p className="text-xs uppercase tracking-wider text-gray-600 dark:text-gray-300">{t.tackles}</p>
+              <div className="text-center p-1.5 sm:p-2 bg-rugby-yellow/5 dark:bg-rugby-yellow/10 rounded-lg">
+                <p className="text-base sm:text-xl font-bold text-rugby-yellow">{player.stats?.tackles || 0}</p>
+                <p className="text-[10px] sm:text-xs uppercase tracking-wider text-gray-600 dark:text-gray-300">{t.tackles}</p>
               </div>
             </div>
           </div>
