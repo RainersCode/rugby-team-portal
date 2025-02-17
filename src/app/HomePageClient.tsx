@@ -44,7 +44,7 @@ export default function HomePageClient({
       <LatestNews articles={articles} />
 
       {/* Call to Action Section */}
-      <section className="relative py-12 sm:py-24 bg-rugby-teal/60 overflow-hidden">
+      <section className="relative py-6 sm:py-24 bg-rugby-teal/60 overflow-hidden">
         {/* Background Image */}
         <div 
           className="absolute inset-0 z-0"
@@ -59,19 +59,19 @@ export default function HomePageClient({
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-5 z-0 bg-black/20" />
 
-        <div className="relative container mx-auto px-4 flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-12 z-10">
+        <div className="relative container mx-auto px-4 flex flex-col lg:flex-row items-center justify-between gap-3 lg:gap-12 z-10">
           {/* Text Content */}
           <div className="flex-1 text-white text-center lg:text-left">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 drop-shadow-lg">
+            <h2 className="text-xl sm:text-4xl lg:text-5xl font-bold mb-2 sm:mb-6 drop-shadow-lg">
               {translations.joinOurFamily}
             </h2>
-            <p className="text-lg sm:text-xl lg:text-2xl mb-6 sm:mb-8 opacity-90 drop-shadow-lg">
+            <p className="text-sm sm:text-xl lg:text-2xl mb-3 sm:mb-8 opacity-90 drop-shadow-lg">
               {translations.joinSubheading}
             </p>
             <div className="flex justify-center lg:justify-start">
               <a
                 href="/contact"
-                className="inline-flex items-center justify-center rounded-lg bg-white px-6 py-2.5 text-sm font-semibold text-rugby-teal transition-all hover:bg-white/90 hover:scale-105 min-w-[140px]"
+                className="inline-flex items-center justify-center rounded-lg bg-white px-4 py-1.5 sm:px-6 sm:py-2.5 text-sm font-semibold text-rugby-teal transition-all hover:bg-white/90 hover:scale-105 min-w-[100px] sm:min-w-[140px]"
               >
                 {translations.joinUs}
               </a>

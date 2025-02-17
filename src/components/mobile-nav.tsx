@@ -153,14 +153,14 @@ export function MobileNav() {
     };
 
     return (
-      <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-800">
+      <div className="px-6 py-4 border-t border-white/20">
         <div className="flex flex-col space-y-2">
-          <div className="text-sm font-medium text-muted-foreground">{translations.language}</div>
+          <div className="text-sm font-medium text-white/80">{translations.language}</div>
           <div className="flex flex-col space-y-1">
             <button
               onClick={() => handleLanguageChange('en')}
               className={`flex items-center justify-between px-3 py-2 text-sm rounded-md transition-colors ${
-                language === 'en' ? 'bg-rugby-teal text-white' : 'hover:bg-rugby-teal/10'
+                language === 'en' ? 'bg-white text-rugby-teal' : 'text-white hover:bg-white/10'
               }`}
             >
               <div className="flex items-center">
@@ -172,7 +172,7 @@ export function MobileNav() {
             <button
               onClick={() => handleLanguageChange('lv')}
               className={`flex items-center justify-between px-3 py-2 text-sm rounded-md transition-colors ${
-                language === 'lv' ? 'bg-rugby-teal text-white' : 'hover:bg-rugby-teal/10'
+                language === 'lv' ? 'bg-white text-rugby-teal' : 'text-white hover:bg-white/10'
               }`}
             >
               <div className="flex items-center">
@@ -192,33 +192,25 @@ export function MobileNav() {
       <SheetTrigger asChild>
         <Button
           variant="ghost"
-          className="mr-2 px-2 text-base hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 md:hidden group"
+          className="mr-2 px-2 text-base hover:bg-white/5 focus-visible:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 md:hidden group rounded-full"
         >
           <div className="flex flex-col gap-1.5 items-center justify-center w-6">
-            <div className="w-6 h-[2px] bg-rugby-teal transition-all duration-200 group-hover:w-5" />
-            <div className="w-5 h-[2px] bg-rugby-teal transition-all duration-200 group-hover:w-4" />
-            <div className="w-4 h-[2px] bg-rugby-teal transition-all duration-200 group-hover:w-6" />
+            <div className="w-6 h-[2px] bg-rugby-teal transition-all duration-200 group-hover:bg-rugby-teal/80 group-hover:w-5" />
+            <div className="w-5 h-[2px] bg-rugby-teal transition-all duration-200 group-hover:bg-rugby-teal/80 group-hover:w-4" />
+            <div className="w-4 h-[2px] bg-rugby-teal transition-all duration-200 group-hover:bg-rugby-teal/80 group-hover:w-6" />
           </div>
           <span className="sr-only">Toggle Menu</span>
         </Button>
       </SheetTrigger>
       <SheetContent
         side="right"
-        className="w-[300px] bg-card-bg-light dark:bg-card-bg-dark border-l border-gray-200 dark:border-gray-800 p-0 transition-transform duration-300 ease-in-out"
+        className="w-[300px] bg-rugby-teal dark:bg-rugby-teal border-l border-white/20 p-0 transition-transform duration-300 ease-in-out"
       >
         <div className="h-full flex flex-col">
-          <div className="p-6 border-b border-gray-200 dark:border-gray-800 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent">
+          <div className="p-6 border-b border-white/20 bg-white/5">
             <div className="flex items-center justify-between mb-2">
               <SheetTitle
-                className="text-2xl font-bold"
-                style={{
-                  background:
-                    "linear-gradient(135deg, #00796B 0%, #009688 50%, #4DB6AC 100%)",
-                  backgroundClip: "text",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  textShadow: "0 1px 2px rgba(0,0,0,0.1)",
-                }}
+                className="text-2xl font-bold text-white"
               >
                 RK "Fēnikss"
               </SheetTitle>
@@ -231,14 +223,14 @@ export function MobileNav() {
                       setIsOpen(false);
                       router.push('/auth/signin');
                     }}
-                    className="inline-flex items-center justify-center rounded-md text-sm font-medium text-white bg-rugby-teal hover:bg-rugby-teal/90 h-9 px-4 py-2 transition-colors"
+                    className="inline-flex items-center justify-center rounded-md text-sm font-medium text-rugby-teal bg-white hover:bg-white/90 h-9 px-4 py-2 transition-colors"
                   >
                     {translations.signIn || 'Sign In'}
                   </Button>
                 )}
               </div>
             </div>
-            <p className="text-sm font-medium text-foreground/80 dark:text-foreground/80">
+            <p className="text-sm font-medium text-white/80">
               
             </p>
           </div>
@@ -247,9 +239,9 @@ export function MobileNav() {
             <div className="px-6 py-4">
               <Link href="/contact">
                 <Button
-                  className="w-full mb-6 relative overflow-hidden group bg-rugby-teal hover:bg-rugby-teal/90"
+                  className="w-full mb-6 relative overflow-hidden group bg-white hover:bg-white/90"
                 >
-                  <span className="relative flex items-center justify-center gap-2 text-white font-semibold py-1">
+                  <span className="relative flex items-center justify-center gap-2 text-rugby-teal font-semibold py-1">
                     {language === 'en' ? 'Contact Us' : 'Sazinies ar mums'} <ArrowRight className="w-4 h-4 animate-pulse" />
                   </span>
                 </Button>
@@ -263,11 +255,11 @@ export function MobileNav() {
                     onClick={() => setIsOpen(false)}
                     className={`px-4 py-3 text-base rounded-md transition-colors flex items-center gap-3 ${
                       pathname === item.href
-                        ? "bg-rugby-teal text-white font-medium"
-                        : "text-muted-foreground hover:bg-rugby-teal/10"
+                        ? "bg-white text-rugby-teal font-medium"
+                        : "text-white/80 hover:bg-white/10"
                     }`}
                   >
-                    <item.icon className={`w-5 h-5 ${pathname === item.href ? 'text-white' : 'text-rugby-teal'}`} />
+                    <item.icon className={`w-5 h-5 ${pathname === item.href ? 'text-rugby-teal' : 'text-white'}`} />
                     <span className="font-medium">{translations[item.label]}</span>
                   </Link>
                 ))}
@@ -277,7 +269,7 @@ export function MobileNav() {
                 <div className="mt-4">
                   <Accordion type="single" collapsible className="w-full">
                     <AccordionItem value="admin-nav" className="border-none">
-                      <AccordionTrigger className="flex items-center gap-3 py-3 text-base font-medium hover:no-underline hover:bg-rugby-teal/10 rounded-lg px-4 transition-colors text-rugby-teal">
+                      <AccordionTrigger className="flex items-center gap-3 py-3 text-base font-medium hover:no-underline hover:bg-white/10 rounded-lg px-4 transition-colors text-white">
                         <Menu className="w-5 h-5" />
                         {translations.adminPanel}
                       </AccordionTrigger>
@@ -290,8 +282,8 @@ export function MobileNav() {
                               onClick={() => setIsOpen(false)}
                               className={`px-4 py-3.5 text-base rounded-md transition-colors flex items-center gap-3 min-h-[48px] ${
                                 pathname === item.href
-                                  ? "bg-rugby-teal text-white font-medium"
-                                  : "text-muted-foreground hover:bg-rugby-teal/10"
+                                  ? "bg-white text-rugby-teal font-medium"
+                                  : "text-white/80 hover:bg-white/10"
                               }`}
                             >
                               <span className="font-medium">{translations[item.label]}</span>
@@ -308,7 +300,7 @@ export function MobileNav() {
 
           <LanguageSwitcher />
 
-          <div className="border-t border-gray-200 dark:border-gray-800 p-6 space-y-4">
+          <div className="border-t border-white/20 p-6 space-y-4">
             <div className="flex justify-center gap-4">
               {socialLinks.map((social) => (
                 <a
@@ -322,7 +314,7 @@ export function MobileNav() {
                 </a>
               ))}
             </div>
-            <p className="text-sm text-muted-foreground text-center">
+            <p className="text-sm text-white/80 text-center">
               Rugby Team Portal v1.0
             </p>
           </div>

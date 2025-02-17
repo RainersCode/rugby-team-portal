@@ -85,105 +85,85 @@ export default function UserNav({ user, isAdmin }: UserNavProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="focus:outline-none group">
-        <Avatar className="h-8 w-8 bg-gradient-to-br from-rugby-teal/10 to-rugby-teal/20 hover:from-rugby-teal/20 hover:to-rugby-teal/30 transition-all duration-300 ring-2 ring-rugby-teal/20 group-hover:ring-rugby-teal/40">
-          <AvatarFallback className="text-rugby-teal font-semibold bg-transparent">
+        <Avatar className="h-8 w-8 bg-white/10 hover:bg-white/20 transition-all duration-300 ring-2 ring-white/20 group-hover:ring-white/40">
+          <AvatarFallback className="text-white font-semibold bg-transparent">
             {initials}
           </AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        className="w-64 p-2 bg-gradient-to-b from-white to-gray-50/80 dark:from-gray-900 dark:to-gray-900/80 backdrop-blur-xl border-rugby-teal/20 shadow-xl shadow-rugby-teal/10"
+        className="w-64 p-2 bg-rugby-teal/95 backdrop-blur-xl border-none shadow-xl"
       >
-        <Link href="/profile">
-          <DropdownMenuItem className="cursor-pointer flex items-center gap-2 px-3 py-2.5 hover:bg-rugby-teal/10 rounded-md transition-colors duration-200">
-            <div className="p-1.5 rounded-full bg-rugby-teal/10">
-              <Users className="w-4 h-4 text-rugby-teal" />
+        <Link href="/profile" className="block">
+          <DropdownMenuItem className="group cursor-pointer flex items-center gap-2 px-3 py-2.5 hover:bg-white rounded-md transition-colors duration-200">
+            <div className="p-1.5 rounded-full bg-white/10 group-hover:bg-rugby-teal/10">
+              <Users className="w-4 h-4 text-white group-hover:text-rugby-teal" />
             </div>
-            <span className="font-medium">Profile</span>
+            <div className="flex flex-col">
+              <span className="text-sm font-medium text-white group-hover:text-rugby-teal">{user.email}</span>
+              <span className="text-xs text-white/70 group-hover:text-rugby-teal/70">View Profile</span>
+            </div>
           </DropdownMenuItem>
         </Link>
+
+        <DropdownMenuSeparator className="my-2 bg-white/20" />
+
         {isAdmin && (
           <>
-            <DropdownMenuSeparator className="my-2 bg-rugby-teal/10" />
-            <div className="px-3 py-1.5 text-xs font-semibold text-muted-foreground">
-              Admin Panel
-            </div>
-            <Link href="/admin">
-              <DropdownMenuItem className="cursor-pointer flex items-center gap-2 px-3 py-2.5 hover:bg-rugby-teal/10 rounded-md transition-colors duration-200">
-                <div className="p-1.5 rounded-full bg-rugby-teal/10">
-                  <LayoutDashboard className="w-4 h-4 text-rugby-teal" />
-                </div>
-                <span className="font-medium">Dashboard</span>
+            <Link href="/admin" className="block">
+              <DropdownMenuItem className="group cursor-pointer flex items-center gap-2 px-3 py-2 hover:bg-white rounded-md transition-colors duration-200">
+                <LayoutDashboard className="w-4 h-4 text-white group-hover:text-rugby-teal" />
+                <span className="text-sm text-white group-hover:text-rugby-teal">Admin Dashboard</span>
               </DropdownMenuItem>
             </Link>
-            <Link href="/admin/players">
-              <DropdownMenuItem className="cursor-pointer flex items-center gap-2 px-3 py-2.5 hover:bg-rugby-teal/10 rounded-md transition-colors duration-200">
-                <div className="p-1.5 rounded-full bg-rugby-teal/10">
-                  <Users className="w-4 h-4 text-rugby-teal" />
-                </div>
-                <span className="font-medium">Players</span>
+            <Link href="/admin/news/edit" className="block">
+              <DropdownMenuItem className="group cursor-pointer flex items-center gap-2 px-3 py-2 hover:bg-white rounded-md transition-colors duration-200">
+                <FileText className="w-4 h-4 text-white group-hover:text-rugby-teal" />
+                <span className="text-sm text-white group-hover:text-rugby-teal">Edit News</span>
               </DropdownMenuItem>
             </Link>
-            <Link href="/admin/matches">
-              <DropdownMenuItem className="cursor-pointer flex items-center gap-2 px-3 py-2.5 hover:bg-rugby-teal/10 rounded-md transition-colors duration-200">
-                <div className="p-1.5 rounded-full bg-rugby-teal/10">
-                  <Calendar className="w-4 h-4 text-rugby-teal" />
-                </div>
-                <span className="font-medium">Matches</span>
+            <Link href="/admin/matches/edit" className="block">
+              <DropdownMenuItem className="group cursor-pointer flex items-center gap-2 px-3 py-2 hover:bg-white rounded-md transition-colors duration-200">
+                <Calendar className="w-4 h-4 text-white group-hover:text-rugby-teal" />
+                <span className="text-sm text-white group-hover:text-rugby-teal">Edit Matches</span>
               </DropdownMenuItem>
             </Link>
-            <Link href="/admin/tournaments">
-              <DropdownMenuItem className="cursor-pointer flex items-center gap-2 px-3 py-2.5 hover:bg-rugby-teal/10 rounded-md transition-colors duration-200">
-                <div className="p-1.5 rounded-full bg-rugby-teal/10">
-                  <Trophy className="w-4 h-4 text-rugby-teal" />
-                </div>
-                <span className="font-medium">Tournaments</span>
+            <Link href="/admin/training/edit" className="block">
+              <DropdownMenuItem className="group cursor-pointer flex items-center gap-2 px-3 py-2 hover:bg-white rounded-md transition-colors duration-200">
+                <Dumbbell className="w-4 h-4 text-white group-hover:text-rugby-teal" />
+                <span className="text-sm text-white group-hover:text-rugby-teal">Edit Training</span>
               </DropdownMenuItem>
             </Link>
-            <Link href="/admin/articles">
-              <DropdownMenuItem className="cursor-pointer flex items-center gap-2 px-3 py-2.5 hover:bg-rugby-teal/10 rounded-md transition-colors duration-200">
-                <div className="p-1.5 rounded-full bg-rugby-teal/10">
-                  <FileText className="w-4 h-4 text-rugby-teal" />
-                </div>
-                <span className="font-medium">Articles</span>
+            <Link href="/admin/tournaments/edit" className="block">
+              <DropdownMenuItem className="group cursor-pointer flex items-center gap-2 px-3 py-2 hover:bg-white rounded-md transition-colors duration-200">
+                <Trophy className="w-4 h-4 text-white group-hover:text-rugby-teal" />
+                <span className="text-sm text-white group-hover:text-rugby-teal">Edit Tournaments</span>
               </DropdownMenuItem>
             </Link>
-            <Link href="/admin/training">
-              <DropdownMenuItem className="cursor-pointer flex items-center gap-2 px-3 py-2.5 hover:bg-rugby-teal/10 rounded-md transition-colors duration-200">
-                <div className="p-1.5 rounded-full bg-rugby-teal/10">
-                  <Dumbbell className="w-4 h-4 text-rugby-teal" />
-                </div>
-                <span className="font-medium">Training</span>
+            <Link href="/admin/gallery/edit" className="block">
+              <DropdownMenuItem className="group cursor-pointer flex items-center gap-2 px-3 py-2 hover:bg-white rounded-md transition-colors duration-200">
+                <Image className="w-4 h-4 text-white group-hover:text-rugby-teal" />
+                <span className="text-sm text-white group-hover:text-rugby-teal">Edit Gallery</span>
               </DropdownMenuItem>
             </Link>
-            <Link href="/admin/gallery">
-              <DropdownMenuItem className="cursor-pointer flex items-center gap-2 px-3 py-2.5 hover:bg-rugby-teal/10 rounded-md transition-colors duration-200">
-                <div className="p-1.5 rounded-full bg-rugby-teal/10">
-                  <Image className="w-4 h-4 text-rugby-teal" />
-                </div>
-                <span className="font-medium">Gallery</span>
+            <Link href="/admin/live/edit" className="block">
+              <DropdownMenuItem className="group cursor-pointer flex items-center gap-2 px-3 py-2 hover:bg-white rounded-md transition-colors duration-200">
+                <Play className="w-4 h-4 text-white group-hover:text-rugby-teal" />
+                <span className="text-sm text-white group-hover:text-rugby-teal">Edit Live</span>
               </DropdownMenuItem>
             </Link>
-            <Link href="/admin/live">
-              <DropdownMenuItem className="cursor-pointer flex items-center gap-2 px-3 py-2.5 hover:bg-rugby-teal/10 rounded-md transition-colors duration-200">
-                <div className="p-1.5 rounded-full bg-rugby-teal/10">
-                  <Play className="w-4 h-4 text-rugby-teal" />
-                </div>
-                <span className="font-medium">Live Streams</span>
-              </DropdownMenuItem>
-            </Link>
+
+            <DropdownMenuSeparator className="my-2 bg-white/20" />
           </>
         )}
-        <DropdownMenuSeparator className="my-2 bg-rugby-teal/10" />
+
         <DropdownMenuItem
-          className="cursor-pointer flex items-center gap-2 px-3 py-2.5 hover:bg-rugby-red/10 rounded-md transition-colors duration-200 text-rugby-red"
           onClick={handleSignOut}
+          className="group cursor-pointer flex items-center gap-2 px-3 py-2 hover:bg-white rounded-md transition-colors duration-200"
         >
-          <div className="p-1.5 rounded-full bg-rugby-red/10">
-            <LogOut className="w-4 h-4 text-rugby-red" />
-          </div>
-          <span className="font-medium">Sign Out</span>
+          <LogOut className="w-4 h-4 text-white group-hover:text-rugby-teal" />
+          <span className="text-sm text-white group-hover:text-rugby-teal">Sign Out</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
