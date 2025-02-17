@@ -69,29 +69,6 @@ export default function PlayerCard({ player }: PlayerCardProps) {
               </div>
             </div>
           </div>
-
-          {/* Player info section - Shown on all screens */}
-          <div className="p-2 sm:p-4 bg-white dark:bg-gray-800">
-            {/* Stats grid */}
-            <div className="grid grid-cols-2 gap-2 sm:gap-4">
-              <div className="text-center p-1.5 sm:p-2 bg-rugby-teal/5 dark:bg-rugby-teal/10 rounded-lg">
-                <p className="text-base sm:text-xl font-bold text-rugby-teal">{player.stats?.matches || 0}</p>
-                <p className="text-[10px] sm:text-xs uppercase tracking-wider text-gray-600 dark:text-gray-300">{t.matches}</p>
-              </div>
-              <div className="text-center p-1.5 sm:p-2 bg-rugby-yellow/5 dark:bg-rugby-yellow/10 rounded-lg">
-                <p className="text-base sm:text-xl font-bold text-rugby-yellow">{player.stats?.tries || 0}</p>
-                <p className="text-[10px] sm:text-xs uppercase tracking-wider text-gray-600 dark:text-gray-300">{t.tries}</p>
-              </div>
-              <div className="text-center p-1.5 sm:p-2 bg-rugby-teal/5 dark:bg-rugby-teal/10 rounded-lg">
-                <p className="text-base sm:text-xl font-bold text-rugby-teal">{player.stats?.assists || 0}</p>
-                <p className="text-[10px] sm:text-xs uppercase tracking-wider text-gray-600 dark:text-gray-300">{t.assists}</p>
-              </div>
-              <div className="text-center p-1.5 sm:p-2 bg-rugby-yellow/5 dark:bg-rugby-yellow/10 rounded-lg">
-                <p className="text-base sm:text-xl font-bold text-rugby-yellow">{player.stats?.tackles || 0}</p>
-                <p className="text-[10px] sm:text-xs uppercase tracking-wider text-gray-600 dark:text-gray-300">{t.tackles}</p>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
       {/* Bottom accent line with center origin animation */}
