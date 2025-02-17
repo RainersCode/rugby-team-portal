@@ -34,7 +34,7 @@ export default function LatestNews({ articles }: LatestNewsProps) {
     <Link href={`/news/${article.slug}`} className="block group">
       <article
         key={article.id}
-        className="relative bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden border border-rugby-teal/20 hover:border-rugby-teal transition-all duration-300 h-[250px]"
+        className="relative bg-gradient-to-br from-card-bg-light to-card-bg-light/95 dark:from-card-bg-dark dark:to-card-bg-dark/95 rounded-xl shadow-md overflow-hidden border border-rugby-teal/20 hover:border-rugby-teal transition-all duration-300 h-[250px]"
       >
         <div className="relative w-full h-full">
           <Image
@@ -79,7 +79,7 @@ export default function LatestNews({ articles }: LatestNewsProps) {
   );
 
   return (
-    <section className="bg-white dark:bg-gray-800/50">
+    <section className="bg-rugby-teal/5 dark:bg-rugby-teal/10">
       <div className="container-width py-12">
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100">

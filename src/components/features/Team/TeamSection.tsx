@@ -28,7 +28,7 @@ export default function TeamSection({ players }: TeamSectionProps) {
   const { language } = useLanguage();
 
   return (
-    <section className="bg-white dark:bg-gray-800/50">
+    <section className="bg-rugby-teal/5 dark:bg-rugby-teal/10">
       <div className="container-width py-12">
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
@@ -57,7 +57,7 @@ export default function TeamSection({ players }: TeamSectionProps) {
                 >
                   {players.slice(0, 6).map((player) => (
                     <SwiperSlide key={player.id} className="!w-auto">
-                      <div className="w-[140px] xs:w-[160px] sm:w-[200px] lg:w-[260px] pt-2 pb-2 pr-1">
+                      <div className="w-[180px] xs:w-[200px] sm:w-[220px] lg:w-[260px] pt-2 pb-2 pr-1">
                         <PlayerCard player={player} />
                       </div>
                     </SwiperSlide>

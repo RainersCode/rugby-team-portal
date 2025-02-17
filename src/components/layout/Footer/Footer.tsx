@@ -42,35 +42,35 @@ export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-card-bg-dark border-t border-gray-800/20">
+    <footer className="bg-card-bg-dark/95 dark:bg-card-bg-dark border-t border-rugby-teal/10">
       <div className="relative">
         <div className="container-width py-12">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Quick Links */}
             <div>
-              <h3 className="text-xl font-semibold mb-4 text-[rgb(0,170,150)]">{footerTranslations[language].quickLinks}</h3>
+              <h3 className="text-xl font-semibold mb-4 text-rugby-teal">{footerTranslations[language].quickLinks}</h3>
               <nav className="space-y-2">
                 <Link 
                   href="/about" 
-                  className="block text-gray-300 hover:text-[rgb(0,170,150)] transition-colors duration-200"
+                  className="block text-gray-200 hover:text-rugby-teal transition-colors duration-200"
                 >
                   {footerTranslations[language].aboutUs}
                 </Link>
                 <Link 
                   href="/team" 
-                  className="block text-gray-300 hover:text-[rgb(0,170,150)] transition-colors duration-200"
+                  className="block text-gray-200 hover:text-rugby-teal transition-colors duration-200"
                 >
                   {footerTranslations[language].team}
                 </Link>
                 <Link 
                   href="/matches" 
-                  className="block text-gray-300 hover:text-[rgb(0,170,150)] transition-colors duration-200"
+                  className="block text-gray-200 hover:text-rugby-teal transition-colors duration-200"
                 >
                   {footerTranslations[language].matches}
                 </Link>
                 <Link 
                   href="/contact" 
-                  className="block text-gray-300 hover:text-[rgb(0,170,150)] transition-colors duration-200"
+                  className="block text-gray-200 hover:text-rugby-teal transition-colors duration-200"
                 >
                   {footerTranslations[language].contact}
                 </Link>
@@ -79,12 +79,12 @@ export default function Footer() {
 
             {/* Contact Info */}
             <div>
-              <h3 className="text-xl font-semibold mb-4 text-[rgb(0,170,150)]">{footerTranslations[language].contactInfo.title}</h3>
+              <h3 className="text-xl font-semibold mb-4 text-rugby-teal">{footerTranslations[language].contactInfo.title}</h3>
               <div className="space-y-2">
-                <p className="text-gray-300">
+                <p className="text-gray-200">
                   {footerTranslations[language].contactInfo.email}
                 </p>
-                <p className="text-gray-300">
+                <p className="text-gray-200">
                   {footerTranslations[language].contactInfo.phone}
                 </p>
               </div>
@@ -92,25 +92,25 @@ export default function Footer() {
 
             {/* Social & Legal */}
             <div>
-              <h3 className="text-xl font-semibold mb-4 text-[rgb(0,170,150)]">{footerTranslations[language].followUs}</h3>
+              <h3 className="text-xl font-semibold mb-4 text-rugby-teal">{footerTranslations[language].followUs}</h3>
               <div className="flex space-x-4 mb-6">
                 <a 
                   href="#" 
-                  className="text-gray-300 hover:text-[rgb(0,170,150)] transition-colors duration-200"
+                  className="text-gray-200 hover:text-rugby-teal transition-colors duration-200"
                   aria-label="Facebook"
                 >
                   <Facebook size={24} />
                 </a>
                 <a 
                   href="#" 
-                  className="text-gray-300 hover:text-[rgb(0,170,150)] transition-colors duration-200"
+                  className="text-gray-200 hover:text-rugby-teal transition-colors duration-200"
                   aria-label="Instagram"
                 >
                   <Instagram size={24} />
                 </a>
                 <a 
                   href="#" 
-                  className="text-gray-300 hover:text-[rgb(0,170,150)] transition-colors duration-200"
+                  className="text-gray-200 hover:text-rugby-teal transition-colors duration-200"
                   aria-label="Twitter"
                 >
                   <Twitter size={24} />
@@ -119,7 +119,7 @@ export default function Footer() {
               <div className="text-sm">
                 <Link 
                   href="/privacy-policy" 
-                  className="text-gray-400 hover:text-[rgb(0,170,150)] transition-colors duration-200"
+                  className="text-gray-300 hover:text-rugby-teal transition-colors duration-200"
                 >
                   {footerTranslations[language].privacyPolicy}
                 </Link>
@@ -127,8 +127,8 @@ export default function Footer() {
             </div>
           </div>
 
-          <div className="mt-12 pt-8 border-t border-gray-800/20">
-            <p className="text-sm text-gray-500">© {currentYear} Rugby Club. {footerTranslations[language].allRightsReserved}</p>
+          <div className="mt-12 pt-8 border-t border-rugby-teal/10">
+            <p className="text-sm text-gray-400">© {currentYear} Rugby Club. {footerTranslations[language].allRightsReserved}</p>
           </div>
         </div>
       </div>

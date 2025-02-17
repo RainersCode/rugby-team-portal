@@ -19,7 +19,7 @@ interface TrainingListProps {
 function TrainingCard({ training }: { training: Training }) {
   return (
     <Link href={`/training/${training.id}`} className="block h-[320px] relative">
-      <Card className="peer relative overflow-hidden transition-all duration-300 border-rugby-teal/20 hover:border-rugby-teal hover:shadow-md h-full">
+      <Card className="peer relative bg-gradient-to-br from-card-bg-light to-card-bg-light/95 dark:from-card-bg-dark dark:to-card-bg-dark/95 overflow-hidden transition-all duration-300 border-rugby-teal/20 hover:border-rugby-teal hover:shadow-md h-full">
         <div className="relative h-40 w-full overflow-hidden">
           <Image
             src={training.image || '/images/training-hero.jpg'}
@@ -59,7 +59,7 @@ export default function TrainingList({ trainings, title, showViewAll = true }: T
   const { translations } = useLanguage();
 
   return (
-    <section className="bg-white dark:bg-gray-800/50">
+    <section className="bg-rugby-teal/5 dark:bg-rugby-teal/10">
       <div className="container-width py-12">
         {title && (
           <div className="flex justify-between items-center mb-8">

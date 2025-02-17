@@ -37,7 +37,7 @@ export default function HomePageClient({
   const { translations } = useLanguage();
 
   return (
-    <div className="space-y-0 pb-12">
+    <div className="space-y-0">
       {/* Hero Carousel */}
       <div>
         <HeroCarousel articles={heroArticles} nextMatch={upcomingMatches[0]} />
@@ -47,45 +47,47 @@ export default function HomePageClient({
       <LatestNews articles={articles} />
 
       {/* Call to Action Section */}
-      <div className="container-width px-4">
-        <section className="relative py-4 sm:py-12 bg-rugby-teal/60 overflow-hidden rounded-2xl">
-          {/* Background Image */}
-          <div 
-            className="absolute inset-0 z-0 rounded-2xl"
-            style={{
-              backgroundImage: 'url("/fnx banner png.png")',
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              backgroundRepeat: 'no-repeat',
-              opacity: 0.9
-            }}
-          />
-          {/* Background Pattern */}
-          <div className="absolute inset-0 opacity-5 z-0 bg-black/20 rounded-2xl" />
+      <section className="bg-rugby-teal/5 dark:bg-rugby-teal/10">
+        <div className="container-width py-12">
+          <div className="relative overflow-hidden rounded-2xl bg-rugby-teal/60">
+            {/* Background Image */}
+            <div 
+              className="absolute inset-0 z-0"
+              style={{
+                backgroundImage: 'url("/fnx banner png.png")',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat',
+                opacity: 0.9
+              }}
+            />
+            {/* Background Pattern */}
+            <div className="absolute inset-0 opacity-5 z-0 bg-black/20" />
 
-          <div className="relative container mx-auto px-4 flex flex-col lg:flex-row items-center justify-between gap-3 lg:gap-12 z-10">
-            {/* Text Content */}
-            <div className="flex-1 text-white text-center lg:text-left px-4 lg:pl-8 lg:pr-12">
-              <h2 className="text-xl sm:text-4xl lg:text-5xl font-bold mb-2 sm:mb-6 drop-shadow-lg">
-                {translations.joinOurFamily}
-              </h2>
-              <p className="text-sm sm:text-xl lg:text-2xl mb-3 sm:mb-8 opacity-90 drop-shadow-lg">
-                {translations.joinSubheading}
-              </p>
-              <div className="flex justify-center lg:justify-start">
-                <a
-                  href="/contact"
-                  className="inline-flex items-center justify-center rounded-lg bg-white px-4 py-1.5 sm:px-6 sm:py-2.5 text-sm font-semibold text-rugby-teal transition-all hover:bg-white/90 hover:scale-105 min-w-[100px] sm:min-w-[140px]"
-                >
-                  {translations.joinUs}
-                </a>
+            <div className="relative py-4 sm:py-12 px-4 flex flex-col lg:flex-row items-center justify-between gap-3 lg:gap-12 z-10">
+              {/* Text Content */}
+              <div className="flex-1 text-white text-center lg:text-left px-4 lg:pl-8 lg:pr-12">
+                <h2 className="text-xl sm:text-4xl lg:text-5xl font-bold mb-2 sm:mb-6 drop-shadow-lg">
+                  {translations.joinOurFamily}
+                </h2>
+                <p className="text-sm sm:text-xl lg:text-2xl mb-3 sm:mb-8 opacity-90 drop-shadow-lg">
+                  {translations.joinSubheading}
+                </p>
+                <div className="flex justify-center lg:justify-start">
+                  <a
+                    href="/contact"
+                    className="inline-flex items-center justify-center rounded-lg bg-white px-4 py-1.5 sm:px-6 sm:py-2.5 text-sm font-semibold text-rugby-teal transition-all hover:bg-white/90 hover:scale-105 min-w-[100px] sm:min-w-[140px]"
+                  >
+                    {translations.joinUs}
+                  </a>
+                </div>
               </div>
+              {/* Right side space for visual balance */}
+              <div className="flex-1 lg:flex-none lg:w-1/3"></div>
             </div>
-            {/* Right side space for visual balance */}
-            <div className="flex-1 lg:flex-none lg:w-1/3"></div>
           </div>
-        </section>
-      </div>
+        </div>
+      </section>
 
       {/* Team Section */}
       {players.length > 0 && (

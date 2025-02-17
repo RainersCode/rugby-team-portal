@@ -26,7 +26,7 @@ export default function TeamPageClient({ players }: TeamPageClientProps) {
   const { language } = useLanguage();
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-bg-light to-gray-50 dark:from-bg-dark dark:to-gray-900">
+    <div className="min-h-screen bg-rugby-teal/5 dark:bg-rugby-teal/10">
       {/* Hero Section */}
       <div className="relative py-20 bg-rugby-teal overflow-hidden">
         <div className="absolute inset-0 opacity-10">
@@ -75,7 +75,7 @@ export default function TeamPageClient({ players }: TeamPageClientProps) {
             </h2>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             {players.map((player) => (
               <motion.div
                 key={player.id}

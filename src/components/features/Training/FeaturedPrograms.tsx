@@ -42,7 +42,7 @@ export default function FeaturedPrograms({ programs }: FeaturedProgramsProps) {
   };
 
   return (
-    <section className="bg-gray-50 dark:bg-gray-800/50">
+    <section className="bg-rugby-teal/5 dark:bg-rugby-teal/10">
       <div className="container-width py-12">
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
@@ -59,7 +59,7 @@ export default function FeaturedPrograms({ programs }: FeaturedProgramsProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {programs.map((program) => (
             <Link key={program.id} href={`/training/${program.id}`}>
-              <Card className="group relative flex flex-col overflow-hidden hover:shadow-lg transition-all duration-300 border-rugby-teal/20 hover:border-rugby-teal">
+              <Card className="group relative bg-gradient-to-br from-card-bg-light to-card-bg-light/95 dark:from-card-bg-dark dark:to-card-bg-dark/95 flex flex-col overflow-hidden hover:shadow-lg transition-all duration-300 border-rugby-teal/20 hover:border-rugby-teal">
                 {/* Program Image Container */}
                 <div className="relative w-full pt-[50%] overflow-hidden">
                   <div className="absolute inset-0">
