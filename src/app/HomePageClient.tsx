@@ -4,9 +4,10 @@ import { Suspense, lazy } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 import HeroCarousel from "@/components/features/Hero/HeroCarousel";
 import LatestNews from "@/components/features/News/LatestNews";
-import { TrainingProgram, Article, Match } from "@/types";
+import { TrainingProgram, Article, Match, Player } from "@/types";
 import MatchList from "@/components/features/Matches/MatchList";
 import TrainingList from "@/components/features/Training/TrainingList";
+import TeamSection from "@/components/features/Team/TeamSection";
 import Link from "next/link";
 import Image from "next/image";
 import { Card } from "@/components/ui/card";
@@ -22,6 +23,7 @@ interface HomePageClientProps {
   upcomingMatches: Match[];
   completedMatches: Match[];
   programs: TrainingProgram[];
+  players: Player[];
 }
 
 export default function HomePageClient({
@@ -30,6 +32,7 @@ export default function HomePageClient({
   upcomingMatches,
   completedMatches,
   programs,
+  players,
 }: HomePageClientProps) {
   const { translations } = useLanguage();
 
@@ -81,6 +84,11 @@ export default function HomePageClient({
           <div className="flex-1 lg:flex-none lg:w-1/3"></div>
         </div>
       </section>
+
+      {/* Team Section */}
+      {players.length > 0 && (
+        <TeamSection players={players} />
+      )}
 
       {/* Latest Matches Section */}
       <Suspense fallback={<div className="h-48 flex items-center justify-center">Loading matches...</div>}>

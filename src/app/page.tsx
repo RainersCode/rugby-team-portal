@@ -43,6 +43,27 @@ export default async function Home() {
     .order("created_at", { ascending: false })
     .limit(3);
 
+  // Fetch players
+  const { data: players } = await supabase
+    .from("players")
+    .select("*")
+    .order("number");
+
+  // Map the players data
+  const mappedPlayers = players?.map(player => ({
+    id: player.id.toString(),
+    name: player.name,
+    position: player.position,
+    number: player.number,
+    image: player.image,
+    stats: player.stats || {
+      matches: 0,
+      tries: 0,
+      tackles: 0,
+      assists: 0
+    }
+  })) || [];
+
   // Transform the programs data to include the author field
   const programs =
     programsData?.map((program) => ({
@@ -57,6 +78,7 @@ export default async function Home() {
       upcomingMatches={upcomingMatches || []}
       completedMatches={completedMatches || []}
       programs={programs as TrainingProgram[]}
+      players={mappedPlayers}
     />
   );
 }

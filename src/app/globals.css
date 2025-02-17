@@ -57,3 +57,13 @@ body {
   animation: shimmer 3s ease-in-out infinite;
   background-size: 200% 100%;
 }
+
+/* Hide scrollbar while keeping scroll functionality */
+.hide-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari and Opera */
+}
