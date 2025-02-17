@@ -20,9 +20,9 @@ begin
 
   -- Return user emails for the given IDs
   return query
-  select u.id, u.email::text
-  from auth.users u
-  where u.id = any(user_ids);
+  select auth.users.id, auth.users.email::text
+  from auth.users
+  where auth.users.id = any(user_ids);
 end;
 $$;
 

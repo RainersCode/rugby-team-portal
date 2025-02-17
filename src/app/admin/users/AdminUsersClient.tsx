@@ -34,6 +34,8 @@ export default function AdminUsersClient() {
   const [users, setUsers] = useState<UserData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [updatingRole, setUpdatingRole] = useState<string | null>(null);
+  const [deletingUser, setDeletingUser] = useState<string | null>(null);
   const { toast } = useToast();
   const router = useRouter();
 
@@ -76,6 +78,9 @@ export default function AdminUsersClient() {
   };
 
   const handleUpdateRole = async (userId: string, newRole: string) => {
+    if (updatingRole) return; // Prevent multiple clicks
+    setUpdatingRole(userId);
+    
     try {
       const { error } = await supabase
         .from('profiles')
@@ -84,10 +89,8 @@ export default function AdminUsersClient() {
 
       if (error) throw error;
 
-      // Update local state
-      setUsers(users.map(user => 
-        user.id === userId ? { ...user, role: newRole } : user
-      ));
+      // Refresh the users list instead of updating local state
+      await fetchUsers();
 
       toast({
         title: "Role Updated",
@@ -100,13 +103,19 @@ export default function AdminUsersClient() {
         description: "Failed to update user role.",
         variant: "destructive",
       });
+    } finally {
+      setUpdatingRole(null);
     }
   };
 
   const handleDeleteUser = async (userId: string) => {
+    if (deletingUser) return; // Prevent multiple clicks
+    
     if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
       return;
     }
+
+    setDeletingUser(userId);
 
     try {
       const response = await fetch('/api/admin/delete-user', {
@@ -117,12 +126,14 @@ export default function AdminUsersClient() {
         body: JSON.stringify({ userId }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error('Failed to delete user');
+        throw new Error(data.error || 'Failed to delete user');
       }
 
-      // Remove user from local state
-      setUsers(users.filter(user => user.id !== userId));
+      // Refresh the users list instead of updating local state
+      await fetchUsers();
 
       toast({
         title: "User Deleted",
@@ -132,9 +143,11 @@ export default function AdminUsersClient() {
       console.error('Error deleting user:', error);
       toast({
         title: "Error",
-        description: "Failed to delete user.",
+        description: error instanceof Error ? error.message : "Failed to delete user.",
         variant: "destructive",
       });
+    } finally {
+      setDeletingUser(null);
     }
   };
 
@@ -200,19 +213,28 @@ export default function AdminUsersClient() {
                       <Button
                         variant="outline"
                         size="sm"
+                        disabled={updatingRole === user.id}
                         onClick={() => handleUpdateRole(
                           user.id,
                           user.role === 'admin' ? 'user' : 'admin'
                         )}
                       >
+                        {updatingRole === user.id ? (
+                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                        ) : null}
                         {user.role === 'admin' ? 'Remove Admin' : 'Make Admin'}
                       </Button>
                       <Button
                         variant="destructive"
                         size="sm"
+                        disabled={deletingUser === user.id}
                         onClick={() => handleDeleteUser(user.id)}
                       >
-                        <UserX className="h-4 w-4" />
+                        {deletingUser === user.id ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <UserX className="h-4 w-4" />
+                        )}
                       </Button>
                     </div>
                   </TableCell>

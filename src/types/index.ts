@@ -25,7 +25,18 @@ export interface Player {
   name: string;
   position?: string;
   number?: number;
-  image_url?: string;
+  image?: string;
+  image_url?: string; // Keep for backward compatibility
+  nationality?: string;
+  height?: string;
+  weight?: string;
+  age?: number;
+  stats?: {
+    matches?: number;
+    tries?: number;
+    assists?: number;
+    tackles?: number;
+  };
 }
 
 export interface MatchEvent {

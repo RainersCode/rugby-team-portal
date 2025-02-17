@@ -93,11 +93,26 @@ export default function TeamPage() {
         .order("number");
 
       if (error) {
-        throw error;
+        console.error("Error fetching players:", error);
+        return; // Don't throw error, just return to keep sample data
       }
 
-      if (data && data.length > 0) {
-        setPlayers(data);
+      if (data && data.length > 0) { // Only update if we have real data
+        // Map the data to match our Player type
+        const mappedPlayers = data.map(player => ({
+          id: player.id.toString(),
+          name: player.name,
+          position: player.position,
+          number: player.number,
+          image: player.image,
+          stats: player.stats || {
+            matches: 0,
+            tries: 0,
+            tackles: 0,
+            assists: 0
+          }
+        }));
+        setPlayers(mappedPlayers);
       }
     } catch (error) {
       console.error("Error fetching players:", error);
@@ -157,20 +172,27 @@ export default function TeamPage() {
 
       {/* Content Section */}
       <div className="container-width py-12">
-        {/* Players Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {players.map((player) => (
-            <motion.div
-              key={player.id}
-              layout
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-            >
-              <PlayerCard player={player} />
-            </motion.div>
-          ))}
-        </div>
+        {players.length === 0 ? (
+          <div className="text-center py-12">
+            <h2 className="text-xl font-semibold text-gray-600 dark:text-gray-400">
+              {language === 'en' ? 'No players found' : 'Nav atrasti spēlētāji'}
+            </h2>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {players.map((player) => (
+              <motion.div
+                key={player.id}
+                layout
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                <PlayerCard player={player} />
+              </motion.div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
