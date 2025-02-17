@@ -45,19 +45,19 @@ export default function TeamSection({ players }: TeamSectionProps) {
 
         {/* Horizontal Scrollable List with contained overflow */}
         <div className="relative -mx-5 px-5">
-          <div className="overflow-visible">
-            <div className="-my-4">
-              <div className="py-4">
+          <div className="overflow-hidden">
+            <div className="-my-2">
+              <div className="py-2">
                 <SwiperContainer
                   slidesPerView="auto"
-                  spaceBetween={8}
+                  spaceBetween={12}
                   navigation={true}
                   pagination={false}
                   className="!overflow-visible"
                 >
                   {players.slice(0, 6).map((player) => (
                     <SwiperSlide key={player.id} className="!w-auto">
-                      <div className="w-[180px] xs:w-[200px] sm:w-[220px] lg:w-[260px] pt-2 pb-2 pr-1">
+                      <div className="w-[180px] xs:w-[200px] sm:w-[220px] lg:w-[260px] pt-1 pb-1 pr-1">
                         <PlayerCard player={player} />
                       </div>
                     </SwiperSlide>
