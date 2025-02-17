@@ -22,8 +22,8 @@ export async function GET(request: Request) {
         );
       }
 
-      // Redirect to home page after successful authentication
-      return NextResponse.redirect(new URL('/', requestUrl.origin));
+      // Redirect to the loading page
+      return NextResponse.redirect(new URL('/auth/verification-loading', requestUrl.origin));
     }
 
     // Return to sign in if no code

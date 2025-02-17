@@ -31,6 +31,9 @@ export default function SignInForm() {
       // Force a refresh to update auth state
       router.refresh();
       
+      // Add a small delay to ensure session is properly established
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
       // Use window.location for a hard redirect to ensure complete page refresh
       window.location.href = redirectTo;
     } catch (error) {
