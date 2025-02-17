@@ -57,9 +57,29 @@ export default function UserNav({ user, isAdmin }: UserNavProps) {
   }
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    router.push("/auth/signin");
-    router.refresh();
+    try {
+      // Call our API endpoint
+      const response = await fetch('/api/auth/signout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Sign out failed');
+      }
+
+      // Clear client-side state
+      setInitials("");
+      
+      // Redirect to home page and force a full page reload
+      window.location.href = '/';
+    } catch (error) {
+      console.error('Error during sign out:', error);
+      // If there's an error, still try to refresh the page
+      window.location.href = '/';
+    }
   };
 
   return (

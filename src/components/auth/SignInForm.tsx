@@ -21,20 +21,22 @@ export default function SignInForm() {
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+      // Call our API endpoint
+      const response = await fetch('/api/auth/signin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
       });
 
-      if (error) throw error;
+      const data = await response.json();
 
-      // Force a refresh to update auth state
-      router.refresh();
-      
-      // Add a small delay to ensure session is properly established
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Use window.location for a hard redirect to ensure complete page refresh
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to sign in');
+      }
+
+      // If successful, force a complete page refresh to ensure all components get the latest session
       window.location.href = redirectTo;
     } catch (error) {
       setError(error instanceof Error ? error.message : 'An error occurred');

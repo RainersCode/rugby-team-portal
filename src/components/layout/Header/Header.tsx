@@ -38,44 +38,80 @@ export function Header() {
 
   useEffect(() => {
     const getUser = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError) {
+        console.error('Error getting user:', userError);
+        setUser(null);
+        setIsAdmin(false);
+        return;
+      }
+
       setUser(user);
 
       if (user) {
         // Check if user is admin
-        const { data: profile } = await supabase
+        const { data: profile, error: profileError } = await supabase
           .from("profiles")
           .select("role")
           .eq("id", user.id)
           .single();
 
+        if (profileError) {
+          console.error('Error getting profile:', profileError);
+          setIsAdmin(false);
+          return;
+        }
+
         setIsAdmin(profile?.role === "admin");
+      } else {
+        setUser(null);
+        setIsAdmin(false);
       }
     };
 
+    // Initial user check
     getUser();
 
+    // Set up auth state change listener
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      setUser(session?.user ?? null);
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth state changed:', event, session?.user?.id);
+      
+      if (event === 'SIGNED_OUT') {
+        setUser(null);
+        setIsAdmin(false);
+        return;
+      }
+
       if (session?.user) {
-        const { data: profile } = await supabase
+        setUser(session.user);
+        
+        // Check user role whenever auth state changes
+        const { data: profile, error: profileError } = await supabase
           .from("profiles")
           .select("role")
           .eq("id", session.user.id)
           .single();
 
+        if (profileError) {
+          console.error('Error getting profile:', profileError);
+          setIsAdmin(false);
+          return;
+        }
+
         setIsAdmin(profile?.role === "admin");
       } else {
+        setUser(null);
         setIsAdmin(false);
       }
     });
 
-    return () => subscription.unsubscribe();
-  }, [supabase.auth]);
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [supabase]);
 
   const isLinkActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
