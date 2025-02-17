@@ -6,6 +6,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { useEffect } from "react";
 import { SwiperSlide } from 'swiper/react';
 import { SwiperContainer } from '@/components/ui/swiper-container';
+import { ChevronRight } from "lucide-react";
 
 interface Article {
   id: string;
@@ -87,9 +88,10 @@ export default function LatestNews({ articles }: LatestNewsProps) {
           </h2>
           <Link
             href="/news"
-            className="text-rugby-teal hover:text-rugby-teal/80 font-medium transition-colors"
+            className="group flex items-center gap-1 text-rugby-teal hover:text-rugby-teal/80 font-medium transition-colors"
           >
-            {translations.viewAllNews} →
+            <span>{translations.viewAllNews}</span>
+            <ChevronRight className="w-5 h-5 transform transition-transform group-hover:translate-x-1" />
           </Link>
         </div>
 
