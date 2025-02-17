@@ -18,7 +18,7 @@ export default function MatchList({ matches, title, showViewAll = true }: MatchL
   const { translations } = useLanguage();
 
   return (
-    <section className="bg-rugby-teal/5 dark:bg-rugby-teal/10">
+    <section className="bg-rugby-teal/10 dark:bg-rugby-teal/20">
       <div className="container-width py-12">
         {title && (
           <div className="flex justify-between items-center mb-8">
