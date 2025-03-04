@@ -160,7 +160,7 @@ export function Header() {
             {isDropdownActive(item.items) ? (
               <>
                 <span className="absolute inset-x-1 -bottom-px h-0.5 bg-gradient-to-r from-white via-white/80 to-white animate-shimmer" />
-                <span className="absolute -inset-1 rounded-lg bg-white/10 scale-90" />
+                <span className="absolute -inset-1 rounded-none bg-white/10 scale-90" />
               </>
             ) : (
               <span className="absolute inset-x-1 -bottom-px h-0.5 bg-gradient-to-r from-white to-white/60 scale-x-0 transition-transform duration-300 group-hover:scale-x-100" />
@@ -168,7 +168,7 @@ export function Header() {
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="center"
-            className="w-56 bg-rugby-teal/95 border-none shadow-lg backdrop-blur-sm p-0"
+            className="w-56 bg-rugby-teal/95 border-none shadow-lg backdrop-blur-sm p-0 rounded-none"
           >
             {item.items.map((subItem: NavItem) => (
               <Link
@@ -205,7 +205,7 @@ export function Header() {
         {isLinkActive(item.href) ? (
           <>
             <span className="absolute inset-x-1 -bottom-px h-0.5 bg-gradient-to-r from-white via-white/80 to-white animate-shimmer" />
-            <span className="absolute -inset-1 rounded-lg bg-white/10 scale-90" />
+            <span className="absolute -inset-1 rounded-none bg-white/10 scale-90" />
           </>
         ) : (
           <span className="absolute inset-x-1 -bottom-px h-0.5 bg-gradient-to-r from-white to-white/60 scale-x-0 transition-transform duration-300 group-hover:scale-x-100" />
@@ -222,14 +222,14 @@ export function Header() {
 
     return (
       <DropdownMenu>
-        <DropdownMenuTrigger className="flex items-center px-3 py-2 text-sm font-medium text-white/80 hover:text-white transition-colors rounded-full hover:bg-white/10">
+        <DropdownMenuTrigger className="flex items-center px-3 py-2 text-sm font-medium text-white/80 hover:text-white transition-colors rounded-none hover:bg-white/10">
           <Globe className="w-4 h-4 mr-1.5" />
           <span className="font-medium">{language === 'en' ? 'EN' : 'LV'}</span>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-[140px] bg-rugby-teal/95 border-none shadow-lg rounded-lg p-1 backdrop-blur-sm">
+        <DropdownMenuContent align="end" className="w-[140px] bg-rugby-teal/95 border-none shadow-lg rounded-none p-1 backdrop-blur-sm">
           <DropdownMenuItem
             onClick={() => handleLanguageChange('en')}
-            className="flex items-center justify-between px-3 py-2 text-sm rounded-md cursor-pointer text-white hover:bg-white/10 transition-colors"
+            className="flex items-center justify-between px-3 py-2 text-sm rounded-none cursor-pointer text-white hover:bg-white/10 transition-colors"
           >
             <div className="flex items-center">
               <span className="mr-2">🇬🇧</span>
@@ -239,7 +239,7 @@ export function Header() {
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => handleLanguageChange('lv')}
-            className="flex items-center justify-between px-3 py-2 text-sm rounded-md cursor-pointer text-white hover:bg-white/10 transition-colors"
+            className="flex items-center justify-between px-3 py-2 text-sm rounded-none cursor-pointer text-white hover:bg-white/10 transition-colors"
           >
             <div className="flex items-center">
               <span className="mr-2">🇱🇻</span>
@@ -304,7 +304,7 @@ export function Header() {
             ) : (
               <Link
                 href="/auth/signin"
-                className="group relative inline-flex h-9 items-center justify-center overflow-hidden rounded-full bg-rugby-yellow px-6 py-2 text-sm font-medium text-rugby-teal hover:scale-105 transition-all duration-300 shadow-lg shadow-rugby-yellow/20 hover:shadow-xl hover:shadow-rugby-yellow/30"
+                className="group relative inline-flex h-9 items-center justify-center overflow-hidden rounded-none bg-rugby-yellow px-6 py-2 text-sm font-medium text-rugby-teal hover:scale-105 transition-all duration-300 shadow-lg shadow-rugby-yellow/20 hover:shadow-xl hover:shadow-rugby-yellow/30"
               >
                 <span className="absolute inset-0 bg-gradient-to-r from-rugby-yellow via-rugby-yellow/80 to-rugby-yellow opacity-0 transition-opacity group-hover:opacity-100" />
                 <span className="relative font-semibold tracking-wide">
