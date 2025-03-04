@@ -133,7 +133,7 @@ export default function MatchCard({ match, isLocalMatch, variant = 'default' }: 
               e.preventDefault();
               setIsExpanded(!isExpanded);
             }}
-            className="mt-2 w-full flex items-center justify-center gap-1 text-xs font-medium text-rugby-teal hover:text-rugby-teal/80 transition-colors bg-rugby-teal/5 hover:bg-rugby-teal/10 py-1 rounded-md"
+            className="mt-2 w-full flex items-center justify-center gap-1 text-xs font-medium text-rugby-teal hover:text-rugby-teal/80 transition-colors bg-white dark:bg-gray-800 py-2 border-2 border-rugby-teal/30 hover:border-rugby-teal shadow-lg hover:shadow-xl rounded-none"
           >
             {isExpanded ? (
               <>
@@ -176,8 +176,8 @@ export default function MatchCard({ match, isLocalMatch, variant = 'default' }: 
       <Link href={`/matches/${match.id}`} className="block relative">
         <Card 
           className={`peer relative overflow-hidden transition-all duration-300 ${
-            isLive ? 'ring-2 ring-rugby-red shadow-lg' : 'hover:shadow-lg border-rugby-teal/20'
-          } p-3 hover:border-rugby-teal backdrop-blur-sm bg-white dark:bg-gray-800/90`}
+            isLive ? 'ring-2 ring-rugby-red shadow-lg' : 'hover:shadow-xl border-2 border-rugby-teal/30'
+          } p-3 hover:border-rugby-teal backdrop-blur-sm bg-white dark:bg-gray-800/90 rounded-none`}
         >
           {cardContent}
         </Card>
@@ -190,7 +190,7 @@ export default function MatchCard({ match, isLocalMatch, variant = 'default' }: 
   return (
     <div className="relative">
       <Card 
-        className="peer relative overflow-hidden transition-all duration-300 border-rugby-teal/20 hover:border-rugby-teal hover:shadow-md p-3 backdrop-blur-sm bg-white dark:bg-gray-800/90"
+        className="peer relative overflow-hidden transition-all duration-300 border-2 border-rugby-teal/30 hover:border-rugby-teal hover:shadow-xl p-3 backdrop-blur-sm bg-white dark:bg-gray-800/90 rounded-none"
       >
         {cardContent}
       </Card>

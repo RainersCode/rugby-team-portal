@@ -21,7 +21,7 @@ export default function NewsCard({
   
   return (
     <article className={cn(
-      "group relative bg-card-bg-light dark:bg-card-bg-dark rounded-lg shadow-md overflow-hidden transition-transform hover:scale-[1.02] border border-rugby-teal/20 hover:border-rugby-teal",
+      "group relative bg-card-bg-light dark:bg-card-bg-dark rounded-none shadow-lg overflow-hidden transition-transform hover:scale-[1.02] border-2 border-rugby-teal/30 hover:border-rugby-teal hover:shadow-xl",
       isCompact && "hover:scale-[1.01]"
     )}>
       <Link href={`/news/${article.slug}`}>

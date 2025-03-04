@@ -74,7 +74,7 @@ export default function HeroCarousel({
                   href={`/news/${article.slug}`}
                   variant="ghost"
                   size="md"
-                  className="group bg-rugby-teal hover:bg-rugby-teal/90 text-white shadow-lg transition-all duration-300 border-none"
+                  className="group bg-white dark:bg-gray-800 px-4 py-2 border-2 border-rugby-teal/30 hover:border-rugby-teal shadow-lg hover:shadow-xl rounded-none text-rugby-teal hover:text-rugby-teal/90 transition-all duration-300"
                 >
                   <span className="font-medium">{translations.readMore}</span>
                   <ChevronRight className="w-4 h-4 ml-2 transform group-hover:translate-x-1 transition-transform" />

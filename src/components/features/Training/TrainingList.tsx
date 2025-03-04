@@ -19,7 +19,7 @@ interface TrainingListProps {
 function TrainingCard({ training }: { training: Training }) {
   return (
     <Link href={`/training/${training.id}`} className="block h-[320px] relative">
-      <Card className="peer relative bg-gradient-to-br from-card-bg-light to-card-bg-light/95 dark:from-card-bg-dark dark:to-card-bg-dark/95 overflow-hidden transition-all duration-300 border-rugby-teal/20 hover:border-rugby-teal hover:shadow-md h-full">
+      <Card className="peer relative bg-gradient-to-br from-card-bg-light to-card-bg-light/95 dark:from-card-bg-dark dark:to-card-bg-dark/95 overflow-hidden transition-all duration-300 border-2 border-rugby-teal/30 hover:border-rugby-teal hover:shadow-xl rounded-none h-full">
         <div className="relative h-40 w-full overflow-hidden">
           <Image
             src={training.image || '/images/training-hero.jpg'}
@@ -69,7 +69,7 @@ export default function TrainingList({ trainings, title, showViewAll = true }: T
             {showViewAll && (
               <Link
                 href="/training"
-                className="group flex items-center gap-1 text-rugby-teal hover:text-rugby-teal/80 font-medium transition-colors"
+                className="group flex items-center gap-1 text-rugby-teal hover:text-rugby-teal/80 font-medium transition-colors bg-white dark:bg-gray-800 px-4 py-2 border-2 border-rugby-teal/30 hover:border-rugby-teal shadow-lg hover:shadow-xl rounded-none"
               >
                 <span>{translations.viewAllTrainings}</span>
                 <ChevronRight className="w-5 h-5 transform transition-transform group-hover:translate-x-1" />

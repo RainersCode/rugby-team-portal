@@ -34,8 +34,8 @@ export default function PlayerCard({ player }: PlayerCardProps) {
   const t = language === 'en' ? playerCardTranslations.en : playerCardTranslations.lv;
 
   return (
-    <div className="relative p-0.5">
-      <div className="peer relative bg-gradient-to-br from-card-bg-light to-card-bg-light/95 dark:from-card-bg-dark dark:to-card-bg-dark/95 rounded-xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 border border-rugby-teal/10 hover:border-rugby-teal/30 cursor-pointer">
+    <div className="relative group">
+      <div className="peer relative bg-gradient-to-br from-card-bg-light to-card-bg-light/95 dark:from-card-bg-dark dark:to-card-bg-dark/95 overflow-hidden transition-all duration-300 border-2 border-rugby-teal/30 hover:border-rugby-teal hover:shadow-xl rounded-none">
         {/* Background pattern */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(74,222,128,0.05),transparent_40%)] dark:bg-[radial-gradient(circle_at_top_right,rgba(74,222,128,0.08),transparent_40%)]" />
         

@@ -36,7 +36,7 @@ export default function TeamSection({ players }: TeamSectionProps) {
           </h2>
           <Link
             href="/team"
-            className="group flex items-center gap-1 text-rugby-teal hover:text-rugby-teal/80 font-medium transition-colors"
+            className="group flex items-center gap-1 text-rugby-teal hover:text-rugby-teal/80 font-medium transition-colors bg-white dark:bg-gray-800 px-4 py-2 border-2 border-rugby-teal/30 hover:border-rugby-teal shadow-lg hover:shadow-xl rounded-none"
           >
             <span>{language === 'en' ? teamTranslations.en.viewAll : teamTranslations.lv.viewAll}</span>
             <ChevronRight className="w-5 h-5 transform transition-transform group-hover:translate-x-1" />

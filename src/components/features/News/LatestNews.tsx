@@ -35,7 +35,7 @@ export default function LatestNews({ articles }: LatestNewsProps) {
     <Link href={`/news/${article.slug}`} className="block group">
       <article
         key={article.id}
-        className="relative bg-gradient-to-br from-card-bg-light to-card-bg-light/95 dark:from-card-bg-dark dark:to-card-bg-dark/95 rounded-xl shadow-md overflow-hidden border border-rugby-teal/20 hover:border-rugby-teal transition-all duration-300 h-[250px]"
+        className="relative bg-gradient-to-br from-card-bg-light to-card-bg-light/95 dark:from-card-bg-dark dark:to-card-bg-dark/95 rounded-none shadow-lg overflow-hidden border-2 border-rugby-teal/30 hover:border-rugby-teal hover:shadow-xl transition-all duration-300 h-[250px]"
       >
         <div className="relative w-full h-full">
           <Image
@@ -88,7 +88,7 @@ export default function LatestNews({ articles }: LatestNewsProps) {
           </h2>
           <Link
             href="/news"
-            className="group flex items-center gap-1 text-rugby-teal hover:text-rugby-teal/80 font-medium transition-colors"
+            className="group flex items-center gap-1 text-rugby-teal hover:text-rugby-teal/80 font-medium transition-colors bg-white dark:bg-gray-800 px-4 py-2 border-2 border-rugby-teal/30 hover:border-rugby-teal shadow-lg hover:shadow-xl rounded-none"
           >
             <span>{translations.viewAllNews}</span>
             <ChevronRight className="w-5 h-5 transform transition-transform group-hover:translate-x-1" />

@@ -49,7 +49,7 @@ export default function HomePageClient({
       {/* Call to Action Section */}
       <section className="bg-rugby-teal/5 dark:bg-rugby-teal/10">
         <div className="container-width py-12">
-          <div className="relative overflow-hidden rounded-2xl bg-rugby-teal/60">
+          <div className="relative overflow-hidden rounded-none bg-rugby-teal/60 border-2 border-rugby-teal/30 hover:border-rugby-teal shadow-lg hover:shadow-xl transition-all duration-300">
             {/* Background Image */}
             <div 
               className="absolute inset-0 z-0"
@@ -76,7 +76,7 @@ export default function HomePageClient({
                 <div className="flex justify-center lg:justify-start">
                   <a
                     href="/contact"
-                    className="inline-flex items-center justify-center rounded-lg bg-white px-4 py-1.5 sm:px-6 sm:py-2.5 text-sm font-semibold text-rugby-teal transition-all hover:bg-white/90 hover:scale-105 min-w-[100px] sm:min-w-[140px]"
+                    className="inline-flex items-center justify-center rounded-none bg-white px-4 py-1.5 sm:px-6 sm:py-2.5 text-sm font-semibold text-rugby-teal transition-all hover:bg-white/90 hover:scale-105 min-w-[100px] sm:min-w-[140px] border-2 border-rugby-teal/30 hover:border-rugby-teal shadow-lg hover:shadow-xl"
                   >
                     {translations.joinUs}
                   </a>
