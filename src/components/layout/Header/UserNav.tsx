@@ -117,42 +117,6 @@ export default function UserNav({ user, isAdmin }: UserNavProps) {
                 <span className="text-sm text-white group-hover:text-rugby-teal">Admin Dashboard</span>
               </DropdownMenuItem>
             </Link>
-            <Link href="/admin/news/edit" className="block">
-              <DropdownMenuItem className="group cursor-pointer flex items-center gap-2 px-3 py-2 hover:bg-white rounded-md transition-colors duration-200">
-                <FileText className="w-4 h-4 text-white group-hover:text-rugby-teal" />
-                <span className="text-sm text-white group-hover:text-rugby-teal">Edit News</span>
-              </DropdownMenuItem>
-            </Link>
-            <Link href="/admin/matches/edit" className="block">
-              <DropdownMenuItem className="group cursor-pointer flex items-center gap-2 px-3 py-2 hover:bg-white rounded-md transition-colors duration-200">
-                <Calendar className="w-4 h-4 text-white group-hover:text-rugby-teal" />
-                <span className="text-sm text-white group-hover:text-rugby-teal">Edit Matches</span>
-              </DropdownMenuItem>
-            </Link>
-            <Link href="/admin/training/edit" className="block">
-              <DropdownMenuItem className="group cursor-pointer flex items-center gap-2 px-3 py-2 hover:bg-white rounded-md transition-colors duration-200">
-                <Dumbbell className="w-4 h-4 text-white group-hover:text-rugby-teal" />
-                <span className="text-sm text-white group-hover:text-rugby-teal">Edit Training</span>
-              </DropdownMenuItem>
-            </Link>
-            <Link href="/admin/tournaments/edit" className="block">
-              <DropdownMenuItem className="group cursor-pointer flex items-center gap-2 px-3 py-2 hover:bg-white rounded-md transition-colors duration-200">
-                <Trophy className="w-4 h-4 text-white group-hover:text-rugby-teal" />
-                <span className="text-sm text-white group-hover:text-rugby-teal">Edit Tournaments</span>
-              </DropdownMenuItem>
-            </Link>
-            <Link href="/admin/gallery/edit" className="block">
-              <DropdownMenuItem className="group cursor-pointer flex items-center gap-2 px-3 py-2 hover:bg-white rounded-md transition-colors duration-200">
-                <Image className="w-4 h-4 text-white group-hover:text-rugby-teal" />
-                <span className="text-sm text-white group-hover:text-rugby-teal">Edit Gallery</span>
-              </DropdownMenuItem>
-            </Link>
-            <Link href="/admin/live/edit" className="block">
-              <DropdownMenuItem className="group cursor-pointer flex items-center gap-2 px-3 py-2 hover:bg-white rounded-md transition-colors duration-200">
-                <Play className="w-4 h-4 text-white group-hover:text-rugby-teal" />
-                <span className="text-sm text-white group-hover:text-rugby-teal">Edit Live</span>
-              </DropdownMenuItem>
-            </Link>
 
             <DropdownMenuSeparator className="my-2 bg-white/20" />
           </>

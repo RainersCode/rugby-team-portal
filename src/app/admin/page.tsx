@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import { Users, FileText, Calendar, Settings, BarChart, CalendarDays, Dumbbell, Image as ImageIcon } from "lucide-react";
+import { Users, FileText, Calendar, Settings, BarChart, CalendarDays, Dumbbell, Image as ImageIcon, Play, Trophy } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -23,6 +23,11 @@ export default function AdminDashboard() {
     activities: 0,
     exercises: 0,
     training_programs: 0,
+    live_streams: 0,
+    tournaments: 0,
+    championship_teams: 0,
+    sevens_teams: 0,
+    cup_teams: 0,
   });
 
   const router = useRouter();
@@ -68,6 +73,10 @@ export default function AdminDashboard() {
         { count: activitiesCount },
         { count: exercisesCount },
         { count: trainingProgramsCount },
+        { count: liveStreamsCount },
+        { count: championshipTeamsCount },
+        { count: sevensTeamsCount },
+        { count: cupTeamsCount },
       ] = await Promise.all([
         supabase.from("players").select("*", { count: "exact", head: true }),
         supabase.from("articles").select("*", { count: "exact", head: true }),
@@ -76,6 +85,10 @@ export default function AdminDashboard() {
         supabase.from("activities").select("*", { count: "exact", head: true }),
         supabase.from("exercises").select("*", { count: "exact", head: true }),
         supabase.from("training_programs").select("*", { count: "exact", head: true }),
+        supabase.from("live_streams").select("*", { count: "exact", head: true }),
+        supabase.from("championship_teams").select("*", { count: "exact", head: true }),
+        supabase.from("sevens_teams").select("*", { count: "exact", head: true }),
+        supabase.from("cup_teams").select("*", { count: "exact", head: true }),
       ]);
 
       setStats({
@@ -86,6 +99,11 @@ export default function AdminDashboard() {
         activities: activitiesCount || 0,
         exercises: exercisesCount || 0,
         training_programs: trainingProgramsCount || 0,
+        live_streams: liveStreamsCount || 0,
+        tournaments: (championshipTeamsCount || 0) + (sevensTeamsCount || 0) + (cupTeamsCount || 0),
+        championship_teams: championshipTeamsCount || 0,
+        sevens_teams: sevensTeamsCount || 0,
+        cup_teams: cupTeamsCount || 0,
       });
     } catch (error) {
       console.error("Error fetching stats:", error);
@@ -136,12 +154,28 @@ export default function AdminDashboard() {
       color: "text-rose-500",
     },
     {
+      title: "Tournaments",
+      description: `Championship (${stats.championship_teams}), Sevens (${stats.sevens_teams}), Cup (${stats.cup_teams})`,
+      icon: Trophy,
+      href: "/admin/tournaments",
+      count: stats.tournaments,
+      color: "text-yellow-500",
+    },
+    {
       title: "Gallery",
       description: "Manage photo galleries",
       icon: ImageIcon,
       href: "/admin/gallery",
       count: 0,
       color: "text-cyan-500",
+    },
+    {
+      title: "Live Streams",
+      description: "Manage live streams and broadcasts",
+      icon: Play,
+      href: "/admin/live",
+      count: stats.live_streams,
+      color: "text-red-500",
     },
     {
       title: "Users",
@@ -255,6 +289,22 @@ export default function AdminDashboard() {
                   <CardContent className="flex flex-col items-center justify-center p-4">
                     <Dumbbell className="h-6 w-6 mb-2" />
                     <span className="text-sm font-medium">New Program</span>
+                  </CardContent>
+                </Card>
+              </Link>
+              <Link href="/admin/tournaments">
+                <Card className="hover:bg-accent transition-colors cursor-pointer">
+                  <CardContent className="flex flex-col items-center justify-center p-4">
+                    <Trophy className="h-6 w-6 mb-2" />
+                    <span className="text-sm font-medium">New Tournament</span>
+                  </CardContent>
+                </Card>
+              </Link>
+              <Link href="/admin/live">
+                <Card className="hover:bg-accent transition-colors cursor-pointer">
+                  <CardContent className="flex flex-col items-center justify-center p-4">
+                    <Play className="h-6 w-6 mb-2" />
+                    <span className="text-sm font-medium">New Live Stream</span>
                   </CardContent>
                 </Card>
               </Link>
