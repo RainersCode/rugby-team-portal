@@ -41,6 +41,43 @@ export default function HeroCarousel({
 
   return (
     <section className="relative h-[500px] md:h-[600px] w-full overflow-hidden bg-gradient-to-b from-gray-900 to-black">
+      {/* Navigation Controls - Fixed positioning and z-index */}
+      <div className="absolute inset-x-0 top-1/2 z-30 flex -translate-y-1/2 justify-between px-4 pointer-events-none">
+        <button
+          onClick={prevSlide}
+          className="group rounded-none bg-black/30 p-2 backdrop-blur-sm transition-all duration-300 hover:bg-rugby-teal/80 pointer-events-auto border border-white/20 hover:border-white/40"
+          aria-label="Previous slide"
+          type="button"
+        >
+          <ChevronLeft className="h-6 w-6 text-white transition-transform group-hover:scale-110" />
+        </button>
+        <button
+          onClick={nextSlide}
+          className="group rounded-none bg-black/30 p-2 backdrop-blur-sm transition-all duration-300 hover:bg-rugby-teal/80 pointer-events-auto border border-white/20 hover:border-white/40"
+          aria-label="Next slide"
+          type="button"
+        >
+          <ChevronRight className="h-6 w-6 text-white transition-transform group-hover:scale-110" />
+        </button>
+      </div>
+
+      {/* Slide Indicators */}
+      <div className="absolute bottom-4 left-1/2 z-30 flex -translate-x-1/2 space-x-2 pointer-events-none">
+        {articles.map((_, index) => (
+          <button
+            key={index}
+            onClick={() => setCurrentSlide(index)}
+            className={`h-2 w-8 rounded-none transition-all duration-300 pointer-events-auto ${
+              index === currentSlide
+                ? "bg-rugby-teal w-10"
+                : "bg-white/50 hover:bg-white/80"
+            }`}
+            aria-label={`Go to slide ${index + 1}`}
+            type="button"
+          />
+        ))}
+      </div>
+
       <div
         className="absolute inset-0 flex transition-transform duration-700 ease-out"
         style={{ transform: `translateX(-${currentSlide * 100}%)` }}
@@ -50,8 +87,11 @@ export default function HeroCarousel({
             key={article.id}
             className="relative w-full h-full flex-shrink-0"
           >
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent z-10" />
-            <div className="absolute inset-0 bg-gradient-to-r from-black/30 via-transparent to-black/30 z-10" />
+            {/* Enhanced Gradient Overlays */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-10" />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-transparent to-black/50 z-10" />
+            <div className="absolute inset-0 bg-rugby-teal/10 mix-blend-overlay z-10" />
+            
             <Image
               src={article.image}
               alt={article.title}
@@ -60,35 +100,40 @@ export default function HeroCarousel({
               priority={index === 0}
             />
             <div className="absolute inset-0 z-20 flex items-center pb-32 md:pb-40">
-              <div className="container-width text-white px-4 md:px-0 animate-fade-in-up">
-                <span className="inline-block bg-gradient-to-r from-rugby-teal to-rugby-teal/80 text-white text-xs md:text-sm px-4 py-1.5 rounded-none mb-3 md:mb-4 shadow-lg backdrop-blur-sm">
-                  {translations.latestNews}
-                </span>
-                <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-3 md:mb-4 line-clamp-2 drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)] md:drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] [text-shadow:_1px_1px_2px_rgb(0_0_0_/_40%)] md:[text-shadow:_2px_2px_4px_rgb(0_0_0_/_50%)]">
-                  {article.title}
-                </h1>
-                <p className="text-base md:text-lg mb-6 md:mb-8 max-w-2xl line-clamp-2 text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]">
-                  {article.content}
-                </p>
-                <Button
-                  href={`/news/${article.slug}`}
-                  variant="ghost"
-                  size="md"
-                  className="group bg-white dark:bg-gray-800 px-4 py-2 border-2 border-rugby-teal/30 hover:border-rugby-teal shadow-lg hover:shadow-xl rounded-none text-rugby-teal hover:text-rugby-teal/90 transition-all duration-300"
-                >
-                  <span className="font-medium">{translations.readMore}</span>
-                  <ChevronRight className="w-4 h-4 ml-2 transform group-hover:translate-x-1 transition-transform" />
-                </Button>
+              <div className="container-width text-white px-4 md:px-0">
+                <div className="animate-fade-in-up transform transition-all duration-500 ease-out">
+                  <span className="inline-block bg-gradient-to-r from-rugby-teal to-rugby-teal-light text-white text-xs md:text-sm px-4 py-1.5 rounded-sm mb-3 md:mb-4 shadow-lg backdrop-blur-sm">
+                    {translations.latestNews}
+                  </span>
+                  <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-3 md:mb-4 line-clamp-2 drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)] md:drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] [text-shadow:_1px_1px_2px_rgb(0_0_0_/_40%)] md:[text-shadow:_2px_2px_4px_rgb(0_0_0_/_50%)]">
+                    {article.title}
+                  </h1>
+                  <p className="text-base md:text-lg mb-6 md:mb-8 max-w-2xl line-clamp-2 text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]">
+                    {article.content}
+                  </p>
+                  <Button
+                    href={`/news/${article.slug}`}
+                    variant="ghost"
+                    size="md"
+                    rounded="none"
+                    className="group bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm px-4 py-2 border-2 border-rugby-teal/30 hover:border-rugby-teal shadow-lg hover:shadow-xl text-rugby-teal hover:text-rugby-teal/90 transition-all duration-300"
+                  >
+                    <span className="font-medium">{translations.readMore}</span>
+                    <ChevronRight className="w-4 h-4 ml-2 transform group-hover:translate-x-1 transition-transform" />
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Next Match Card */}
+      {/* Next Match Card - Fixed */}
       {nextMatch && (
         <div className="absolute bottom-0 left-0 right-0 md:bottom-16 md:left-auto md:right-8 lg:right-12 w-full md:w-[360px] z-10">
-          <Card className="bg-gradient-to-br from-white/95 via-rugby-teal/20 to-gray-100/95 shadow-xl hover:shadow-2xl transition-all duration-300 border-0 rounded-none backdrop-blur-sm">
+          <Card 
+            className="bg-gradient-to-br from-white/95 via-rugby-teal/20 to-gray-100/95 shadow-xl hover:shadow-2xl transition-all duration-300 border-0 rounded-none backdrop-blur-sm"
+          >
             <div className="p-3 md:p-4">
               <div className="flex justify-between items-center mb-1.5 md:mb-3">
                 <span className="text-[10px] md:text-xs font-medium bg-rugby-teal text-white px-2 py-0.5 md:px-3 md:py-1 rounded-none shadow-sm">
@@ -153,38 +198,6 @@ export default function HeroCarousel({
           </Card>
         </div>
       )}
-
-      {/* Navigation Arrows */}
-      <button
-        onClick={prevSlide}
-        className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 text-white p-2.5 md:p-3 rounded-none transition-all duration-300 backdrop-blur-sm border border-white/20 hover:border-white/40 group"
-        aria-label="Previous slide"
-      >
-        <ChevronLeft className="w-4 h-4 md:w-5 md:h-5 group-hover:-translate-x-0.5 transition-transform" />
-      </button>
-      <button
-        onClick={nextSlide}
-        className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 text-white p-2.5 md:p-3 rounded-none transition-all duration-300 backdrop-blur-sm border border-white/20 hover:border-white/40 group"
-        aria-label="Next slide"
-      >
-        <ChevronRight className="w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-0.5 transition-transform" />
-      </button>
-
-      {/* Slide Indicators */}
-      <div className="absolute bottom-28 md:bottom-6 left-1/2 -translate-x-1/2 flex gap-2.5">
-        {articles.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => setCurrentSlide(index)}
-            className={`transition-all duration-300 ${
-              currentSlide === index
-                ? "w-6 md:w-8 h-1.5 bg-rugby-yellow rounded-none"
-                : "w-1.5 h-1.5 bg-white/50 hover:bg-white/75 rounded-none"
-            }`}
-            aria-label={`Go to slide ${index + 1}`}
-          />
-        ))}
-      </div>
     </section>
   );
 }

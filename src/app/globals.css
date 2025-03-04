@@ -10,6 +10,13 @@
   --accent-blue: #1E90FF;
   --background: #ffffff;
   --foreground: #171717;
+  
+  /* Rugby theme colors */
+  --rugby-teal: rgb(0, 85, 75);
+  --rugby-teal-dark: rgb(0, 65, 55);
+  --rugby-teal-light: rgb(20, 125, 110);
+  --rugby-red: rgb(225, 60, 50);
+  --rugby-yellow: rgb(255, 205, 0);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -31,11 +38,30 @@
     font-family: var(--font-jockey-one);
     letter-spacing: 0.05em;  /* Increased letter spacing */
   }
+  
+  /* Smooth scrolling for the entire page */
+  html {
+    scroll-behavior: smooth;
+  }
 }
 
 @layer components {
   .container-width {
     @apply max-w-[1440px] mx-auto px-5;
+  }
+  
+  /* Modern card styles */
+  .modern-card {
+    @apply bg-white dark:bg-gray-800 rounded-md shadow-md hover:shadow-lg transition-all duration-300 border border-gray-100 dark:border-gray-700 overflow-hidden;
+  }
+  
+  /* Button styles */
+  .btn-primary {
+    @apply bg-rugby-teal hover:bg-rugby-teal-dark text-white shadow-md hover:shadow-lg transition-all duration-300 rounded-md;
+  }
+  
+  .btn-secondary {
+    @apply bg-white hover:bg-gray-50 text-rugby-teal border border-rugby-teal/30 hover:border-rugby-teal shadow-md hover:shadow-lg transition-all duration-300 rounded-md;
   }
 }
 
@@ -44,6 +70,7 @@ body {
   background: var(--background);
 }
 
+/* Animation keyframes */
 @keyframes shimmer {
   0% {
     background-position: -200% center;
@@ -58,6 +85,34 @@ body {
   background-size: 200% 100%;
 }
 
+@keyframes fade-in-up {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.6s ease-out forwards;
+}
+
+@keyframes pulse-subtle {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 3s ease-in-out infinite;
+}
+
 /* Hide scrollbar while keeping scroll functionality */
 .hide-scrollbar {
   -ms-overflow-style: none;  /* IE and Edge */
@@ -66,4 +121,14 @@ body {
 
 .hide-scrollbar::-webkit-scrollbar {
   display: none;  /* Chrome, Safari and Opera */
+}
+
+/* Glass morphism effect */
+.glass-effect {
+  @apply bg-white/70 dark:bg-gray-900/70 backdrop-blur-md border border-white/20 dark:border-gray-700/20;
+}
+
+/* Text gradient effect */
+.text-gradient {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-rugby-teal to-rugby-teal-light;
 }

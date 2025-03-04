@@ -13,6 +13,7 @@ import Image from "next/image";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Clock, Users, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 // Lazy load components that are not immediately visible
 const LatestMatches = lazy(() => import("@/components/features/Matches/LatestMatches"));

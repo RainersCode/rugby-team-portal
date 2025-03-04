@@ -14,13 +14,18 @@ const config: Config = {
         'jockey': ['var(--font-jockey-one)'],
       },
       colors: {
-        // Rugby theme colors
+        // Rugby theme colors - refined palette
         'rugby-red': 'rgb(225, 60, 50)',
+        'rugby-red-dark': 'rgb(195, 40, 30)',
         'rugby-yellow': 'rgb(255, 205, 0)',
+        'rugby-yellow-light': 'rgb(255, 225, 100)',
         'rugby-teal': 'rgb(0, 85, 75)',
+        'rugby-teal-dark': 'rgb(0, 65, 55)',
+        'rugby-teal-light': 'rgb(20, 125, 110)',
         'rugby-black': 'rgb(0, 0, 0)',
         'rugby-gray-4': 'rgb(195, 195, 195)',
         'rugby-gray-1': 'rgb(220, 220, 220)',
+        'rugby-gray-dark': 'rgb(50, 50, 50)',
         // System colors
         'primary': 'rgb(0, 85, 75)', // rugby-teal as primary
         'secondary': 'rgb(225, 60, 50)', // rugby-red as secondary
