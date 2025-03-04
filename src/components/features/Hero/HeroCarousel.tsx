@@ -88,18 +88,18 @@ export default function HeroCarousel({
       {/* Next Match Card */}
       {nextMatch && (
         <div className="absolute bottom-0 left-0 right-0 md:bottom-16 md:left-auto md:right-8 lg:right-12 w-full md:w-[360px] z-10">
-          <Card className="bg-gradient-to-br from-rugby-teal/90 via-gray-800/90 to-gray-900/95 shadow-xl hover:shadow-2xl transition-all duration-300 border-0 rounded-none md:rounded-lg backdrop-blur-sm">
+          <Card className="bg-gradient-to-br from-white/95 via-rugby-teal/20 to-gray-100/95 shadow-xl hover:shadow-2xl transition-all duration-300 border-0 rounded-none md:rounded-lg backdrop-blur-sm">
             <div className="p-3 md:p-4">
               <div className="flex justify-between items-center mb-1.5 md:mb-3">
-                <span className="text-[10px] md:text-xs font-medium bg-white/90 text-rugby-teal px-2 py-0.5 md:px-3 md:py-1 rounded-none md:rounded-full shadow-sm">
+                <span className="text-[10px] md:text-xs font-medium bg-rugby-teal text-white px-2 py-0.5 md:px-3 md:py-1 rounded-none md:rounded-full shadow-sm">
                   Next Match
                 </span>
-                <span className="text-[10px] md:text-xs font-semibold text-white">
+                <span className="text-[10px] md:text-xs font-bold text-gray-900 bg-white/80 px-2 py-0.5 rounded-full shadow-sm">
                   {format(new Date(nextMatch.match_date), "MMM d")}
                 </span>
               </div>
 
-              <div className="flex items-center justify-between gap-3 md:gap-6 bg-gradient-to-br from-white/10 via-white/5 to-transparent p-2 md:p-3 rounded-md border border-white/20">
+              <div className="flex items-center justify-between gap-3 md:gap-6 bg-gradient-to-br from-rugby-teal/10 via-white/90 to-transparent p-2 md:p-3 rounded-md border border-rugby-teal/20">
                 {/* Home Team */}
                 <div className="flex flex-col items-center text-center flex-1">
                   <div className="relative w-6 h-6 md:w-12 md:h-12 mb-1 md:mb-2 transform hover:scale-110 transition-transform duration-300">
@@ -110,17 +110,17 @@ export default function HeroCarousel({
                       className="object-contain drop-shadow-md"
                     />
                   </div>
-                  <span className="text-[10px] md:text-sm font-semibold text-white">
+                  <span className="text-[10px] md:text-sm font-semibold text-gray-900">
                     {nextMatch.home_team}
                   </span>
                 </div>
 
                 {/* Match Info */}
                 <div className="flex flex-col items-center">
-                  <span className="text-[10px] md:text-sm font-bold text-rugby-yellow">
+                  <span className="text-[10px] md:text-sm font-bold text-rugby-teal">
                     VS
                   </span>
-                  <span className="text-[8px] md:text-xs font-medium text-white mt-0.5 md:mt-1">
+                  <span className="text-[8px] md:text-xs font-medium text-gray-800 mt-0.5 md:mt-1">
                     {format(new Date(nextMatch.match_date), "HH:mm")}
                   </span>
                 </div>
@@ -135,16 +135,16 @@ export default function HeroCarousel({
                       className="object-contain drop-shadow-md"
                     />
                   </div>
-                  <span className="text-[10px] md:text-sm font-semibold text-white">
+                  <span className="text-[10px] md:text-sm font-semibold text-gray-900">
                     {nextMatch.away_team}
                   </span>
                 </div>
               </div>
 
-              <div className="mt-1.5 md:mt-3 pt-1.5 md:pt-3 border-t border-white/20">
+              <div className="mt-1.5 md:mt-3 pt-1.5 md:pt-3 border-t border-rugby-teal/20">
                 <div className="flex items-center gap-1 md:gap-1.5 text-[8px] md:text-xs">
                   <MapPin className="w-2.5 h-2.5 md:w-3 md:h-3 text-rugby-red" />
-                  <span className="truncate text-white/90 font-medium">
+                  <span className="truncate text-gray-900 font-medium bg-white/80 px-2 py-0.5 rounded-full">
                     {nextMatch.venue}
                   </span>
                 </div>
