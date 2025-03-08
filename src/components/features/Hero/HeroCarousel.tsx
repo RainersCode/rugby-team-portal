@@ -105,7 +105,7 @@ export default function HeroCarousel({
                   <span className="inline-block bg-gradient-to-r from-rugby-teal to-rugby-teal-light text-white text-xs md:text-sm px-4 py-1.5 rounded-sm mb-3 md:mb-4 shadow-lg backdrop-blur-sm">
                     {translations.latestNews}
                   </span>
-                  <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-3 md:mb-4 line-clamp-2 drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)] md:drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] [text-shadow:_1px_1px_2px_rgb(0_0_0_/_40%)] md:[text-shadow:_2px_2px_4px_rgb(0_0_0_/_50%)]">
+                  <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-3 md:mb-4 line-clamp-2 drop-shadow-[0_1px_1px_rgba(0,0,0,0.3)] md:drop-shadow-[0_1px_1px_rgba(0,0,0,0.4)] [text-shadow:_0px_1px_1px_rgb(0_0_0_/_20%)] md:[text-shadow:_1px_1px_2px_rgb(0_0_0_/_30%)]">
                     {article.title}
                   </h1>
                   <p className="text-base md:text-lg mb-6 md:mb-8 max-w-2xl line-clamp-2 text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]">
