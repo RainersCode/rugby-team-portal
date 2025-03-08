@@ -16,7 +16,6 @@ import { Pencil, Trash2 } from 'lucide-react';
 import { supabase, withRetry } from '@/utils/supabase';
 import { Database } from '@/lib/database.types';
 import { formatDate } from '@/lib/utils';
-import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/components/ui/use-toast';
 
 interface Article {
@@ -146,12 +145,12 @@ export default function ArticlesPage() {
   const renderTableContent = () => {
     if (loading) {
       return Array.from({ length: 5 }).map((_, index) => (
-        <TableRow key={`skeleton-${index}`}>
-          <TableCell><Skeleton className="h-6 w-48" /></TableCell>
-          <TableCell><Skeleton className="h-6 w-24" /></TableCell>
-          <TableCell><Skeleton className="h-6 w-24" /></TableCell>
-          <TableCell><Skeleton className="h-6 w-24" /></TableCell>
-          <TableCell><Skeleton className="h-6 w-20" /></TableCell>
+        <TableRow key={`loading-${index}`}>
+          <TableCell><div className="h-6 w-48 bg-gray-200 dark:bg-gray-700 animate-pulse rounded"></div></TableCell>
+          <TableCell><div className="h-6 w-24 bg-gray-200 dark:bg-gray-700 animate-pulse rounded"></div></TableCell>
+          <TableCell><div className="h-6 w-24 bg-gray-200 dark:bg-gray-700 animate-pulse rounded"></div></TableCell>
+          <TableCell><div className="h-6 w-24 bg-gray-200 dark:bg-gray-700 animate-pulse rounded"></div></TableCell>
+          <TableCell><div className="h-6 w-20 bg-gray-200 dark:bg-gray-700 animate-pulse rounded"></div></TableCell>
         </TableRow>
       ));
     }

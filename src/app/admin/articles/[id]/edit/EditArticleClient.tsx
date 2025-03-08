@@ -7,7 +7,6 @@ import { supabase, withRetry } from '@/utils/supabase';
 import { Database } from '@/lib/database.types';
 import ArticleEditor from '@/components/features/News/ArticleEditor';
 import { Article } from '@/types';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Loader2 } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 
@@ -146,39 +145,35 @@ export default function EditArticleClient({ id }: EditArticleClientProps) {
 
   if (error && !article) {
     return (
-      <Alert variant="destructive" className="max-w-4xl mx-auto">
-        <AlertTitle>Error</AlertTitle>
-        <AlertDescription>
-          {error}
-          <div className="mt-4">
-            <button 
-              onClick={() => router.push('/admin/articles')}
-              className="bg-primary text-white px-4 py-2 rounded-md text-sm"
-            >
-              Back to Articles
-            </button>
-          </div>
-        </AlertDescription>
-      </Alert>
+      <div className="max-w-4xl mx-auto p-6 bg-red-50 border border-red-300 rounded-md">
+        <h2 className="text-lg font-semibold text-red-700 mb-2">Error</h2>
+        <p className="text-red-500">{error}</p>
+        <div className="mt-4">
+          <button 
+            onClick={() => router.push('/admin/articles')}
+            className="bg-primary text-white px-4 py-2 rounded-md text-sm"
+          >
+            Back to Articles
+          </button>
+        </div>
+      </div>
     );
   }
 
   if (!article) {
     return (
-      <Alert variant="destructive" className="max-w-4xl mx-auto">
-        <AlertTitle>Not Found</AlertTitle>
-        <AlertDescription>
-          Article not found
-          <div className="mt-4">
-            <button 
-              onClick={() => router.push('/admin/articles')}
-              className="bg-primary text-white px-4 py-2 rounded-md text-sm"
-            >
-              Back to Articles
-            </button>
-          </div>
-        </AlertDescription>
-      </Alert>
+      <div className="max-w-4xl mx-auto p-6 bg-red-50 border border-red-300 rounded-md">
+        <h2 className="text-lg font-semibold text-red-700 mb-2">Not Found</h2>
+        <p className="text-red-500">Article not found</p>
+        <div className="mt-4">
+          <button 
+            onClick={() => router.push('/admin/articles')}
+            className="bg-primary text-white px-4 py-2 rounded-md text-sm"
+          >
+            Back to Articles
+          </button>
+        </div>
+      </div>
     );
   }
 
@@ -189,10 +184,10 @@ export default function EditArticleClient({ id }: EditArticleClientProps) {
       </div>
 
       {error && (
-        <Alert variant="destructive" className="mb-4">
-          <AlertTitle>Error</AlertTitle>
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
+        <div className="p-4 mb-4 text-red-700 bg-red-100 border-l-4 border-red-500 rounded">
+          <p className="font-bold">Error</p>
+          <p>{error}</p>
+        </div>
       )}
 
       <ArticleEditor
