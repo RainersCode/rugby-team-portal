@@ -193,8 +193,37 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     const savedLanguage = localStorage.getItem('language') as Language;
     if (savedLanguage && (savedLanguage === 'en' || savedLanguage === 'lv')) {
       setLanguage(savedLanguage);
+    } else {
+      // If no saved preference, try to detect location and set language accordingly
+      detectUserLocation();
     }
   }, []);
+
+  // Function to detect user's location and set language accordingly
+  const detectUserLocation = async () => {
+    try {
+      // First try to use browser's language preference
+      const browserLang = navigator.language || (navigator as any).userLanguage;
+      if (browserLang && browserLang.toLowerCase().startsWith('lv')) {
+        setLanguage('lv');
+        localStorage.setItem('language', 'lv');
+        return;
+      }
+
+      // Then try to use IP-based geolocation
+      const response = await fetch('https://ipapi.co/json/');
+      const data = await response.json();
+      
+      // Check if user is in Latvia
+      if (data.country_code === 'LV') {
+        setLanguage('lv');
+        localStorage.setItem('language', 'lv');
+      }
+    } catch (error) {
+      console.error('Error detecting user location:', error);
+      // Default to English if there's an error
+    }
+  };
 
   const handleSetLanguage = (lang: Language) => {
     console.log('Setting language to:', lang);

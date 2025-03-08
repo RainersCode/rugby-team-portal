@@ -63,7 +63,7 @@ export default function PlayerCard({ player }: PlayerCardProps) {
             
             {/* Player name and position overlay */}
             <div className="absolute bottom-0 left-0 right-0 p-3">
-              <h3 className="text-base sm:text-lg font-bold text-white hover:text-rugby-yellow transition-colors whitespace-normal">
+              <h3 className="text-base sm:text-lg font-bold text-white whitespace-normal">
                 {player.name}
               </h3>
               <div className="flex items-center gap-2 text-white/90 mt-1">

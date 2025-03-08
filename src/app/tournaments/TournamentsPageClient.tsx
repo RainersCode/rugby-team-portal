@@ -38,14 +38,14 @@ const tournamentTranslations = {
   lv: {
     title: "Regbija Turnīri",
     season: "Sezona",
-    seasonDescription: "Pašreizējā sezona, kurā ietilpst Čempionāts, Septiņi un Kauss.",
+    seasonDescription: "Pašreizējā sezona, kurā ietilpst Čempionāts, Septiņnieks un Kauss.",
     upcomingMatches: "Gaidāmās Spēles",
     noUpcomingMatches: "Nav ieplānotu gaidāmo spēļu.",
     cupPlayoffBracket: "Kausa Izslēgšanas Spēļu Tabula",
     cupDescription: "Pašreizējā kausa sacensību izslēgšanas struktūra",
     tournaments: {
       championship: "Čempionāts",
-      sevens: "Septiņi",
+      sevens: "Septiņnieks",
       cup: "Kauss"
     },
     tableHeaders: {
