@@ -35,7 +35,7 @@ function TrainingCard({ training }: { training: Training }) {
             <div className="absolute inset-0 bg-black/50 opacity-0 training-card-overlay transition-opacity duration-300" />
           </div>
           <div className="p-4 flex flex-col h-[calc(100%-160px)]">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1.5 line-clamp-1">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-1.5 line-clamp-1 training-card-title">
               {training.title}
             </h3>
             <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-2">
@@ -74,6 +74,10 @@ function TrainingCard({ training }: { training: Training }) {
         
         .training-card-container:hover img {
           transform: scale(1.05);
+        }
+        
+        .training-card-container:hover .training-card-title {
+          color: black;
         }
         
         .training-card-line {

@@ -247,7 +247,7 @@ export default function ActivitiesClient({
                 return (
                   <Card
                     key={activity.id}
-                    className={`group relative overflow-hidden transition-all duration-300 hover:shadow-lg border-2 border-rugby-teal/20 hover:border-rugby-red
+                    className={`group relative overflow-hidden transition-all duration-300 hover:shadow-lg border-2 border-rugby-teal/20
                       ${
                         isUpcoming
                           ? "bg-white dark:bg-gray-900"
@@ -257,6 +257,7 @@ export default function ActivitiesClient({
                   >
                     <div className="absolute top-0 left-0 w-1 h-full bg-rugby-red" />
                     <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background/10 pointer-events-none" />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 dark:group-hover:bg-black/20 transition-colors duration-300 pointer-events-none" />
 
                     <CardHeader>
                       <div className="flex items-center justify-between mb-2">
@@ -269,7 +270,7 @@ export default function ActivitiesClient({
                           participants
                         </span>
                       </div>
-                      <CardTitle className="text-xl mb-2 group-hover:text-rugby-red transition-colors">
+                      <CardTitle className="text-xl mb-2 font-medium text-foreground group-hover:text-black dark:group-hover:text-black transition-colors">
                         {activity.title}
                       </CardTitle>
                       <CardDescription className="line-clamp-2">
@@ -300,7 +301,7 @@ export default function ActivitiesClient({
                           <Button
                             className={`w-full group relative ${
                               status.button.variant === "default"
-                                ? "bg-rugby-red hover:bg-rugby-red/90 text-white font-medium"
+                                ? "bg-rugby-teal hover:bg-rugby-teal/90 text-white font-medium"
                                 : status.button.variant === "destructive"
                                 ? "bg-rugby-red hover:bg-rugby-red/90 text-white font-medium"
                                 : "bg-gray-100 text-gray-500"

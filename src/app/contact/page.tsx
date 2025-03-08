@@ -79,7 +79,7 @@ export default function ContactPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
           {/* Contact Information */}
           <div className="space-y-8">
-            <div className="bg-card rounded-2xl p-8 shadow-lg border border-rugby-teal/20">
+            <div className="bg-card rounded-none p-8 shadow-lg border border-rugby-teal/20">
               <h2 className="text-2xl font-bold mb-6 text-rugby-teal">
                 {contactTranslations[language].contactInfo}
               </h2>
@@ -127,21 +127,21 @@ export default function ContactPage() {
             </div>
 
             {/* Map or Additional Info */}
-            <div className="bg-card rounded-2xl p-8 shadow-lg border border-rugby-teal/20">
+            <div className="bg-card rounded-none p-8 shadow-lg border border-rugby-teal/20">
               <h2 className="text-2xl font-bold mb-6 text-rugby-teal">
                 {contactTranslations[language].trainingGround}
               </h2>
               <p className="text-muted-foreground mb-4">
                 {contactTranslations[language].trainingGroundDesc}
               </p>
-              <div className="aspect-video bg-muted rounded-lg">
+              <div className="aspect-video bg-muted rounded-none">
                 {/* Add map or image here */}
               </div>
             </div>
           </div>
 
           {/* Contact Form */}
-          <div className="bg-card rounded-2xl p-8 shadow-lg border border-rugby-teal/20">
+          <div className="bg-card rounded-none p-8 shadow-lg border border-rugby-teal/20">
             <h2 className="text-2xl font-bold mb-6 text-rugby-teal">
               {contactTranslations[language].sendMessage}
             </h2>
@@ -159,7 +159,7 @@ export default function ContactPage() {
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-lg border border-rugby-teal/20 bg-background focus:ring-2 focus:ring-rugby-teal focus:border-transparent"
+                  className="w-full px-4 py-3 rounded-none border border-rugby-teal/20 bg-background focus:ring-2 focus:ring-rugby-teal focus:border-transparent"
                   required
                 />
               </div>
@@ -176,7 +176,7 @@ export default function ContactPage() {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-lg border border-rugby-teal/20 bg-background focus:ring-2 focus:ring-rugby-teal focus:border-transparent"
+                  className="w-full px-4 py-3 rounded-none border border-rugby-teal/20 bg-background focus:ring-2 focus:ring-rugby-teal focus:border-transparent"
                   required
                 />
               </div>
@@ -193,7 +193,7 @@ export default function ContactPage() {
                   name="subject"
                   value={formData.subject}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-lg border border-rugby-teal/20 bg-background focus:ring-2 focus:ring-rugby-teal focus:border-transparent"
+                  className="w-full px-4 py-3 rounded-none border border-rugby-teal/20 bg-background focus:ring-2 focus:ring-rugby-teal focus:border-transparent"
                   required
                 />
               </div>
@@ -210,13 +210,13 @@ export default function ContactPage() {
                   value={formData.message}
                   onChange={handleChange}
                   rows={5}
-                  className="w-full px-4 py-3 rounded-lg border border-rugby-teal/20 bg-background focus:ring-2 focus:ring-rugby-teal focus:border-transparent"
+                  className="w-full px-4 py-3 rounded-none border border-rugby-teal/20 bg-background focus:ring-2 focus:ring-rugby-teal focus:border-transparent"
                   required
                 ></textarea>
               </div>
               <button
                 type="submit"
-                className="w-full flex items-center justify-center gap-2 bg-rugby-teal hover:bg-rugby-teal/90 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+                className="w-full flex items-center justify-center gap-2 bg-rugby-teal hover:bg-rugby-teal/90 text-white font-semibold py-3 px-6 rounded-none transition-colors"
               >
                 <Send className="w-5 h-5" />
                 {contactTranslations[language].send}
