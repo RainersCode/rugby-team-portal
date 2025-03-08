@@ -21,7 +21,7 @@ export function AdminNav() {
       </Link>
       <Link href="/admin/tournaments">
         <DropdownMenuItem className="cursor-pointer">
-          Manage Tournaments
+          Manage Tournament
         </DropdownMenuItem>
       </Link>
     </>
