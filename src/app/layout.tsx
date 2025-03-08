@@ -20,8 +20,12 @@ const roboto = Roboto({
 });
 
 export const metadata: Metadata = {
-  title: "Rugby Team Portal",
-  description: "Professional Rugby Team Website Portal",
+  title: "Regbija klubs Fēnikss",
+  description: "RK \"Fēnikss\" nodarbojas ar regbija komandas veidošanu un veiksmīgi startē Latvijas Regbija Federācijas rīkotajās sacensībās, kā arī starptautiskajos turnīros gan regbijā XV, gan regbijā 7.",
+  icons: {
+    icon: '/fnx-logo/fēniks_logo-removebg-preview.png',
+    apple: '/fnx-logo/fēniks_logo-removebg-preview.png',
+  },
 };
 
 export default function RootLayout({
