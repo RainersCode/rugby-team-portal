@@ -2,11 +2,13 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Exercise, ExerciseCategory } from '@/types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dumbbell, Timer, RotateCcw } from 'lucide-react';
+import { Dumbbell, Timer, RotateCcw, ChevronDown, ChevronUp } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 
 const exerciseTranslations = {
@@ -16,6 +18,8 @@ const exerciseTranslations = {
     browseExercises: "Browse Exercises",
     viewTrainingPrograms: "View Training Programs",
     watchTutorial: "Watch Tutorial",
+    readMore: "Read More",
+    readLess: "Read Less",
     categories: {
       weightlifting: "Weightlifting",
       strength: "Strength",
@@ -37,6 +41,8 @@ const exerciseTranslations = {
     browseExercises: "Pārlūkot Vingrojumus",
     viewTrainingPrograms: "Skatīt Treniņu Programmas",
     watchTutorial: "Skatīt Pamācību",
+    readMore: "Lasīt Vairāk",
+    readLess: "Lasīt Mazāk",
     categories: {
       weightlifting: "Svarcelšana",
       strength: "Spēks",
@@ -60,6 +66,19 @@ interface ExercisesPageClientProps {
 
 export default function ExercisesPageClient({ groupedExercises }: ExercisesPageClientProps) {
   const { language } = useLanguage();
+  const [expandedDescriptions, setExpandedDescriptions] = useState<Record<string, boolean>>({});
+
+  const toggleDescription = (exerciseId: string) => {
+    setExpandedDescriptions(prev => ({
+      ...prev,
+      [exerciseId]: !prev[exerciseId]
+    }));
+  };
+
+  const truncateDescription = (text: string, maxLength = 100) => {
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength) + '...';
+  };
 
   const categoryOrder: ExerciseCategory[] = [
     'weightlifting',
@@ -126,7 +145,7 @@ export default function ExercisesPageClient({ groupedExercises }: ExercisesPageC
         </div>
 
         <Tabs defaultValue={categoryOrder[0]} className="w-full">
-          <TabsList className="w-full flex flex-wrap gap-2 mb-8">
+          <TabsList className="w-full flex flex-wrap gap-2 mb-12">
             {categoryOrder.map((category) => (
               <TabsTrigger 
                 key={category} 
@@ -149,14 +168,14 @@ export default function ExercisesPageClient({ groupedExercises }: ExercisesPageC
                   >
                     {/* Exercise Image */}
                     {exercise.image_url && (
-                      <div className="relative h-48 w-full">
+                      <div className="relative h-48 w-full overflow-hidden">
                         <Image
                           src={exercise.image_url}
                           alt={exercise.name}
                           fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-300"
+                          className="object-cover transition-transform duration-300"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-70 group-hover:opacity-90 transition-opacity duration-300" />
                         <Badge 
                           className={`absolute top-4 right-4 capitalize ${
                             exercise.difficulty === 'beginner' ? 'bg-rugby-teal text-white hover:bg-rugby-teal/90' :
@@ -174,9 +193,35 @@ export default function ExercisesPageClient({ groupedExercises }: ExercisesPageC
                       <h3 className="text-xl font-semibold mb-2 group-hover:text-rugby-teal transition-colors">
                         {exercise.name}
                       </h3>
-                      <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">
-                        {exercise.description}
-                      </p>
+                      <div className="text-gray-600 dark:text-gray-300 text-sm mb-4">
+                        <p>
+                          {expandedDescriptions[exercise.id] 
+                            ? exercise.description 
+                            : truncateDescription(exercise.description)}
+                        </p>
+                        {exercise.description.length > 100 && (
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleDescription(exercise.id);
+                            }}
+                            className="mt-3 text-white bg-rugby-teal hover:bg-rugby-teal/80 rounded-none px-4 py-1 text-xs font-medium flex items-center gap-1.5 transition-colors duration-200 shadow-sm"
+                          >
+                            {expandedDescriptions[exercise.id] 
+                              ? <>
+                                  {exerciseTranslations[language].readLess}
+                                  <ChevronUp className="w-3.5 h-3.5" />
+                                </>
+                              : <>
+                                  {exerciseTranslations[language].readMore}
+                                  <ChevronDown className="w-3.5 h-3.5" />
+                                </>
+                            }
+                          </Button>
+                        )}
+                      </div>
 
                       {/* Exercise Details */}
                       <div className="space-y-3">
@@ -224,7 +269,7 @@ export default function ExercisesPageClient({ groupedExercises }: ExercisesPageC
                     </div>
 
                     {/* Hover effect line */}
-                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-rugby-teal to-rugby-yellow transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
+                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-rugby-yellow via-rugby-red to-rugby-yellow transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
                   </Card>
                 ))}
               </div>
