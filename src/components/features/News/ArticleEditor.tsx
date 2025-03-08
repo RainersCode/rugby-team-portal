@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -21,7 +21,8 @@ import {
   Link,
   AlignLeft,
   AlignCenter,
-  AlignRight
+  AlignRight,
+  Loader2
 } from 'lucide-react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import {
@@ -31,6 +32,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { supabase } from '@/utils/supabase';
 
 interface ArticleEditorProps {
   onSubmit: (formData: {
@@ -65,9 +67,10 @@ export default function ArticleEditor({ onSubmit, initialData, isSubmitting, aut
       } }
     ]
   );
-  const supabase = createClientComponentClient();
-
-  const getImagePathFromUrl = (url: string): string | null => {
+  
+  const supabaseClient = useMemo(() => supabase(), []);
+  
+  const getImagePathFromUrl = useCallback((url: string): string | null => {
     try {
       const match = url.match(/\/article-images\/([^?]+)/);
       if (match) {
@@ -78,9 +81,9 @@ export default function ArticleEditor({ onSubmit, initialData, isSubmitting, aut
       console.error('Error extracting image path:', error);
       return null;
     }
-  };
+  }, []);
 
-  const deleteImageFromStorage = async (imageUrl: string) => {
+  const deleteImageFromStorage = useCallback(async (imageUrl: string) => {
     try {
       const imagePath = getImagePathFromUrl(imageUrl);
       if (!imagePath) {
@@ -88,7 +91,7 @@ export default function ArticleEditor({ onSubmit, initialData, isSubmitting, aut
         return;
       }
 
-      const { error: storageError } = await supabase.storage
+      const { error: storageError } = await supabaseClient.storage
         .from('articles')
         .remove([imagePath]);
 
@@ -100,8 +103,105 @@ export default function ArticleEditor({ onSubmit, initialData, isSubmitting, aut
       console.log('Successfully deleted image from storage:', imagePath);
     } catch (error) {
       console.error('Error in deleteImageFromStorage:', error);
-      throw error;
     }
+  }, [getImagePathFromUrl, supabaseClient]);
+
+  const onImageUpload = useCallback(async (file: File) => {
+    try {
+      if (!file) return null;
+      
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
+      const filePath = `article-images/${fileName}`;
+      
+      let fileToUpload = file;
+      if (file.size > 1024 * 1024 * 2) {
+        fileToUpload = await resizeImage(file, 1920);
+      }
+      
+      const { data, error } = await supabaseClient.storage
+        .from('articles')
+        .upload(filePath, fileToUpload, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (error) throw error;
+      
+      const { data: { publicUrl } } = supabaseClient.storage
+        .from('articles')
+        .getPublicUrl(filePath);
+      
+      return publicUrl;
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      return null;
+    }
+  }, [supabaseClient]);
+
+  const resizeImage = async (file: File, maxWidth: number): Promise<File> => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          if (img.width <= maxWidth) {
+            resolve(file);
+            return;
+          }
+          
+          const canvas = document.createElement('canvas');
+          const ratio = maxWidth / img.width;
+          canvas.width = maxWidth;
+          canvas.height = img.height * ratio;
+          
+          const ctx = canvas.getContext('2d');
+          ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
+          
+          canvas.toBlob((blob) => {
+            if (blob) {
+              const resizedFile = new File([blob], file.name, {
+                type: file.type,
+                lastModified: Date.now()
+              });
+              resolve(resizedFile);
+            } else {
+              resolve(file);
+            }
+          }, file.type, 0.8);
+        };
+        img.src = e.target?.result as string;
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!title.trim()) {
+      alert('Title is required');
+      return;
+    }
+    
+    if (!mainImage) {
+      alert('Main image is required');
+      return;
+    }
+    
+    const content = blocks
+      .filter(block => block.type === 'paragraph')
+      .map(block => block.content)
+      .join(' ')
+      .substring(0, 300) + '...';
+    
+    await onSubmit({
+      title,
+      content,
+      image: mainImage,
+      blocks,
+      author_id: authorId
+    });
   };
 
   const handleMainImageDelete = async () => {
@@ -183,22 +283,6 @@ export default function ArticleEditor({ onSubmit, initialData, isSubmitting, aut
     setBlocks(newBlocks);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const content = blocks
-      .filter(block => block.type === 'paragraph')
-      .map(block => block.content)
-      .join('\n');
-
-    onSubmit({
-      title,
-      content,
-      image: mainImage,
-      blocks,
-      author_id: authorId,
-    });
-  };
-
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
       <div className="space-y-2">
@@ -209,7 +293,7 @@ export default function ArticleEditor({ onSubmit, initialData, isSubmitting, aut
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Enter article title"
           required
-          className="bg-background border-input"
+          disabled={isSubmitting}
         />
       </div>
 
@@ -235,9 +319,10 @@ export default function ArticleEditor({ onSubmit, initialData, isSubmitting, aut
         <Label>Main Article Image</Label>
         <div className="relative">
           <ImageUpload
-            onUploadComplete={setMainImage}
-            defaultImage={mainImage}
-            id="main-image"
+            value={mainImage}
+            onChange={setMainImage}
+            onUpload={onImageUpload}
+            disabled={isSubmitting}
           />
           {mainImage && (
             <Button
@@ -429,13 +514,18 @@ export default function ArticleEditor({ onSubmit, initialData, isSubmitting, aut
         </div>
       </div>
 
-      <Button 
-        type="submit" 
-        disabled={isSubmitting}
-        className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
-      >
-        {isSubmitting ? 'Saving...' : 'Save Article'}
-      </Button>
+      <div className="flex justify-end">
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Saving...
+            </>
+          ) : (
+            'Save Article'
+          )}
+        </Button>
+      </div>
     </form>
   );
 } 

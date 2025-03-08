@@ -3,10 +3,13 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card } from '@/components/ui/card';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { supabase, withRetry } from '@/utils/supabase';
 import { Database } from '@/lib/database.types';
 import ArticleEditor from '@/components/features/News/ArticleEditor';
 import { Article } from '@/types';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Loader2 } from 'lucide-react';
+import { toast } from '@/components/ui/use-toast';
 
 interface EditArticleClientProps {
   id: string;
@@ -18,33 +21,24 @@ export default function EditArticleClient({ id }: EditArticleClientProps) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-  const supabase = createClientComponentClient<Database>();
 
   useEffect(() => {
     const loadArticle = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { session } } = await supabase().auth.getSession();
         if (!session) {
           router.push('/login');
           return;
         }
 
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', session.user.id)
-          .single();
-
-        if (profile?.role !== 'admin') {
-          router.push('/');
-          return;
-        }
-
-        const { data: article, error: articleError } = await supabase
-          .from('articles')
-          .select('*')
-          .eq('id', id)
-          .single();
+        // Use withRetry to handle temporary errors
+        const { data: article, error: articleError } = await withRetry(() => 
+          supabase()
+            .from('articles')
+            .select('*')
+            .eq('id', id)
+            .single()
+        );
 
         if (articleError) throw articleError;
         if (!article) throw new Error('Article not found');
@@ -55,16 +49,21 @@ export default function EditArticleClient({ id }: EditArticleClientProps) {
         }
 
         setArticle(article);
-      } catch (error) {
-        console.error('Error:', error);
-        setError('Failed to load article');
+      } catch (error: any) {
+        console.error('Error loading article:', error);
+        setError(error.message || 'Failed to load article');
+        toast({
+          title: 'Error loading article',
+          description: error.message || 'Failed to load article',
+          variant: 'destructive',
+        });
       } finally {
         setLoading(false);
       }
     };
 
     loadArticle();
-  }, [id, router, supabase]);
+  }, [id, router]);
 
   const handleSubmit = async (formData: {
     title: string;
@@ -77,39 +76,111 @@ export default function EditArticleClient({ id }: EditArticleClientProps) {
     setError(null);
 
     try {
-      // Convert blocks to JSON string before saving
-      const processedBlocks = JSON.stringify(formData.blocks);
-
-      const { error: updateError } = await supabase
-        .from('articles')
-        .update({
-          title: formData.title,
-          content: formData.content,
-          image: formData.image,
-          blocks: processedBlocks,
-          author_id: formData.author_id || article?.author_id,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', id);
+      // Process blocks before saving to reduce data size
+      const processedBlocks = optimizeArticleBlocks(formData.blocks);
+      
+      // Use withRetry for database operation
+      const { error: updateError } = await withRetry(() => 
+        supabase()
+          .from('articles')
+          .update({
+            title: formData.title,
+            content: formData.content,
+            image: formData.image,
+            blocks: JSON.stringify(processedBlocks),
+            author_id: formData.author_id || article?.author_id,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', id)
+      );
 
       if (updateError) throw updateError;
+
+      toast({
+        title: 'Article updated',
+        description: 'Your article has been updated successfully',
+      });
 
       // Add a small delay before redirecting
       setTimeout(() => {
         router.push('/admin/articles');
         router.refresh(); // Force Next.js to revalidate the cache
       }, 500);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating article:', error);
-      setError(error instanceof Error ? error.message : 'Failed to update article');
+      setError(error.message || 'Failed to update article');
+      toast({
+        title: 'Error updating article',
+        description: error.message || 'Please try again later',
+        variant: 'destructive',
+      });
     } finally {
       setSaving(false);
     }
   };
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div className="text-red-500">{error}</div>;
-  if (!article) return <div>Article not found</div>;
+  // Function to optimize article blocks to reduce size
+  const optimizeArticleBlocks = (blocks: any[]) => {
+    // Create a deep copy of blocks to avoid mutating the original
+    const processedBlocks = JSON.parse(JSON.stringify(blocks));
+    
+    // Process each block to reduce size
+    return processedBlocks.map((block: any) => {
+      // Remove any unnecessary large data or redundant fields
+      if (block.type === 'image' && block.originalFile) {
+        // Don't need to store the full file object
+        delete block.originalFile;
+      }
+      return block;
+    });
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-[200px]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <span className="ml-2">Loading article...</span>
+      </div>
+    );
+  }
+
+  if (error && !article) {
+    return (
+      <Alert variant="destructive" className="max-w-4xl mx-auto">
+        <AlertTitle>Error</AlertTitle>
+        <AlertDescription>
+          {error}
+          <div className="mt-4">
+            <button 
+              onClick={() => router.push('/admin/articles')}
+              className="bg-primary text-white px-4 py-2 rounded-md text-sm"
+            >
+              Back to Articles
+            </button>
+          </div>
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  if (!article) {
+    return (
+      <Alert variant="destructive" className="max-w-4xl mx-auto">
+        <AlertTitle>Not Found</AlertTitle>
+        <AlertDescription>
+          Article not found
+          <div className="mt-4">
+            <button 
+              onClick={() => router.push('/admin/articles')}
+              className="bg-primary text-white px-4 py-2 rounded-md text-sm"
+            >
+              Back to Articles
+            </button>
+          </div>
+        </AlertDescription>
+      </Alert>
+    );
+  }
 
   return (
     <Card className="p-6 max-w-4xl mx-auto">
@@ -118,7 +189,10 @@ export default function EditArticleClient({ id }: EditArticleClientProps) {
       </div>
 
       {error && (
-        <div className="text-red-500 mb-4">{error}</div>
+        <Alert variant="destructive" className="mb-4">
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
 
       <ArticleEditor
