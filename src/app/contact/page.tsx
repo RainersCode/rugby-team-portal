@@ -64,9 +64,22 @@ export default function ContactPage() {
     setIsSubmitting(true);
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log(formData);
+      // Send data to the API endpoint
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+      
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to send message');
+      }
+      
+      console.log('Message sent successfully:', result);
       setSubmitSuccess(true);
       
       // Reset form after success
@@ -81,6 +94,7 @@ export default function ContactPage() {
       }, 3000);
     } catch (error) {
       console.error("Error submitting form:", error);
+      alert('Failed to send message. Please try again later.');
     } finally {
       setIsSubmitting(false);
     }
