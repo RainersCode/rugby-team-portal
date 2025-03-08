@@ -304,10 +304,9 @@ export function Header() {
             ) : (
               <Link
                 href="/auth/signin"
-                className="group relative inline-flex h-9 items-center justify-center overflow-hidden rounded-none bg-rugby-yellow px-6 py-2 text-sm font-medium text-rugby-teal hover:scale-105 transition-all duration-300 shadow-lg shadow-rugby-yellow/20 hover:shadow-xl hover:shadow-rugby-yellow/30"
+                className="inline-flex h-9 items-center justify-center rounded-none bg-white px-6 py-2 text-sm font-medium text-rugby-teal hover:bg-gray-100 transition-all duration-200"
               >
-                <span className="absolute inset-0 bg-gradient-to-r from-rugby-yellow via-rugby-yellow/80 to-rugby-yellow opacity-0 transition-opacity group-hover:opacity-100" />
-                <span className="relative font-semibold tracking-wide">
+                <span className="font-semibold tracking-wide">
                   {translations.signIn || 'Sign In'}
                 </span>
               </Link>

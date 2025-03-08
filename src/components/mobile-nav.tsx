@@ -223,7 +223,7 @@ export function MobileNav() {
                       setIsOpen(false);
                       router.push('/auth/signin');
                     }}
-                    className="inline-flex items-center justify-center rounded-none text-sm font-medium text-rugby-teal bg-white hover:bg-white/90 h-9 px-4 py-2 transition-colors"
+                    className="inline-flex items-center justify-center rounded-none text-sm font-medium text-white bg-rugby-teal hover:bg-rugby-teal-light h-9 px-4 py-2 transition-colors"
                   >
                     {translations.signIn || 'Sign In'}
                   </Button>
