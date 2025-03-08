@@ -40,9 +40,16 @@ export default function ArticlesPage() {
     setError(null);
     
     try {
+      // Check authentication
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        router.push('/auth/signin');
+        return;
+      }
+
       // Use withRetry for better resilience
       const { data, error } = await withRetry(() => 
-        supabase()
+        supabase
           .from('articles')
           .select('*')
           .order('created_at', { ascending: false })
@@ -77,7 +84,7 @@ export default function ArticlesPage() {
     try {
       // First get the article to access the image path
       const { data: article, error: getError } = await withRetry(() => 
-        supabase()
+        supabase
           .from('articles')
           .select('image')
           .eq('id', id)
@@ -88,7 +95,7 @@ export default function ArticlesPage() {
 
       // Delete the article from the database
       const { error: deleteError } = await withRetry(() => 
-        supabase()
+        supabase
           .from('articles')
           .delete()
           .eq('id', id)
@@ -101,7 +108,7 @@ export default function ArticlesPage() {
         try {
           const imagePath = getImagePathFromUrl(article.image);
           if (imagePath) {
-            await supabase()
+            await supabase
               .storage
               .from('articles')
               .remove([imagePath]);

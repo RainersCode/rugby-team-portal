@@ -24,7 +24,7 @@ import {
   AlignRight,
   Loader2
 } from 'lucide-react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { supabase } from '@/utils/supabase';
 import {
   Select,
   SelectContent,
@@ -32,7 +32,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { supabase } from '@/utils/supabase';
 
 interface ArticleEditorProps {
   onSubmit: (formData: {
@@ -68,8 +67,6 @@ export default function ArticleEditor({ onSubmit, initialData, isSubmitting, aut
     ]
   );
   
-  const supabaseClient = useMemo(() => supabase(), []);
-  
   const getImagePathFromUrl = useCallback((url: string): string | null => {
     try {
       const match = url.match(/\/article-images\/([^?]+)/);
@@ -91,7 +88,7 @@ export default function ArticleEditor({ onSubmit, initialData, isSubmitting, aut
         return;
       }
 
-      const { error: storageError } = await supabaseClient.storage
+      const { error: storageError } = await supabase.storage
         .from('articles')
         .remove([imagePath]);
 
@@ -104,7 +101,7 @@ export default function ArticleEditor({ onSubmit, initialData, isSubmitting, aut
     } catch (error) {
       console.error('Error in deleteImageFromStorage:', error);
     }
-  }, [getImagePathFromUrl, supabaseClient]);
+  }, [getImagePathFromUrl]);
 
   const onImageUpload = useCallback(async (file: File) => {
     try {
@@ -119,7 +116,7 @@ export default function ArticleEditor({ onSubmit, initialData, isSubmitting, aut
         fileToUpload = await resizeImage(file, 1920);
       }
       
-      const { data, error } = await supabaseClient.storage
+      const { data, error } = await supabase.storage
         .from('articles')
         .upload(filePath, fileToUpload, {
           cacheControl: '3600',
@@ -128,7 +125,7 @@ export default function ArticleEditor({ onSubmit, initialData, isSubmitting, aut
 
       if (error) throw error;
       
-      const { data: { publicUrl } } = supabaseClient.storage
+      const { data: { publicUrl } } = supabase.storage
         .from('articles')
         .getPublicUrl(filePath);
       
@@ -137,7 +134,7 @@ export default function ArticleEditor({ onSubmit, initialData, isSubmitting, aut
       console.error('Error uploading image:', error);
       return null;
     }
-  }, [supabaseClient]);
+  }, []);
 
   const resizeImage = async (file: File, maxWidth: number): Promise<File> => {
     return new Promise((resolve) => {

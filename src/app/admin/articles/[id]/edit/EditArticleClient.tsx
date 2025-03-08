@@ -24,15 +24,15 @@ export default function EditArticleClient({ id }: EditArticleClientProps) {
   useEffect(() => {
     const loadArticle = async () => {
       try {
-        const { data: { session } } = await supabase().auth.getSession();
+        const { data: { session } } = await supabase.auth.getSession();
         if (!session) {
-          router.push('/login');
+          router.push('/auth/signin');
           return;
         }
 
         // Use withRetry to handle temporary errors
         const { data: article, error: articleError } = await withRetry(() => 
-          supabase()
+          supabase
             .from('articles')
             .select('*')
             .eq('id', id)
@@ -80,7 +80,7 @@ export default function EditArticleClient({ id }: EditArticleClientProps) {
       
       // Use withRetry for database operation
       const { error: updateError } = await withRetry(() => 
-        supabase()
+        supabase
           .from('articles')
           .update({
             title: formData.title,
