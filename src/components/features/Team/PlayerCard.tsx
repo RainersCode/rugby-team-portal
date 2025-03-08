@@ -35,9 +35,9 @@ export default function PlayerCard({ player }: PlayerCardProps) {
 
   return (
     <div className="relative hover:shadow-xl">
-      <div className="relative bg-gradient-to-br from-card-bg-light to-card-bg-light/95 dark:from-card-bg-dark dark:to-card-bg-dark/95 overflow-hidden transition-all duration-300 border-2 border-rugby-teal/30 rounded-none">
+      <div className="relative bg-rugby-teal/10 dark:bg-rugby-teal/20 overflow-hidden transition-all duration-300 border-2 border-rugby-teal/30 rounded-none">
         {/* Background pattern */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(74,222,128,0.05),transparent_40%)] dark:bg-[radial-gradient(circle_at_top_right,rgba(74,222,128,0.08),transparent_40%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(0,85,75,0.1),transparent_40%)] dark:bg-[radial-gradient(circle_at_top_right,rgba(20,125,110,0.15),transparent_40%)]" />
         
         {/* Player number watermark */}
         <div className="absolute -right-4 -top-6 text-[80px] font-black text-rugby-teal/5 dark:text-rugby-teal/10 select-none">
@@ -56,10 +56,10 @@ export default function PlayerCard({ player }: PlayerCardProps) {
               sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
             />
             {/* Base overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
             
             {/* Hover overlay - separate element for stronger effect */}
-            <div className="absolute inset-0 bg-black/50 opacity-0 hover:opacity-100 transition-opacity duration-300" />
+            <div className="absolute inset-0 bg-black/30 opacity-0 hover:opacity-100 transition-opacity duration-300" />
             
             {/* Player name and position overlay */}
             <div className="absolute bottom-0 left-0 right-0 p-3">
