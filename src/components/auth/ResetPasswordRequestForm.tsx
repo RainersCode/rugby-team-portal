@@ -5,6 +5,7 @@ import { supabase } from '@/utils/supabase';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Mail, ArrowLeft, Loader2 } from 'lucide-react';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function ResetPasswordRequestForm() {
   const [email, setEmail] = useState('');
@@ -12,6 +13,7 @@ export default function ResetPasswordRequestForm() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const router = useRouter();
+  const { translations } = useLanguage();
 
   const handleResetRequest = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,7 +29,7 @@ export default function ResetPasswordRequestForm() {
 
       setSuccess(true);
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'An error occurred');
+      setError(error instanceof Error ? error.message : translations.error);
       setLoading(false);
     }
   };
@@ -37,19 +39,19 @@ export default function ResetPasswordRequestForm() {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-bg-light to-gray-50 dark:from-bg-dark dark:to-gray-900 p-4">
         <div className="max-w-md w-full space-y-8 p-6 bg-white dark:bg-gray-800 rounded-none shadow-md">
           <div>
-            <h2 className="text-3xl font-bold text-center text-rugby-teal mb-2">Check Your Email</h2>
+            <h2 className="text-3xl font-bold text-center text-rugby-teal mb-2">{translations.checkYourEmail || 'Check Your Email'}</h2>
             <p className="mt-4 text-center text-gray-600 dark:text-gray-300">
-              We&apos;ve sent you an email with a link to reset your password. Please check your inbox and click the link to continue.
+              {translations.resetEmailSent || "We've sent you an email with a link to reset your password. Please check your inbox and click the link to continue."}
             </p>
           </div>
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Didn&apos;t receive the email?{' '}
+              {translations.didntReceiveEmail || "Didn't receive the email?"}{' '}
               <button
                 onClick={() => setSuccess(false)}
                 className="text-rugby-teal hover:text-rugby-teal/80 transition-colors font-medium"
               >
-                Try again
+                {translations.tryAgain || 'Try again'}
               </button>
             </p>
           </div>
@@ -69,7 +71,7 @@ export default function ResetPasswordRequestForm() {
               className="h-16 w-auto"
             />
           </div>
-          <p className="text-muted-foreground font-medium">Enter your email to reset your password</p>
+          <p className="text-muted-foreground font-medium">{translations.resetPasswordInstructions || 'Enter your email to reset your password'}</p>
         </div>
 
         <div className="bg-card backdrop-blur-xl border border-rugby-teal/20 rounded-none shadow-lg p-6 md:p-8 space-y-6 transition-all duration-300">
@@ -86,7 +88,7 @@ export default function ResetPasswordRequestForm() {
             <div className="space-y-4">
               <div className="relative">
                 <label htmlFor="email" className="block text-sm font-medium text-foreground/80 mb-1.5">
-                  Email address
+                  {translations.email || 'Email address'}
                 </label>
                 <div className="relative">
                   <input
@@ -98,7 +100,7 @@ export default function ResetPasswordRequestForm() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="block w-full pl-10 pr-4 py-2.5 text-sm bg-white/50 dark:bg-gray-900/50 border border-rugby-teal/20 rounded-none shadow-none transition-colors duration-200 placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-rugby-teal focus:border-rugby-teal"
-                    placeholder="Enter your email"
+                    placeholder={translations.enterEmail || "Enter your email"}
                   />
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 </div>
@@ -111,7 +113,7 @@ export default function ResetPasswordRequestForm() {
                 className="text-rugby-teal hover:text-rugby-teal/80 transition-colors font-medium inline-flex items-center gap-1.5 group"
               >
                 <ArrowLeft className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-[-2px]" />
-                Back to sign in
+                {translations.backToSignIn || 'Back to sign in'}
               </Link>
             </div>
 
@@ -123,10 +125,10 @@ export default function ResetPasswordRequestForm() {
               {loading ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Sending reset link...
+                  {translations.sendingResetLink || 'Sending reset link...'}
                 </>
               ) : (
-                'Send Reset Link'
+                translations.sendResetLink || 'Send Reset Link'
               )}
             </button>
           </form>

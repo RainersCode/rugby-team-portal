@@ -5,6 +5,7 @@ import { supabase } from '@/utils/supabase';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { UserPlus, Mail, Lock, Loader2, ArrowLeft } from 'lucide-react';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function SignUpForm() {
   const [email, setEmail] = useState('');
@@ -13,18 +14,19 @@ export default function SignUpForm() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { translations } = useLanguage();
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
     if (password !== confirmPassword) {
-      setError('Passwords do not match');
+      setError(translations.passwordsDoNotMatch || 'Passwords do not match');
       return;
     }
 
     if (password.length < 6) {
-      setError('Password must be at least 6 characters');
+      setError(translations.passwordTooShort || 'Password must be at least 6 characters');
       return;
     }
 
@@ -47,14 +49,14 @@ export default function SignUpForm() {
       if (error) throw error;
 
       if (data.user && data.user.identities && data.user.identities.length === 0) {
-        setError('This email is already registered. Please sign in instead.');
+        setError(translations.emailAlreadyRegistered || 'This email is already registered. Please sign in instead.');
         return;
       }
 
       // Show success message and redirect to verify email page
       router.push('/auth/verify-email');
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'An error occurred');
+      setError(error instanceof Error ? error.message : translations.error);
     } finally {
       setLoading(false);
     }
@@ -72,7 +74,7 @@ export default function SignUpForm() {
               className="h-16 w-auto"
             />
           </div>
-          <p className="text-muted-foreground font-medium">Create your account</p>
+          <p className="text-muted-foreground font-medium">{translations.createAccount || 'Create your account'}</p>
         </div>
 
         {/* Card Container */}
@@ -90,7 +92,7 @@ export default function SignUpForm() {
             <div className="space-y-4">
               <div className="relative">
                 <label htmlFor="email" className="block text-sm font-medium text-foreground/80 mb-1.5">
-                  Email address
+                  {translations.email || 'Email address'}
                 </label>
                 <div className="relative">
                   <input
@@ -102,7 +104,7 @@ export default function SignUpForm() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="block w-full pl-10 pr-4 py-2.5 text-sm bg-white/50 dark:bg-gray-900/50 border border-rugby-teal/20 rounded-none shadow-none transition-colors duration-200 placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-rugby-teal focus:border-rugby-teal"
-                    placeholder="Enter your email"
+                    placeholder={translations.enterEmail || "Enter your email"}
                   />
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 </div>
@@ -110,7 +112,7 @@ export default function SignUpForm() {
 
               <div className="relative">
                 <label htmlFor="password" className="block text-sm font-medium text-foreground/80 mb-1.5">
-                  Password
+                  {translations.password || 'Password'}
                 </label>
                 <div className="relative">
                   <input
@@ -122,7 +124,7 @@ export default function SignUpForm() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="block w-full pl-10 pr-4 py-2.5 text-sm bg-white/50 dark:bg-gray-900/50 border border-rugby-teal/20 rounded-none shadow-none transition-colors duration-200 placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-rugby-teal focus:border-rugby-teal"
-                    placeholder="Create a password"
+                    placeholder={translations.createPassword || "Create a password"}
                   />
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 </div>
@@ -130,7 +132,7 @@ export default function SignUpForm() {
 
               <div className="relative">
                 <label htmlFor="confirmPassword" className="block text-sm font-medium text-foreground/80 mb-1.5">
-                  Confirm Password
+                  {translations.confirmPassword || 'Confirm Password'}
                 </label>
                 <div className="relative">
                   <input
@@ -142,7 +144,7 @@ export default function SignUpForm() {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     className="block w-full pl-10 pr-4 py-2.5 text-sm bg-white/50 dark:bg-gray-900/50 border border-rugby-teal/20 rounded-none shadow-none transition-colors duration-200 placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-rugby-teal focus:border-rugby-teal"
-                    placeholder="Confirm your password"
+                    placeholder={translations.confirmYourPassword || "Confirm your password"}
                   />
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 </div>
@@ -155,7 +157,7 @@ export default function SignUpForm() {
                 className="text-rugby-teal hover:text-rugby-teal/80 transition-colors font-medium inline-flex items-center gap-1.5 group"
               >
                 <ArrowLeft className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-[-2px]" />
-                Back to sign in
+                {translations.backToSignIn || 'Back to sign in'}
               </Link>
             </div>
 
@@ -167,12 +169,12 @@ export default function SignUpForm() {
               {loading ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Creating account...
+                  {translations.creatingAccount || 'Creating account...'}
                 </>
               ) : (
                 <>
                   <UserPlus className="w-4 h-4 mr-2 transition-transform duration-200 group-hover:translate-x-[-2px]" />
-                  Create account
+                  {translations.createAccount || 'Create account'}
                 </>
               )}
             </button>

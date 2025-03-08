@@ -5,6 +5,7 @@ import { supabase } from '@/utils/supabase';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { LogIn, Mail, Lock, Loader2 } from 'lucide-react';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function SignInForm() {
   const [email, setEmail] = useState('');
@@ -14,6 +15,7 @@ export default function SignInForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams?.get('redirectTo') || '/';
+  const { translations } = useLanguage();
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,7 +41,7 @@ export default function SignInForm() {
       // If successful, force a complete page refresh to ensure all components get the latest session
       window.location.href = redirectTo;
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'An error occurred');
+      setError(error instanceof Error ? error.message : translations.error);
       setLoading(false);
     }
   };
@@ -56,7 +58,7 @@ export default function SignInForm() {
               className="h-16 w-auto"
             />
           </div>
-          <p className="text-muted-foreground font-medium">Sign in to your account</p>
+          <p className="text-muted-foreground font-medium">{translations.signIn}</p>
         </div>
 
         {/* Card Container */}
@@ -74,7 +76,7 @@ export default function SignInForm() {
             <div className="space-y-4">
               <div className="relative">
                 <label htmlFor="email" className="block text-sm font-medium text-foreground/80 mb-1.5">
-                  Email address
+                  {translations.email || 'Email address'}
                 </label>
                 <div className="relative">
                   <input
@@ -86,7 +88,7 @@ export default function SignInForm() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="block w-full pl-10 pr-4 py-2.5 text-sm bg-white/50 dark:bg-gray-900/50 border border-rugby-teal/20 rounded-none shadow-none transition-colors duration-200 placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-rugby-teal focus:border-rugby-teal"
-                    placeholder="Enter your email"
+                    placeholder={translations.enterEmail || "Enter your email"}
                   />
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 </div>
@@ -94,7 +96,7 @@ export default function SignInForm() {
 
               <div className="relative">
                 <label htmlFor="password" className="block text-sm font-medium text-foreground/80 mb-1.5">
-                  Password
+                  {translations.password || 'Password'}
                 </label>
                 <div className="relative">
                   <input
@@ -106,7 +108,7 @@ export default function SignInForm() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="block w-full pl-10 pr-4 py-2.5 text-sm bg-white/50 dark:bg-gray-900/50 border border-rugby-teal/20 rounded-none shadow-none transition-colors duration-200 placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-rugby-teal focus:border-rugby-teal"
-                    placeholder="Enter your password"
+                    placeholder={translations.enterPassword || "Enter your password"}
                   />
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 </div>
@@ -118,13 +120,13 @@ export default function SignInForm() {
                 href="/auth/reset-password"
                 className="text-rugby-teal hover:text-rugby-teal/80 transition-colors font-medium"
               >
-                Forgot password?
+                {translations.forgotPassword || 'Forgot password?'}
               </Link>
               <Link 
                 href="/auth/signup"
                 className="text-rugby-teal hover:text-rugby-teal/80 transition-colors font-medium"
               >
-                Create account
+                {translations.createAccount || 'Create account'}
               </Link>
             </div>
 
@@ -136,12 +138,12 @@ export default function SignInForm() {
               {loading ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Signing in...
+                  {translations.signingIn || 'Signing in...'}
                 </>
               ) : (
                 <>
                   <LogIn className="w-4 h-4 mr-2 transition-transform duration-200 group-hover:translate-x-[-2px]" />
-                  Sign in
+                  {translations.signIn}
                 </>
               )}
             </button>
