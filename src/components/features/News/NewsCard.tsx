@@ -59,7 +59,7 @@ export default function NewsCard({
             </time>
           </div>
           <h3 className={cn(
-            "font-bold mb-2 text-content-light dark:text-content-dark line-clamp-2 transition-colors",
+            "font-medium mb-2 text-content-light dark:text-content-dark line-clamp-2 transition-colors",
             isCompact ? "text-base" : "text-xl"
           )}>
             {article.title}

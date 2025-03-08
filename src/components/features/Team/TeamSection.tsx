@@ -31,7 +31,7 @@ export default function TeamSection({ players }: TeamSectionProps) {
     <section className="bg-rugby-teal/5 dark:bg-rugby-teal/10">
       <div className="container-width py-12">
         <div className="flex justify-between items-center mb-8">
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 uppercase tracking-wider border-l-4 border-rugby-teal pl-3 py-1">
             {language === 'en' ? teamTranslations.en.title : teamTranslations.lv.title}
           </h2>
           <Link

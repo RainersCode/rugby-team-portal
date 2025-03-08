@@ -22,7 +22,7 @@ export default function MatchList({ matches, title, showViewAll = true }: MatchL
       <div className="container-width py-12">
         {title && (
           <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl font-bold text-white dark:text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.3)] md:drop-shadow-[0_1px_1px_rgba(0,0,0,0.4)] [text-shadow:_0px_1px_2px_rgb(0_0_0_/_30%)] md:[text-shadow:_1px_1px_3px_rgb(0_0_0_/_40%)]">
+            <h2 className="text-3xl font-bold text-white dark:text-white uppercase tracking-wider border-l-4 border-white pl-3 py-1 drop-shadow-[0_1px_1px_rgba(0,0,0,0.3)] md:drop-shadow-[0_1px_1px_rgba(0,0,0,0.4)]">
               {title}
             </h2>
             {showViewAll && (

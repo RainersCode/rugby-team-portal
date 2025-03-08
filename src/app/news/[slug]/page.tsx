@@ -6,9 +6,9 @@ import { formatDate } from '@/lib/utils';
 import { Metadata } from 'next';
 import { Article, ArticleBlock } from '@/types';
 import { cn } from '@/lib/utils';
-import ShareButtons from '@/components/features/News/ShareButtons';
 import Link from 'next/link';
 import NewsCard from '@/components/features/News/NewsCard';
+import MoreNewsSection from './MoreNewsSection';
 
 interface Props {
   params: {
@@ -192,7 +192,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function ArticlePage({ params }: Props) {
   const article = await getArticle(params.slug);
   const latestArticles = await getLatestArticles(params.slug);
-
+  
   if (!article) {
     notFound();
   }
@@ -237,41 +237,11 @@ export default async function ArticlePage({ params }: Props) {
           )}
         </div>
 
-        {/* Share Section */}
-        <div className="mt-12 pt-8 border-t border-rugby-teal/10">
-          <div className="flex flex-col items-center gap-2">
-            <h3 className="text-base font-semibold text-content-medium">Share this article</h3>
-            <div className="bg-card-bg-light dark:bg-card-bg-dark p-2 rounded-none shadow-md border border-rugby-teal/20 max-w-[200px] w-full flex justify-center">
-              <ShareButtons title={article.title} size="default" />
-            </div>
-          </div>
-        </div>
       </article>
 
       {/* Latest Articles Section */}
       {latestArticles.length > 0 && (
-        <section className="mt-16 max-w-4xl mx-auto border-t border-rugby-teal/10 pt-12">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-bold text-rugby-teal">
-              More News
-            </h2>
-            <Link
-              href="/news"
-              className="text-rugby-teal hover:text-rugby-teal/80 font-medium transition-colors text-sm"
-            >
-              View all news →
-            </Link>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {latestArticles.map((article) => (
-              <NewsCard 
-                key={article.id} 
-                article={article} 
-                variant="compact"
-              />
-            ))}
-          </div>
-        </section>
+        <MoreNewsSection articles={latestArticles} />
       )}
     </div>
   );

@@ -105,7 +105,7 @@ export default function TrainingList({ trainings, title, showViewAll = true }: T
       <div className="container-width py-12">
         {title && (
           <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 uppercase tracking-wider border-l-4 border-rugby-teal pl-3 py-1">
               {title}
             </h2>
             {showViewAll && (

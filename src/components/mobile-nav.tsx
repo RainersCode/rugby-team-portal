@@ -45,7 +45,6 @@ const mainNavItems = [
   { href: "/team", label: "team", icon: Users },
   { href: "/matches", label: "matches", icon: Trophy },
   { href: "/training", label: "training", icon: Dumbbell },
-  { href: "/tournaments", label: "tournaments", icon: Trophy },
   { href: "/activities", label: "activities", icon: Calendar },
   { href: "/live", label: "live", icon: Play },
   { href: "/gallery", label: "gallery", icon: Image },

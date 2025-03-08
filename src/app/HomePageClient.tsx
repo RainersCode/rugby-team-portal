@@ -68,7 +68,7 @@ export default function HomePageClient({
             <div className="relative py-4 sm:py-12 px-4 flex flex-col lg:flex-row items-center justify-between gap-3 lg:gap-12 z-10">
               {/* Text Content */}
               <div className="flex-1 text-white text-center lg:text-left px-4 lg:pl-8 lg:pr-12">
-                <h2 className="text-xl sm:text-4xl lg:text-5xl font-bold mb-2 sm:mb-6 drop-shadow-[0_1px_1px_rgba(0,0,0,0.3)] md:drop-shadow-[0_1px_1px_rgba(0,0,0,0.4)] [text-shadow:_0px_1px_2px_rgb(0_0_0_/_30%)] md:[text-shadow:_1px_1px_3px_rgb(0_0_0_/_40%)]">
+                <h2 className="text-xl sm:text-4xl lg:text-5xl font-bold uppercase tracking-wider border-l-4 border-white pl-3 py-1 mb-2 sm:mb-6 drop-shadow-[0_1px_1px_rgba(0,0,0,0.3)] md:drop-shadow-[0_1px_1px_rgba(0,0,0,0.4)]">
                   {translations.joinOurFamily}
                 </h2>
                 <p className="text-sm sm:text-xl lg:text-2xl mb-3 sm:mb-8 opacity-90 drop-shadow-lg">

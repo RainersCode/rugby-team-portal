@@ -125,7 +125,6 @@ export function Header() {
     { href: "/activities", label: translations.activities },
     { href: "/matches", label: translations.matches },
     { href: "/training", label: translations.training },
-    { href: "/tournaments", label: translations.tournaments },
     {
       label: translations.media,
       items: [

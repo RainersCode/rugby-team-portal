@@ -20,7 +20,7 @@ export const translations = {
     team: 'Team',
     activities: 'Activities',
     matches: 'Matches',
-    training: 'Training',
+    training: 'Training Programs',
     tournaments: 'Tournaments',
     media: 'Media',
     gallery: 'Gallery',
@@ -74,6 +74,7 @@ export const translations = {
     // Home Page
     latestNews: 'Latest News',
     viewAllNews: 'View all news',
+    moreNews: 'More News',
     readMore: 'Read More',
     joinOurFamily: 'Join Our Rugby Family',
     joinSubheading: 'Be part of something special. Train with the best, play with passion, and create lasting memories.',
@@ -127,7 +128,7 @@ export const translations = {
     team: 'Komanda',
     activities: 'Aktivitātes',
     matches: 'Spēles',
-    training: 'Treniņi',
+    training: 'Treniņu Programmas',
     tournaments: 'Turnīri',
     media: 'Mediji',
     gallery: 'Galerija',
@@ -181,6 +182,7 @@ export const translations = {
     // Home Page
     latestNews: 'Jaunākās Ziņas',
     viewAllNews: 'Skatīt visas ziņas',
+    moreNews: 'Vairāk Ziņu',
     readMore: 'Lasīt vairāk',
     joinOurFamily: 'Pievienojies Mūsu Regbija Ģimenei',
     joinSubheading: 'Esi daļa no kaut kā īpaša. Trenējies ar labākajiem, spēlē ar aizrautību un veido neaizmirstamas atmiņas.',

@@ -57,7 +57,7 @@ export default function LatestNews({ articles }: LatestNewsProps) {
                   {article.category}
                 </span>
               )}
-              <h3 className="font-bold mb-2 text-base md:text-lg line-clamp-2">
+              <h3 className="font-medium mb-2 text-base md:text-lg line-clamp-2">
                 {article.title}
               </h3>
               <p className="text-sm text-gray-200 line-clamp-2 mb-2">
@@ -98,6 +98,11 @@ export default function LatestNews({ articles }: LatestNewsProps) {
         .news-card-container:hover .news-card-image {
           transform: scale(1.05);
         }
+        .news-card-line {
+          transform: scaleX(0);
+          transform-origin: center;
+          transition: transform 0.5s ease-out;
+        }
       `}</style>
     </div>
   );
@@ -106,7 +111,7 @@ export default function LatestNews({ articles }: LatestNewsProps) {
     <section className="bg-rugby-teal/5 dark:bg-rugby-teal/10">
       <div className="container-width py-12">
         <div className="flex justify-between items-center mb-8">
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 uppercase tracking-wider border-l-4 border-rugby-teal pl-3 py-1">
             {translations.latestNews}
           </h2>
           <Link
