@@ -94,7 +94,7 @@ export default function ContactPage() {
                       {contactTranslations[language].phone}
                     </h3>
                     <p className="text-gray-600 dark:text-gray-400">
-                      +1 (555) 123-4567
+                      +371 29113938
                     </p>
                   </div>
                 </div>
@@ -107,7 +107,7 @@ export default function ContactPage() {
                       {contactTranslations[language].email}
                     </h3>
                     <p className="text-gray-600 dark:text-gray-400">
-                      info@rugbyteam.com
+                      rkfenikss@gmail.com
                     </p>
                   </div>
                 </div>
@@ -120,7 +120,7 @@ export default function ContactPage() {
                       {contactTranslations[language].location}
                     </h3>
                     <p className="text-gray-600 dark:text-gray-400">
-                      123 Rugby Street, Sports City, SC 12345
+                      "Lukstiņi", Bērzaines pagasts, Valmieras novads, LV-4208
                     </p>
                   </div>
                 </div>

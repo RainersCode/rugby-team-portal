@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Facebook, Instagram, Twitter } from 'lucide-react';
+import { Facebook, Instagram } from 'lucide-react';
 import { useLanguage } from "@/context/LanguageContext";
 
 const footerTranslations = {
@@ -13,8 +13,8 @@ const footerTranslations = {
     contact: "Contact",
     contactInfo: {
       title: "Contact",
-      email: "Email: info@regbijalapa.lv",
-      phone: "Phone: +371 123 456 789"
+      email: "Email: rkfenikss@gmail.com",
+      phone: "Phone: +371 29113938"
     },
     followUs: "Follow Us",
     privacyPolicy: "Privacy Policy",
@@ -28,8 +28,8 @@ const footerTranslations = {
     contact: "Kontakti",
     contactInfo: {
       title: "Kontakti",
-      email: "E-pasts: info@regbijalapa.lv",
-      phone: "Tālrunis: +371 123 456 789"
+      email: "E-pasts: rkfenikss@gmail.com",
+      phone: "Tālrunis: +371 29113938"
     },
     followUs: "Seko Mums",
     privacyPolicy: "Privātuma Politika",
@@ -110,25 +110,18 @@ export default function Footer() {
             </h3>
             <div className="flex space-x-4 mb-8">
               <a 
-                href="#" 
+                href="https://www.facebook.com/RKFenikss" 
                 className="bg-white/10 hover:bg-white/20 text-white p-3 rounded-none transition-all duration-300"
                 aria-label="Facebook"
               >
                 <Facebook size={20} />
               </a>
               <a 
-                href="#" 
+                href="https://www.instagram.com/rk_fenikss/" 
                 className="bg-white/10 hover:bg-white/20 text-white p-3 rounded-none transition-all duration-300"
                 aria-label="Instagram"
               >
                 <Instagram size={20} />
-              </a>
-              <a 
-                href="#" 
-                className="bg-white/10 hover:bg-white/20 text-white p-3 rounded-none transition-all duration-300"
-                aria-label="Twitter"
-              >
-                <Twitter size={20} />
               </a>
             </div>
             <div className="text-sm">
@@ -143,7 +136,7 @@ export default function Footer() {
         </div>
 
         <div className="mt-16 pt-6 border-t border-white/20 text-center">
-          <p className="text-sm text-gray-300">© {currentYear} Rugby Club. {footerTranslations[language].allRightsReserved}</p>
+          <p className="text-sm text-gray-300">© {currentYear} RK "Fēnikss". {footerTranslations[language].allRightsReserved}</p>
         </div>
       </div>
     </footer>
