@@ -26,19 +26,23 @@ export default function NewsCard({
     )}>
       <Link href={`/news/${article.slug}`}>
         <div className={cn(
-          "relative",
+          "relative overflow-hidden",
           isCompact ? "h-32" : "h-48"
         )}>
-          <Image
-            src={article.image}
-            alt={article.title}
-            fill
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
-            priority={priority}
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
-          
-          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <div className="w-full h-full transform transition-transform duration-300 group-hover:scale-105">
+            <Image
+              src={article.image}
+              alt={article.title}
+              fill
+              className="object-cover"
+              priority={priority}
+            />
+            {/* Base overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+            
+            {/* Hover overlay */}
+            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          </div>
         </div>
         <div className={cn(
           "p-6",
@@ -55,7 +59,7 @@ export default function NewsCard({
             </time>
           </div>
           <h3 className={cn(
-            "font-bold mb-2 text-content-light dark:text-content-dark line-clamp-2 group-hover:text-rugby-red transition-colors",
+            "font-bold mb-2 text-content-light dark:text-content-dark line-clamp-2 transition-colors",
             isCompact ? "text-base" : "text-xl"
           )}>
             {article.title}

@@ -204,12 +204,12 @@ export default async function ArticlePage({ params }: Props) {
       <article className="max-w-4xl mx-auto">
         {/* Article Header */}
         <header className="mb-8">
-          <h1 className="text-4xl font-bold text-rugby-red mb-4">
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">
             {article.title}
           </h1>
           <div className="flex items-center text-content-medium gap-4">
-            <time className="text-rugby-red/80">{formatDate(article.created_at)}</time>
-            <span className="text-rugby-red/80">By {authorEmail}</span>
+            <time className="text-gray-600 dark:text-gray-400">{formatDate(article.created_at)}</time>
+            <span className="text-gray-600 dark:text-gray-400">By {authorEmail}</span>
           </div>
         </header>
 
@@ -219,13 +219,13 @@ export default async function ArticlePage({ params }: Props) {
             src={article.image}
             alt={article.title}
             fill
-            className="object-cover rounded-lg ring-1 ring-rugby-red/20"
+            className="object-cover rounded-lg ring-1 ring-rugby-teal/20"
             priority
           />
         </div>
 
         {/* Article Content */}
-        <div className="prose dark:prose-invert max-w-none prose-headings:text-rugby-red prose-a:text-rugby-red hover:prose-a:text-rugby-red/80">
+        <div className="prose dark:prose-invert max-w-none prose-headings:text-rugby-teal prose-a:text-rugby-teal hover:prose-a:text-rugby-teal/80">
           {Array.isArray(article.blocks) ? (
             article.blocks.map((block, index) => (
               <RenderBlock key={index} block={block} />
@@ -238,11 +238,11 @@ export default async function ArticlePage({ params }: Props) {
         </div>
 
         {/* Share Section */}
-        <div className="mt-12 pt-8 border-t border-rugby-red/10">
-          <div className="flex flex-col items-center gap-4">
-            <h3 className="text-lg font-semibold text-content-medium">Share this article</h3>
-            <div className="bg-card-bg-light dark:bg-card-bg-dark p-4 rounded-full shadow-lg border border-rugby-red/20">
-              <ShareButtons title={article.title} size="lg" />
+        <div className="mt-12 pt-8 border-t border-rugby-teal/10">
+          <div className="flex flex-col items-center gap-2">
+            <h3 className="text-base font-semibold text-content-medium">Share this article</h3>
+            <div className="bg-card-bg-light dark:bg-card-bg-dark p-2 rounded-none shadow-md border border-rugby-teal/20 max-w-[200px] w-full flex justify-center">
+              <ShareButtons title={article.title} size="default" />
             </div>
           </div>
         </div>
@@ -250,14 +250,14 @@ export default async function ArticlePage({ params }: Props) {
 
       {/* Latest Articles Section */}
       {latestArticles.length > 0 && (
-        <section className="mt-16 max-w-4xl mx-auto border-t border-rugby-red/10 pt-12">
+        <section className="mt-16 max-w-4xl mx-auto border-t border-rugby-teal/10 pt-12">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-bold text-rugby-red">
+            <h2 className="text-xl font-bold text-rugby-teal">
               More News
             </h2>
             <Link
               href="/news"
-              className="text-rugby-red hover:text-rugby-red/80 font-medium transition-colors text-sm"
+              className="text-rugby-teal hover:text-rugby-teal/80 font-medium transition-colors text-sm"
             >
               View all news →
             </Link>

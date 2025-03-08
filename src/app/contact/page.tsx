@@ -63,11 +63,12 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-bg-light to-gray-50 dark:from-bg-dark dark:to-gray-900">
+    <div className="min-h-screen bg-gradient-to-b from-white to-rugby-teal/5 dark:from-gray-900 dark:to-rugby-teal/10">
       {/* Hero Section */}
       <div className="relative py-20 overflow-hidden bg-cover bg-center" style={{ backgroundImage: 'url("/fnx banner png.png")' }}>
-        <div className="absolute inset-0 bg-black bg-opacity-50"></div>
-        <div className="relative container-width mx-auto text-center">
+        <div className="absolute inset-0 bg-gradient-to-r from-rugby-teal/80 to-rugby-teal-dark/80"></div>
+        <div className="absolute top-0 left-0 right-0 h-1 bg-white/20 z-10"></div>
+        <div className="relative container-width mx-auto text-center z-10">
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
             {contactTranslations[language].getInTouch}
           </h1>
@@ -79,46 +80,46 @@ export default function ContactPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
           {/* Contact Information */}
           <div className="space-y-8">
-            <div className="bg-card rounded-none p-8 shadow-lg border border-rugby-teal/20">
-              <h2 className="text-2xl font-bold mb-6 text-rugby-teal">
+            <div className="bg-gradient-to-br from-rugby-teal/20 to-rugby-teal/30 p-6 rounded-none shadow-md backdrop-blur-sm">
+              <h3 className="text-xl font-semibold mb-6 text-rugby-teal border-b border-white/20 pb-2">
                 {contactTranslations[language].contactInfo}
-              </h2>
+              </h3>
               <div className="space-y-6">
                 <div className="flex items-start space-x-4">
                   <div className="flex-shrink-0">
                     <Phone className="w-6 h-6 text-rugby-teal" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-rugby-teal/90">
+                    <h3 className="font-semibold text-rugby-teal">
                       {contactTranslations[language].phone}
                     </h3>
-                    <p className="text-muted-foreground">
+                    <p className="text-gray-600 dark:text-gray-400">
                       +1 (555) 123-4567
                     </p>
                   </div>
                 </div>
                 <div className="flex items-start space-x-4">
                   <div className="flex-shrink-0">
-                    <Mail className="w-6 h-6 text-rugby-red" />
+                    <Mail className="w-6 h-6 text-rugby-teal" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-rugby-teal/90">
+                    <h3 className="font-semibold text-rugby-teal">
                       {contactTranslations[language].email}
                     </h3>
-                    <p className="text-muted-foreground">
+                    <p className="text-gray-600 dark:text-gray-400">
                       info@rugbyteam.com
                     </p>
                   </div>
                 </div>
                 <div className="flex items-start space-x-4">
                   <div className="flex-shrink-0">
-                    <MapPin className="w-6 h-6 text-rugby-yellow" />
+                    <MapPin className="w-6 h-6 text-rugby-teal" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-rugby-teal/90">
+                    <h3 className="font-semibold text-rugby-teal">
                       {contactTranslations[language].location}
                     </h3>
-                    <p className="text-muted-foreground">
+                    <p className="text-gray-600 dark:text-gray-400">
                       123 Rugby Street, Sports City, SC 12345
                     </p>
                   </div>
@@ -127,29 +128,29 @@ export default function ContactPage() {
             </div>
 
             {/* Map or Additional Info */}
-            <div className="bg-card rounded-none p-8 shadow-lg border border-rugby-teal/20">
-              <h2 className="text-2xl font-bold mb-6 text-rugby-teal">
+            <div className="bg-gradient-to-br from-rugby-teal/20 to-rugby-teal/30 p-6 rounded-none shadow-md backdrop-blur-sm">
+              <h3 className="text-xl font-semibold mb-6 text-rugby-teal border-b border-white/20 pb-2">
                 {contactTranslations[language].trainingGround}
-              </h2>
-              <p className="text-muted-foreground mb-4">
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 mb-4">
                 {contactTranslations[language].trainingGroundDesc}
               </p>
-              <div className="aspect-video bg-muted rounded-none">
+              <div className="aspect-video bg-white/50 dark:bg-gray-800/50 rounded-none">
                 {/* Add map or image here */}
               </div>
             </div>
           </div>
 
           {/* Contact Form */}
-          <div className="bg-card rounded-none p-8 shadow-lg border border-rugby-teal/20">
-            <h2 className="text-2xl font-bold mb-6 text-rugby-teal">
+          <div className="bg-gradient-to-br from-rugby-teal/20 to-rugby-teal/30 p-6 rounded-none shadow-md backdrop-blur-sm">
+            <h3 className="text-xl font-semibold mb-6 text-rugby-teal border-b border-white/20 pb-2">
               {contactTranslations[language].sendMessage}
-            </h2>
+            </h3>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <label
                   htmlFor="name"
-                  className="block text-sm font-medium mb-2 text-rugby-teal/90"
+                  className="block text-sm font-medium mb-2 text-rugby-teal"
                 >
                   {contactTranslations[language].yourName}
                 </label>
@@ -159,14 +160,14 @@ export default function ContactPage() {
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-none border border-rugby-teal/20 bg-background focus:ring-2 focus:ring-rugby-teal focus:border-transparent"
+                  className="w-full px-4 py-3 rounded-none border border-rugby-teal/20 bg-white/80 dark:bg-gray-800/80 focus:ring-1 focus:ring-rugby-teal focus:border-rugby-teal"
                   required
                 />
               </div>
               <div>
                 <label
                   htmlFor="email"
-                  className="block text-sm font-medium mb-2 text-rugby-teal/90"
+                  className="block text-sm font-medium mb-2 text-rugby-teal"
                 >
                   {contactTranslations[language].emailAddress}
                 </label>
@@ -176,14 +177,14 @@ export default function ContactPage() {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-none border border-rugby-teal/20 bg-background focus:ring-2 focus:ring-rugby-teal focus:border-transparent"
+                  className="w-full px-4 py-3 rounded-none border border-rugby-teal/20 bg-white/80 dark:bg-gray-800/80 focus:ring-1 focus:ring-rugby-teal focus:border-rugby-teal"
                   required
                 />
               </div>
               <div>
                 <label
                   htmlFor="subject"
-                  className="block text-sm font-medium mb-2 text-rugby-teal/90"
+                  className="block text-sm font-medium mb-2 text-rugby-teal"
                 >
                   {contactTranslations[language].subject}
                 </label>
@@ -193,14 +194,14 @@ export default function ContactPage() {
                   name="subject"
                   value={formData.subject}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-none border border-rugby-teal/20 bg-background focus:ring-2 focus:ring-rugby-teal focus:border-transparent"
+                  className="w-full px-4 py-3 rounded-none border border-rugby-teal/20 bg-white/80 dark:bg-gray-800/80 focus:ring-1 focus:ring-rugby-teal focus:border-rugby-teal"
                   required
                 />
               </div>
               <div>
                 <label
                   htmlFor="message"
-                  className="block text-sm font-medium mb-2 text-rugby-teal/90"
+                  className="block text-sm font-medium mb-2 text-rugby-teal"
                 >
                   {contactTranslations[language].message}
                 </label>
@@ -210,13 +211,13 @@ export default function ContactPage() {
                   value={formData.message}
                   onChange={handleChange}
                   rows={5}
-                  className="w-full px-4 py-3 rounded-none border border-rugby-teal/20 bg-background focus:ring-2 focus:ring-rugby-teal focus:border-transparent"
+                  className="w-full px-4 py-3 rounded-none border border-rugby-teal/20 bg-white/80 dark:bg-gray-800/80 focus:ring-1 focus:ring-rugby-teal focus:border-rugby-teal"
                   required
                 ></textarea>
               </div>
               <button
                 type="submit"
-                className="w-full flex items-center justify-center gap-2 bg-rugby-teal hover:bg-rugby-teal/90 text-white font-semibold py-3 px-6 rounded-none transition-colors"
+                className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-rugby-teal to-rugby-teal-dark hover:from-rugby-teal-dark hover:to-rugby-teal text-white font-semibold py-3 px-6 rounded-none transition-all duration-300"
               >
                 <Send className="w-5 h-5" />
                 {contactTranslations[language].send}

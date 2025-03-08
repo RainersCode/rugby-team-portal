@@ -44,7 +44,7 @@ export default function ShareButtons({ title, size = 'default' }: ShareButtonsPr
             className={cn(
               "group flex items-center justify-center transition-all duration-300",
               isLarge ? "p-3" : "p-2",
-              "hover:bg-rugby-teal/10 rounded-full"
+              "hover:bg-rugby-teal/10 rounded-none"
             )}
             title={`Share on ${platform.name}`}
           >

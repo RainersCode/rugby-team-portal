@@ -65,7 +65,7 @@ export default function TrainingPageClient({ groupedPrograms }: TrainingPageClie
           </h2>
           <Link 
             href="/training/exercises" 
-            className="text-rugby-red hover:text-rugby-red/80 font-medium transition-colors"
+            className="text-rugby-teal hover:text-rugby-teal/80 font-medium transition-colors"
           >
             {trainingTranslations[language].viewExerciseLibrary} →
           </Link>
@@ -86,18 +86,20 @@ export default function TrainingPageClient({ groupedPrograms }: TrainingPageClie
                     <Link key={program.id} href={`/training/${program.id}`}>
                       <Card className="group relative overflow-hidden hover:shadow-lg transition-all duration-300 border-rugby-teal/20">
                         {/* Program Image */}
-                        <div className="relative h-48 w-full">
-                          <Image
-                            src={program.image_url || 'https://placehold.co/600x400/1a365d/ffffff?text=Training+Program'}
-                            alt={program.title}
-                            fill
-                            className="object-cover group-hover:scale-105 transition-transform duration-300"
-                          />
-                          {/* Base overlay */}
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                          
-                          {/* Hover overlay - separate element for stronger effect */}
-                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        <div className="relative h-48 w-full overflow-hidden">
+                          <div className="w-full h-full transform transition-transform duration-300 group-hover:scale-105">
+                            <Image
+                              src={program.image_url || 'https://placehold.co/600x400/1a365d/ffffff?text=Training+Program'}
+                              alt={program.title}
+                              fill
+                              className="object-cover"
+                            />
+                            {/* Base overlay */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                            
+                            {/* Hover overlay - separate element for stronger effect */}
+                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                          </div>
                           
                           <Badge 
                             className={`absolute top-4 right-4 capitalize ${
@@ -133,7 +135,7 @@ export default function TrainingPageClient({ groupedPrograms }: TrainingPageClie
 
                           {/* View Program Button */}
                           <div className="mt-4 flex justify-end">
-                            <div className="group inline-flex items-center gap-1 text-rugby-red hover:text-rugby-red/80 font-medium">
+                            <div className="group inline-flex items-center gap-1 text-rugby-teal hover:text-rugby-teal/80 font-medium">
                               {trainingTranslations[language].viewProgram}
                               <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
                             </div>

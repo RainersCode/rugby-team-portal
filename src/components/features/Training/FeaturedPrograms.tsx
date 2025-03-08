@@ -64,13 +64,15 @@ export default function FeaturedPrograms({ programs }: FeaturedProgramsProps) {
                 <div className="relative w-full pt-[50%] overflow-hidden">
                   <div className="absolute inset-0">
                     <div className="relative w-full h-full overflow-hidden">
-                      <Image
-                        src={program.image_url || 'https://placehold.co/600x400/1a365d/ffffff?text=Training+Program'}
-                        alt={program.title}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                      <div className="w-full h-full transform transition-transform duration-300 group-hover:scale-105">
+                        <Image
+                          src={program.image_url || 'https://placehold.co/600x400/1a365d/ffffff?text=Training+Program'}
+                          alt={program.title}
+                          fill
+                          className="object-cover"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                      </div>
                     </div>
                     <Badge 
                       className={`absolute top-4 right-4 capitalize ${getDifficultyStyle(program.difficulty)}`}

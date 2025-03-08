@@ -22,17 +22,19 @@ function TrainingCard({ training }: { training: Training }) {
       <Link href={`/training/${training.id}`} className="block h-full relative">
         <Card className="relative bg-gradient-to-br from-card-bg-light to-card-bg-light/95 dark:from-card-bg-dark dark:to-card-bg-dark/95 overflow-hidden transition-all duration-300 border-2 border-rugby-teal/30 hover:shadow-xl rounded-none h-full training-card">
           <div className="relative h-40 w-full overflow-hidden">
-            <Image
-              src={training.image || '/images/training-hero.jpg'}
-              alt={training.title}
-              fill
-              className="object-cover transition-transform duration-300"
-            />
-            {/* Base overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-            
-            {/* Hover overlay - separate element for stronger effect */}
-            <div className="absolute inset-0 bg-black/50 opacity-0 training-card-overlay transition-opacity duration-300" />
+            <div className="w-full h-full transform transition-transform duration-300 training-card-image-container">
+              <Image
+                src={training.image || '/images/training-hero.jpg'}
+                alt={training.title}
+                fill
+                className="object-cover"
+              />
+              {/* Base overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+              
+              {/* Hover overlay - separate element for stronger effect */}
+              <div className="absolute inset-0 bg-black/50 opacity-0 training-card-overlay transition-opacity duration-300" />
+            </div>
           </div>
           <div className="p-4 flex flex-col h-[calc(100%-160px)]">
             <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-1.5 line-clamp-1 training-card-title">
@@ -72,7 +74,7 @@ function TrainingCard({ training }: { training: Training }) {
           opacity: 1;
         }
         
-        .training-card-container:hover img {
+        .training-card-container:hover .training-card-image-container {
           transform: scale(1.05);
         }
         

@@ -184,7 +184,7 @@ export default function MatchCard({ match, isLocalMatch, variant = 'default' }: 
             </div>
             
             {/* Hover overlay - appears on hover */}
-            <div className="absolute inset-0 bg-black/30 opacity-0 match-card-overlay transition-opacity duration-300 z-0 pointer-events-none" />
+            <div className="absolute inset-0 bg-black/10 opacity-0 match-card-overlay transition-opacity duration-300 z-0 pointer-events-none" />
             
             {/* Bottom animated line */}
             <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-rugby-yellow via-rugby-red to-rugby-yellow match-card-line" />
@@ -224,7 +224,7 @@ export default function MatchCard({ match, isLocalMatch, variant = 'default' }: 
         </div>
         
         {/* Hover overlay - appears on hover */}
-        <div className="absolute inset-0 bg-black/30 opacity-0 match-card-overlay transition-opacity duration-300 z-0 pointer-events-none" />
+        <div className="absolute inset-0 bg-black/10 opacity-0 match-card-overlay transition-opacity duration-300 z-0 pointer-events-none" />
         
         {/* Bottom animated line */}
         <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-rugby-yellow via-rugby-red to-rugby-yellow match-card-line" />
