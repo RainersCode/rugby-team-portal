@@ -31,12 +31,12 @@ export default function LatestNews({ articles }: LatestNewsProps) {
     console.log('Latest News translation:', translations.latestNews);
   }, [language, translations]);
 
-  const renderArticle = (article: Article) => (
-    <div className="news-card-container">
+  const renderArticle = (article: Article, isFeatured = false) => (
+    <div className={`news-card-container ${isFeatured ? 'col-span-2' : ''}`}>
       <Link href={`/news/${article.slug}`} className="block">
         <article
           key={article.id}
-          className="relative bg-gradient-to-br from-card-bg-light to-card-bg-light/95 dark:from-card-bg-dark dark:to-card-bg-dark/95 rounded-none shadow-lg overflow-hidden border-2 border-rugby-teal/30 hover:shadow-xl transition-all duration-300 h-[250px] news-card"
+          className={`relative bg-gradient-to-br from-card-bg-light to-card-bg-light/95 dark:from-card-bg-dark dark:to-card-bg-dark/95 rounded-none shadow-xl overflow-hidden border-2 border-rugby-teal/30 hover:shadow-2xl transition-all duration-300 news-card h-[400px]`}
         >
           <div className="relative w-full h-full">
             <Image
@@ -51,20 +51,20 @@ export default function LatestNews({ articles }: LatestNewsProps) {
             {/* Hover overlay - separate element for stronger effect */}
             <div className="absolute inset-0 bg-black/50 opacity-0 news-card-overlay transition-opacity duration-300 z-0 pointer-events-none" />
             
-            <div className="absolute bottom-0 left-0 right-0 p-4 text-white z-10">
+            <div className="absolute bottom-0 left-0 right-0 p-6 text-white z-10">
               {article.category && (
-                <span className="inline-block px-2 py-1 mb-2 text-xs font-semibold bg-rugby-teal/80 text-white rounded">
+                <span className="inline-block px-3 py-1.5 mb-3 text-sm font-semibold bg-rugby-teal/90 text-white rounded shadow-md">
                   {article.category}
                 </span>
               )}
-              <h3 className="font-medium mb-2 text-base md:text-lg line-clamp-2">
+              <h3 className={`font-medium mb-3 ${isFeatured ? 'text-xl md:text-2xl' : 'text-lg md:text-xl'} line-clamp-2`}>
                 {article.title}
               </h3>
-              <p className="text-sm text-gray-200 line-clamp-2 mb-2">
+              <p className="text-sm text-gray-200 line-clamp-2 mb-3">
                 {article.content.substring(0, 150)}...
               </p>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-rugby-yellow hover:text-rugby-yellow/80 transition-colors">
+                <span className="text-sm text-rugby-yellow hover:text-rugby-yellow/80 transition-colors font-medium">
                   {translations.readMore}
                 </span>
                 <time className="text-xs text-gray-300" dateTime={article.created_at}>
@@ -80,13 +80,13 @@ export default function LatestNews({ articles }: LatestNewsProps) {
               </div>
             </div>
           </div>
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-rugby-yellow via-rugby-red to-rugby-yellow transform scale-x-0 news-card-line transition-transform duration-300" />
+          <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-gradient-to-r from-rugby-yellow via-rugby-red to-rugby-yellow transform scale-x-0 news-card-line transition-transform duration-300" />
         </article>
       </Link>
       
       <style jsx>{`
         .news-card-container:hover .news-card {
-          box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+          box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
         .news-card-container:hover .news-card-overlay {
           opacity: 1;
@@ -108,9 +108,9 @@ export default function LatestNews({ articles }: LatestNewsProps) {
   );
 
   return (
-    <section className="bg-rugby-teal/5 dark:bg-rugby-teal/10">
-      <div className="container-width py-12">
-        <div className="flex justify-between items-center mb-8">
+    <section className="bg-rugby-teal/5 dark:bg-rugby-teal/10 py-16">
+      <div className="container-width">
+        <div className="flex justify-between items-center mb-10">
           <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 uppercase tracking-wider border-l-4 border-rugby-teal pl-3 py-1">
             {translations.latestNews}
           </h2>
@@ -118,6 +118,7 @@ export default function LatestNews({ articles }: LatestNewsProps) {
             href="/news"
             className="group flex items-center gap-1 text-rugby-teal hover:text-rugby-teal/80 font-medium transition-colors bg-white dark:bg-gray-800 px-4 py-2 border-2 border-rugby-teal/30 hover:border-rugby-teal shadow-lg hover:shadow-xl rounded-none"
           >
+            <span>{translations.viewAll || 'View All'}</span>
             <ChevronRight className="w-5 h-5 transform transition-transform group-hover:translate-x-1" />
           </Link>
         </div>
@@ -126,7 +127,7 @@ export default function LatestNews({ articles }: LatestNewsProps) {
         <div className="md:hidden">
           <SwiperContainer
             slidesPerView={1.2}
-            spaceBetween={6}
+            spaceBetween={12}
           >
             {articles?.slice(0, 6).map((article) => (
               <SwiperSlide key={article.id}>
@@ -136,9 +137,10 @@ export default function LatestNews({ articles }: LatestNewsProps) {
           </SwiperContainer>
         </div>
 
-        {/* Desktop View (Grid) */}
-        <div className="hidden md:grid grid-cols-3 gap-2">
-          {articles?.slice(0, 6).map((article) => renderArticle(article))}
+        {/* Desktop View (Grid) - Featured layout with first article larger */}
+        <div className="hidden md:grid grid-cols-2 lg:grid-cols-3 gap-6">
+          {articles?.slice(0, 1).map((article) => renderArticle(article, true))}
+          {articles?.slice(1, 6).map((article) => renderArticle(article))}
         </div>
       </div>
     </section>
