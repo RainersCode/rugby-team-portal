@@ -48,29 +48,24 @@ export default function SignInForm() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-bg-light to-gray-50 dark:from-bg-dark dark:to-gray-900 p-4">
       <div className="max-w-md w-full">
         {/* Logo/Brand Section */}
-        <div className="text-center mb-8">
-          <h1 
-            className="text-3xl font-bold mb-2"
-            style={{
-              background: "linear-gradient(135deg, #00796B 0%, #009688 50%, #4DB6AC 100%)",
-              backgroundClip: "text",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              textShadow: "0 1px 2px rgba(0,0,0,0.1)",
-            }}
-          >
-            Rugby Club
-          </h1>
-          <p className="text-muted-foreground">Sign in to your account</p>
+        <div className="text-center mb-6">
+          <div className="flex justify-center mb-2">
+            <img 
+              src="/fnx-logo/fēniks_logo-removebg-preview.png" 
+              alt="Rugby Club Logo" 
+              className="h-16 w-auto"
+            />
+          </div>
+          <p className="text-muted-foreground font-medium">Sign in to your account</p>
         </div>
 
         {/* Card Container */}
-        <div className="bg-card backdrop-blur-xl border border-rugby-teal/20 rounded-2xl shadow-xl shadow-rugby-teal/10 p-6 md:p-8 space-y-6 transition-all duration-300 hover:shadow-2xl hover:shadow-rugby-teal/20">
+        <div className="bg-card backdrop-blur-xl border border-rugby-teal/20 rounded-none shadow-lg p-6 md:p-8 space-y-6 transition-all duration-300">
           <form className="space-y-6" onSubmit={handleSignIn}>
             {error && (
-              <div className="bg-rugby-red/10 text-rugby-red p-4 rounded-lg text-sm font-medium animate-shake">
+              <div className="bg-rugby-red/10 text-rugby-red p-4 rounded-none text-sm font-medium animate-shake">
                 <p className="flex items-center gap-2">
-                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-rugby-red" />
+                  <span className="inline-block w-1.5 h-1.5 rounded-none bg-rugby-red" />
                   {error}
                 </p>
               </div>
@@ -90,7 +85,7 @@ export default function SignInForm() {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="block w-full pl-10 pr-4 py-2.5 text-sm bg-white/50 dark:bg-gray-900/50 border border-rugby-teal/20 rounded-lg shadow-sm transition-colors duration-200 placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-rugby-teal/20 focus:border-rugby-teal"
+                    className="block w-full pl-10 pr-4 py-2.5 text-sm bg-white/50 dark:bg-gray-900/50 border border-rugby-teal/20 rounded-none shadow-none transition-colors duration-200 placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-rugby-teal focus:border-rugby-teal"
                     placeholder="Enter your email"
                   />
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -110,7 +105,7 @@ export default function SignInForm() {
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="block w-full pl-10 pr-4 py-2.5 text-sm bg-white/50 dark:bg-gray-900/50 border border-rugby-teal/20 rounded-lg shadow-sm transition-colors duration-200 placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-rugby-teal/20 focus:border-rugby-teal"
+                    className="block w-full pl-10 pr-4 py-2.5 text-sm bg-white/50 dark:bg-gray-900/50 border border-rugby-teal/20 rounded-none shadow-none transition-colors duration-200 placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-rugby-teal focus:border-rugby-teal"
                     placeholder="Enter your password"
                   />
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -136,7 +131,7 @@ export default function SignInForm() {
             <button
               type="submit"
               disabled={loading}
-              className="relative w-full inline-flex items-center justify-center px-6 py-3 text-sm font-semibold text-white bg-rugby-teal hover:bg-rugby-teal/90 rounded-lg transition-all duration-200 transform hover:translate-y-[-1px] hover:shadow-lg disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-none group"
+              className="relative w-full inline-flex items-center justify-center px-6 py-3 text-sm font-semibold text-white bg-rugby-teal hover:bg-rugby-teal/90 rounded-none transition-all duration-200 disabled:opacity-50 group"
             >
               {loading ? (
                 <>
