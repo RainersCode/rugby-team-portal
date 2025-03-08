@@ -26,7 +26,7 @@ export function SwiperContainer({
   children,
   className = '',
   slidesPerView = 1.2,
-  spaceBetween = 16,
+  spaceBetween = 8,
   navigation = true,
   pagination = false,
   breakpoints,

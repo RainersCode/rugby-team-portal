@@ -18,40 +18,76 @@ interface TrainingListProps {
 
 function TrainingCard({ training }: { training: Training }) {
   return (
-    <Link href={`/training/${training.id}`} className="block h-[320px] relative">
-      <Card className="peer relative bg-gradient-to-br from-card-bg-light to-card-bg-light/95 dark:from-card-bg-dark dark:to-card-bg-dark/95 overflow-hidden transition-all duration-300 border-2 border-rugby-teal/30 hover:border-rugby-teal hover:shadow-xl rounded-none h-full">
-        <div className="relative h-40 w-full overflow-hidden">
-          <Image
-            src={training.image || '/images/training-hero.jpg'}
-            alt={training.title}
-            fill
-            className="object-cover transition-transform duration-300 peer-hover:scale-105"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-        </div>
-        <div className="p-4 flex flex-col h-[calc(100%-160px)]">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1.5 line-clamp-1">
-            {training.title}
-          </h3>
-          <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-2">
-            {training.description}
-          </p>
-          <div className="mt-auto space-y-1.5 text-sm text-gray-600 dark:text-gray-400">
-            <div className="flex items-center gap-1.5">
-              <CalendarDays className="w-4 h-4 text-rugby-teal" />
-              <span>
-                {format(new Date(training.date), 'MMM d, yyyy • HH:mm')}
-              </span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <MapPin className="w-4 h-4 text-rugby-red" />
-              <span className="truncate">{training.location}</span>
+    <div className="training-card-container h-[320px]">
+      <Link href={`/training/${training.id}`} className="block h-full relative">
+        <Card className="relative bg-gradient-to-br from-card-bg-light to-card-bg-light/95 dark:from-card-bg-dark dark:to-card-bg-dark/95 overflow-hidden transition-all duration-300 border-2 border-rugby-teal/30 hover:shadow-xl rounded-none h-full training-card">
+          <div className="relative h-40 w-full overflow-hidden">
+            <Image
+              src={training.image || '/images/training-hero.jpg'}
+              alt={training.title}
+              fill
+              className="object-cover transition-transform duration-300"
+            />
+            {/* Base overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+            
+            {/* Hover overlay - separate element for stronger effect */}
+            <div className="absolute inset-0 bg-black/50 opacity-0 training-card-overlay transition-opacity duration-300" />
+          </div>
+          <div className="p-4 flex flex-col h-[calc(100%-160px)]">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1.5 line-clamp-1">
+              {training.title}
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-2">
+              {training.description}
+            </p>
+            <div className="mt-auto space-y-1.5 text-sm text-gray-600 dark:text-gray-400">
+              <div className="flex items-center gap-1.5">
+                <CalendarDays className="w-4 h-4 text-rugby-teal" />
+                <span>
+                  {format(new Date(training.date), 'MMM d, yyyy • HH:mm')}
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <MapPin className="w-4 h-4 text-rugby-red" />
+                <span className="truncate">{training.location}</span>
+              </div>
             </div>
           </div>
-        </div>
-      </Card>
-      <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-rugby-teal via-rugby-yellow to-rugby-teal transform scale-x-0 peer-hover:scale-x-100 transition-transform duration-500 ease-out" />
-    </Link>
+          <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-rugby-yellow via-rugby-red to-rugby-yellow training-card-line" />
+        </Card>
+      </Link>
+      
+      {/* Add CSS for hover effects */}
+      <style jsx>{`
+        .training-card-container {
+          position: relative;
+        }
+        
+        .training-card-container:hover .training-card {
+          box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .training-card-container:hover .training-card-overlay {
+          opacity: 1;
+        }
+        
+        .training-card-container:hover img {
+          transform: scale(1.05);
+        }
+        
+        .training-card-line {
+          transform: scaleX(0);
+          transform-origin: center;
+          transition: transform 0.5s ease-out;
+        }
+        
+        .training-card-container:hover .training-card-line {
+          transform: scaleX(1);
+          transform-origin: center;
+        }
+      `}</style>
+    </div>
   );
 }
 
@@ -85,14 +121,14 @@ export default function TrainingList({ trainings, title, showViewAll = true }: T
               <div className="py-2">
                 <SwiperContainer
                   slidesPerView="auto"
-                  spaceBetween={12}
+                  spaceBetween={6}
                   navigation={true}
                   pagination={false}
                   className="!overflow-visible"
                 >
                   {trainings.map((training) => (
                     <SwiperSlide key={training.id} className="!w-auto">
-                      <div className="w-[280px] sm:w-[300px] pt-1 pb-1 pr-1">
+                      <div className="w-[280px] sm:w-[300px] pt-0.5 pb-0.5 pr-0.5">
                         <TrainingCard training={training} />
                       </div>
                     </SwiperSlide>

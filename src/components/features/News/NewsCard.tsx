@@ -21,7 +21,7 @@ export default function NewsCard({
   
   return (
     <article className={cn(
-      "group relative bg-card-bg-light dark:bg-card-bg-dark rounded-none shadow-lg overflow-hidden transition-transform hover:scale-[1.02] border-2 border-rugby-teal/30 hover:border-rugby-teal hover:shadow-xl",
+      "group relative bg-card-bg-light dark:bg-card-bg-dark rounded-none shadow-lg overflow-hidden transition-transform hover:scale-[1.02] border-2 border-rugby-teal/30 hover:shadow-xl",
       isCompact && "hover:scale-[1.01]"
     )}>
       <Link href={`/news/${article.slug}`}>
@@ -33,9 +33,12 @@ export default function NewsCard({
             src={article.image}
             alt={article.title}
             fill
-            className="object-cover"
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
             priority={priority}
           />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+          
+          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         </div>
         <div className={cn(
           "p-6",
@@ -52,7 +55,7 @@ export default function NewsCard({
             </time>
           </div>
           <h3 className={cn(
-            "font-bold mb-2 text-content-light dark:text-content-dark line-clamp-2 group-hover:text-rugby-teal transition-colors",
+            "font-bold mb-2 text-content-light dark:text-content-dark line-clamp-2 group-hover:text-rugby-red transition-colors",
             isCompact ? "text-base" : "text-xl"
           )}>
             {article.title}
@@ -64,7 +67,7 @@ export default function NewsCard({
           )}
         </div>
       </Link>
-      <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-rugby-teal to-rugby-yellow transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
+      <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-rugby-yellow via-rugby-red to-rugby-yellow transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
     </article>
   );
 }

@@ -10,19 +10,19 @@ const Card = React.forwardRef<
   }
 >(({ className, hover = false, variant = "default", ...props }, ref) => {
   const variantStyles = {
-    default: "bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700",
-    outline: "bg-transparent border border-gray-200 dark:border-gray-700",
+    default: "bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700",
+    outline: "bg-transparent border-2 border-gray-200 dark:border-gray-700",
     filled: "bg-gray-50 dark:bg-gray-900 border-0",
-    rugby: "bg-white dark:bg-gray-800 border-l-4 border border-rugby-teal dark:border-rugby-teal-light"
+    rugby: "bg-white dark:bg-gray-800 border-l-4 border-2 border-rugby-teal dark:border-rugby-teal-light"
   };
 
   return (
     <div
       ref={ref}
       className={cn(
-        "rounded-lg shadow-sm transition-all duration-200",
+        "rounded-none shadow-md transition-all duration-200",
         variantStyles[variant],
-        hover && "hover:shadow-md hover:border-rugby-teal/30 dark:hover:border-rugby-teal-light/30",
+        hover && "hover:shadow-lg hover:border-rugby-teal dark:hover:border-rugby-teal-light",
         className
       )}
       {...props}

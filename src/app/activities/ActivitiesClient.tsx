@@ -219,17 +219,17 @@ export default function ActivitiesClient({
       <div className="container-width py-12">
         <Tabs defaultValue="grid" className="space-y-8">
           <div className="flex justify-center">
-            <TabsList className="grid grid-cols-2 w-[400px]">
+            <TabsList className="grid grid-cols-2 w-[400px] border-2 border-rugby-teal/30">
               <TabsTrigger
                 value="grid"
-                className="flex items-center gap-2 data-[state=active]:bg-rugby-teal data-[state=active]:text-white"
+                className="flex items-center gap-2 data-[state=active]:bg-rugby-teal data-[state=active]:text-white data-[state=active]:border-b-0"
               >
                 <Users className="w-4 h-4" />
                 {activityTranslations[language].views.cardView}
               </TabsTrigger>
               <TabsTrigger
                 value="calendar"
-                className="flex items-center gap-2 data-[state=active]:bg-rugby-teal data-[state=active]:text-white"
+                className="flex items-center gap-2 data-[state=active]:bg-rugby-teal data-[state=active]:text-white data-[state=active]:border-b-0"
               >
                 <Calendar className="w-4 h-4" />
                 {activityTranslations[language].views.calendarView}
@@ -247,7 +247,7 @@ export default function ActivitiesClient({
                 return (
                   <Card
                     key={activity.id}
-                    className={`group relative overflow-hidden transition-all duration-300 hover:shadow-lg border-rugby-teal/20
+                    className={`group relative overflow-hidden transition-all duration-300 hover:shadow-lg border-2 border-rugby-teal/20 hover:border-rugby-red
                       ${
                         isUpcoming
                           ? "bg-white dark:bg-gray-900"
@@ -255,6 +255,7 @@ export default function ActivitiesClient({
                       }
                     `}
                   >
+                    <div className="absolute top-0 left-0 w-1 h-full bg-rugby-red" />
                     <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background/10 pointer-events-none" />
 
                     <CardHeader>
@@ -268,7 +269,7 @@ export default function ActivitiesClient({
                           participants
                         </span>
                       </div>
-                      <CardTitle className="text-xl mb-2 group-hover:text-rugby-teal transition-colors">
+                      <CardTitle className="text-xl mb-2 group-hover:text-rugby-red transition-colors">
                         {activity.title}
                       </CardTitle>
                       <CardDescription className="line-clamp-2">
@@ -279,7 +280,7 @@ export default function ActivitiesClient({
                     <CardContent>
                       <div className="space-y-4">
                         <div className="flex items-center text-sm">
-                          <Calendar className="mr-2 h-4 w-4 text-rugby-teal" />
+                          <Calendar className="mr-2 h-4 w-4 text-rugby-yellow" />
                           <time
                             dateTime={activity.date}
                             className="text-muted-foreground"
@@ -299,7 +300,7 @@ export default function ActivitiesClient({
                           <Button
                             className={`w-full group relative ${
                               status.button.variant === "default"
-                                ? "bg-rugby-teal hover:bg-rugby-teal/90 text-white font-medium"
+                                ? "bg-rugby-red hover:bg-rugby-red/90 text-white font-medium"
                                 : status.button.variant === "destructive"
                                 ? "bg-rugby-red hover:bg-rugby-red/90 text-white font-medium"
                                 : "bg-gray-100 text-gray-500"
@@ -320,7 +321,7 @@ export default function ActivitiesClient({
                       </div>
                     </CardContent>
 
-                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-rugby-teal to-rugby-yellow transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
+                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-rugby-yellow via-rugby-red to-rugby-yellow transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
                   </Card>
                 );
               })}

@@ -173,28 +173,80 @@ export default function MatchCard({ match, isLocalMatch, variant = 'default' }: 
   // Wrap the card in a link if it's a local match
   if (isLocalMatch) {
     return (
-      <Link href={`/matches/${match.id}`} className="block relative">
-        <Card 
-          className={`peer relative overflow-hidden transition-all duration-300 ${
-            isLive ? 'ring-2 ring-rugby-red shadow-lg' : 'hover:shadow-xl border-2 border-rugby-teal/30'
-          } p-3 hover:border-rugby-teal backdrop-blur-sm bg-white dark:bg-gray-800/90 rounded-none`}
-        >
-          {cardContent}
-        </Card>
-        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-rugby-teal via-rugby-yellow to-rugby-teal transform scale-x-0 peer-hover:scale-x-100 transition-transform duration-500 ease-out" />
-      </Link>
+      <div className="match-card-container">
+        <Link href={`/matches/${match.id}`} className="block relative">
+          <Card 
+            className="relative overflow-hidden transition-all duration-300 border-2 border-rugby-teal/30 hover:shadow-xl p-3 backdrop-blur-sm bg-white dark:bg-gray-800/90 rounded-none match-card"
+          >
+            {/* Card content */}
+            <div className="relative z-10">
+              {cardContent}
+            </div>
+            
+            {/* Hover overlay - appears on hover */}
+            <div className="absolute inset-0 bg-black/30 opacity-0 match-card-overlay transition-opacity duration-300 z-0 pointer-events-none" />
+            
+            {/* Bottom animated line */}
+            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-rugby-yellow via-rugby-red to-rugby-yellow match-card-line" />
+          </Card>
+        </Link>
+        
+        <style jsx>{`
+          .match-card-container:hover .match-card {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+          }
+          .match-card-container:hover .match-card-overlay {
+            opacity: 1;
+          }
+          .match-card-container:hover .match-card-line {
+            transform: scaleX(1);
+            transform-origin: center;
+          }
+          .match-card-line {
+            transform: scaleX(0);
+            transform-origin: center;
+            transition: transform 0.5s ease-out;
+          }
+        `}</style>
+      </div>
     );
   }
 
   // Return without link for non-local matches
   return (
-    <div className="relative">
+    <div className="match-card-container">
       <Card 
-        className="peer relative overflow-hidden transition-all duration-300 border-2 border-rugby-teal/30 hover:border-rugby-teal hover:shadow-xl p-3 backdrop-blur-sm bg-white dark:bg-gray-800/90 rounded-none"
+        className="relative overflow-hidden transition-all duration-300 border-2 border-rugby-teal/30 p-3 backdrop-blur-sm bg-white dark:bg-gray-800/90 rounded-none match-card"
       >
-        {cardContent}
+        {/* Card content */}
+        <div className="relative z-10">
+          {cardContent}
+        </div>
+        
+        {/* Hover overlay - appears on hover */}
+        <div className="absolute inset-0 bg-black/30 opacity-0 match-card-overlay transition-opacity duration-300 z-0 pointer-events-none" />
+        
+        {/* Bottom animated line */}
+        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-rugby-yellow via-rugby-red to-rugby-yellow match-card-line" />
       </Card>
-      <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-rugby-teal via-rugby-yellow to-rugby-teal transform scale-x-0 peer-hover:scale-x-100 transition-transform duration-500 ease-out" />
+      
+      <style jsx>{`
+        .match-card-container:hover .match-card {
+          box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .match-card-container:hover .match-card-overlay {
+          opacity: 1;
+        }
+        .match-card-container:hover .match-card-line {
+          transform: scaleX(1);
+          transform-origin: center;
+        }
+        .match-card-line {
+          transform: scaleX(0);
+          transform-origin: center;
+          transition: transform 0.5s ease-out;
+        }
+      `}</style>
     </div>
   );
 } 

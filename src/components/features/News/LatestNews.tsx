@@ -32,20 +32,25 @@ export default function LatestNews({ articles }: LatestNewsProps) {
   }, [language, translations]);
 
   const renderArticle = (article: Article) => (
-    <Link href={`/news/${article.slug}`} className="block group">
+    <Link href={`/news/${article.slug}`} className="block">
       <article
         key={article.id}
-        className="relative bg-gradient-to-br from-card-bg-light to-card-bg-light/95 dark:from-card-bg-dark dark:to-card-bg-dark/95 rounded-none shadow-lg overflow-hidden border-2 border-rugby-teal/30 hover:border-rugby-teal hover:shadow-xl transition-all duration-300 h-[250px]"
+        className="relative bg-gradient-to-br from-card-bg-light to-card-bg-light/95 dark:from-card-bg-dark dark:to-card-bg-dark/95 rounded-none shadow-lg overflow-hidden border-2 border-rugby-teal/30 hover:shadow-xl transition-all duration-300 h-[250px] group"
       >
         <div className="relative w-full h-full">
           <Image
             src={article.image}
             alt={article.title}
             fill
-            className="object-cover"
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
           />
+          {/* Base overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-          <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+          
+          {/* Hover overlay - separate element for stronger effect */}
+          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          
+          <div className="absolute bottom-0 left-0 right-0 p-4 text-white z-10">
             {article.category && (
               <span className="inline-block px-2 py-1 mb-2 text-xs font-semibold bg-rugby-teal/80 text-white rounded">
                 {article.category}
@@ -74,7 +79,7 @@ export default function LatestNews({ articles }: LatestNewsProps) {
             </div>
           </div>
         </div>
-        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-rugby-teal to-rugby-yellow transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
+        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-rugby-yellow via-rugby-red to-rugby-yellow transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
       </article>
     </Link>
   );
@@ -98,7 +103,7 @@ export default function LatestNews({ articles }: LatestNewsProps) {
         <div className="md:hidden">
           <SwiperContainer
             slidesPerView={1.2}
-            spaceBetween={12}
+            spaceBetween={6}
           >
             {articles?.slice(0, 6).map((article) => (
               <SwiperSlide key={article.id}>
@@ -109,7 +114,7 @@ export default function LatestNews({ articles }: LatestNewsProps) {
         </div>
 
         {/* Desktop View (Grid) */}
-        <div className="hidden md:grid grid-cols-3 gap-4">
+        <div className="hidden md:grid grid-cols-3 gap-2">
           {articles?.slice(0, 6).map((article) => renderArticle(article))}
         </div>
       </div>

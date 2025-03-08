@@ -49,14 +49,14 @@ export default function TeamSection({ players }: TeamSectionProps) {
               <div className="py-2">
                 <SwiperContainer
                   slidesPerView="auto"
-                  spaceBetween={12}
+                  spaceBetween={6}
                   navigation={true}
                   pagination={false}
                   className="!overflow-visible"
                 >
                   {players.slice(0, 6).map((player) => (
                     <SwiperSlide key={player.id} className="!w-auto">
-                      <div className="w-[180px] xs:w-[200px] sm:w-[220px] lg:w-[260px] pt-1 pb-1 pr-1">
+                      <div className="w-[180px] xs:w-[200px] sm:w-[220px] lg:w-[260px] pt-0.5 pb-0.5 pr-0.5">
                         <PlayerCard player={player} />
                       </div>
                     </SwiperSlide>

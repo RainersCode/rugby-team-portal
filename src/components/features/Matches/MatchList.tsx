@@ -44,14 +44,14 @@ export default function MatchList({ matches, title, showViewAll = true }: MatchL
               <div className="py-2">
                 <SwiperContainer
                   slidesPerView="auto"
-                  spaceBetween={12}
+                  spaceBetween={6}
                   navigation={true}
                   pagination={false}
                   className="!overflow-visible"
                 >
                   {matches.map((match) => (
                     <SwiperSlide key={match.id} className="!w-auto">
-                      <div className="w-[280px] sm:w-[300px] pt-1 pb-1 pr-1">
+                      <div className="w-[280px] sm:w-[300px] pt-0.5 pb-0.5 pr-0.5">
                         <MatchCard match={match} isLocalMatch={true} />
                       </div>
                     </SwiperSlide>

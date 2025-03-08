@@ -8,18 +8,20 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        primary: "bg-rugby-teal hover:bg-rugby-teal-dark text-white shadow-md hover:shadow-lg focus:ring-rugby-teal/50",
-        secondary: "bg-rugby-yellow hover:bg-rugby-yellow/90 text-gray-900 shadow-md hover:shadow-lg focus:ring-rugby-yellow/50",
+        primary: "bg-rugby-teal hover:bg-rugby-teal-dark text-white shadow-md hover:shadow-lg focus:ring-rugby-teal/50 border-2 border-rugby-teal",
+        secondary: "bg-rugby-yellow hover:bg-rugby-yellow/90 text-gray-900 shadow-md hover:shadow-lg focus:ring-rugby-yellow/50 border-2 border-rugby-yellow",
         outline: "border-2 border-rugby-teal text-rugby-teal hover:bg-rugby-teal/10 focus:ring-rugby-teal/30",
-        ghost: "bg-white/90 hover:bg-white text-rugby-teal shadow-sm hover:shadow-md border border-gray-200 hover:border-rugby-teal/30",
-        danger: "bg-rugby-red hover:bg-rugby-red-dark text-white shadow-md hover:shadow-lg focus:ring-rugby-red/50",
-        subtle: "bg-rugby-teal/10 hover:bg-rugby-teal/20 text-rugby-teal hover:text-rugby-teal-dark",
+        ghost: "bg-white/90 hover:bg-white text-rugby-teal shadow-sm hover:shadow-md border-2 border-gray-200 hover:border-rugby-teal",
+        danger: "bg-rugby-red hover:bg-rugby-red-dark text-white shadow-md hover:shadow-lg focus:ring-rugby-red/50 border-2 border-rugby-red",
+        subtle: "bg-rugby-teal/10 hover:bg-rugby-teal/20 text-rugby-teal hover:text-rugby-teal-dark border-2 border-rugby-teal/20 hover:border-rugby-teal/40",
+        default: "bg-rugby-teal hover:bg-rugby-teal-dark text-white shadow-md hover:shadow-lg focus:ring-rugby-teal/50 border-2 border-rugby-teal",
+        destructive: "bg-rugby-red hover:bg-rugby-red-dark text-white shadow-md hover:shadow-lg focus:ring-rugby-red/50 border-2 border-rugby-red",
       },
       size: {
-        xs: "px-2.5 py-1.5 text-xs rounded",
-        sm: "px-4 py-2 text-sm rounded-md",
-        md: "px-5 py-2.5 text-base rounded-md",
-        lg: "px-6 py-3 text-lg rounded-md",
+        xs: "px-2.5 py-1.5 text-xs",
+        sm: "px-4 py-2 text-sm",
+        md: "px-5 py-2.5 text-base",
+        lg: "px-6 py-3 text-lg",
       },
       rounded: {
         none: "rounded-none",
@@ -32,7 +34,7 @@ const buttonVariants = cva(
     defaultVariants: {
       variant: "primary",
       size: "md",
-      rounded: "md",
+      rounded: "none",
     },
   }
 );
@@ -50,7 +52,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       children,
       variant = "primary",
       size = "md",
-      rounded = "md",
+      rounded = "none",
       href,
       className,
       isLoading,
