@@ -192,51 +192,71 @@ export default function ProgramPageClient({ program, workouts }: ProgramPageClie
                         {workout.workout_exercises?.map((workoutExercise) => (
                           <div 
                             key={workoutExercise.id}
-                            className="flex items-center gap-4 p-4 rounded-lg bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800/70 transition-colors"
+                            className="flex flex-col sm:flex-row items-start gap-4 p-4 rounded-lg bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800/70 transition-colors"
                           >
                             {/* Exercise Image */}
-                            {workoutExercise.exercise?.image_url && (
-                              <div className="relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
-                                <Image
-                                  src={workoutExercise.exercise.image_url}
-                                  alt={workoutExercise.exercise.name}
-                                  fill
-                                  className="object-cover"
-                                />
-                              </div>
-                            )}
+                            <div className="flex items-center gap-4 w-full sm:w-auto">
+                              {workoutExercise.exercise?.image_url && (
+                                <div className="relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
+                                  <Image
+                                    src={workoutExercise.exercise.image_url}
+                                    alt={workoutExercise.exercise.name}
+                                    fill
+                                    className="object-cover"
+                                  />
+                                </div>
+                              )}
 
-                            {/* Exercise Info */}
-                            <div className="flex-grow">
-                              <h4 className="font-medium text-gray-900 dark:text-gray-100 text-lg">
-                                {workoutExercise.exercise?.name}
-                              </h4>
-                              <div className="flex items-center flex-wrap gap-2 text-sm mt-2">
-                                {workoutExercise.sets && (
-                                  <Badge className="bg-rugby-teal text-white hover:bg-rugby-teal/90 px-2 py-0.5 text-sm sm:text-base sm:px-3 sm:py-1">
-                                    {workoutExercise.sets} {t.sets}
-                                  </Badge>
-                                )}
-                                {workoutExercise.reps && (
-                                  <Badge className="bg-amber-500 text-white hover:bg-amber-600 px-2 py-0.5 text-sm sm:text-base sm:px-3 sm:py-1">
-                                    {workoutExercise.reps} {t.reps}
-                                  </Badge>
-                                )}
-                                {workoutExercise.duration_seconds && (
-                                  <Badge className="bg-rugby-red text-white hover:bg-rugby-red/90 px-2 py-0.5 text-sm sm:text-base sm:px-3 sm:py-1">
-                                    {workoutExercise.duration_seconds}s
-                                  </Badge>
-                                )}
-                                {workoutExercise.rest_seconds && (
-                                  <Badge className="bg-gray-600 text-white hover:bg-gray-700 px-2 py-0.5 text-sm sm:text-base sm:px-3 sm:py-1">
-                                    {workoutExercise.rest_seconds}s {t.rest}
-                                  </Badge>
-                                )}
+                              {/* Exercise Info - Title and Badges */}
+                              <div className="flex-grow">
+                                <h4 className="font-medium text-gray-900 dark:text-gray-100 text-lg">
+                                  {workoutExercise.exercise?.name}
+                                </h4>
+                                <div className="flex items-center flex-wrap gap-2 text-sm mt-2">
+                                  {workoutExercise.sets && (
+                                    <Badge className="bg-rugby-teal text-white hover:bg-rugby-teal/90 px-2 py-0.5 text-sm sm:text-base sm:px-3 sm:py-1">
+                                      {workoutExercise.sets} {t.sets}
+                                    </Badge>
+                                  )}
+                                  {workoutExercise.reps && (
+                                    <Badge className="bg-amber-500 text-white hover:bg-amber-600 px-2 py-0.5 text-sm sm:text-base sm:px-3 sm:py-1">
+                                      {workoutExercise.reps} {t.reps}
+                                    </Badge>
+                                  )}
+                                  {workoutExercise.duration_seconds && (
+                                    <Badge className="bg-rugby-red text-white hover:bg-rugby-red/90 px-2 py-0.5 text-sm sm:text-base sm:px-3 sm:py-1">
+                                      {workoutExercise.duration_seconds}s
+                                    </Badge>
+                                  )}
+                                  {workoutExercise.rest_seconds && (
+                                    <Badge className="bg-gray-600 text-white hover:bg-gray-700 px-2 py-0.5 text-sm sm:text-base sm:px-3 sm:py-1">
+                                      {workoutExercise.rest_seconds}s {t.rest}
+                                    </Badge>
+                                  )}
+                                </div>
                               </div>
-                              
-                              {workoutExercise.exercise?.description && (
-                                <div className="mt-2">
-                                  <p className={`text-sm text-gray-600 dark:text-gray-300 ${!expandedDescriptions[workoutExercise.id] ? 'line-clamp-2' : ''}`}>
+
+                              {/* Video Tutorial Button - Mobile: Below title, Desktop: Right side */}
+                              {workoutExercise.exercise?.video_url && (
+                                <div className="mt-2 sm:mt-0 sm:ml-auto">
+                                  <Link
+                                    href={workoutExercise.exercise.video_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-rugby-teal text-white hover:bg-rugby-teal/90 transition-colors text-sm"
+                                  >
+                                    <Video className="w-4 h-4" />
+                                    <span>{t.watchTutorial}</span>
+                                  </Link>
+                                </div>
+                              )}
+                            </div>
+                            
+                            {/* Description - Full width on mobile */}
+                            {workoutExercise.exercise?.description && (
+                              <div className="mt-3 sm:mt-0 w-full sm:pl-24">
+                                <div className="p-3 bg-white dark:bg-gray-800 rounded-md border border-gray-100 dark:border-gray-700">
+                                  <p className={`text-sm text-gray-600 dark:text-gray-300 ${!expandedDescriptions[workoutExercise.id] ? 'line-clamp-3' : ''}`}>
                                     {workoutExercise.exercise.description}
                                   </p>
                                   <button
@@ -246,20 +266,7 @@ export default function ProgramPageClient({ program, workouts }: ProgramPageClie
                                     {expandedDescriptions[workoutExercise.id] ? t.showLess : t.showMore}
                                   </button>
                                 </div>
-                              )}
-                            </div>
-
-                            {/* Video Tutorial Button */}
-                            {workoutExercise.exercise?.video_url && (
-                              <Link
-                                href={workoutExercise.exercise.video_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-lg bg-rugby-teal text-white hover:bg-rugby-teal/90 transition-colors"
-                              >
-                                <Video className="w-4 h-4" />
-                                <span className="hidden sm:inline">{t.watchTutorial}</span>
-                              </Link>
+                              </div>
                             )}
                           </div>
                         ))}
