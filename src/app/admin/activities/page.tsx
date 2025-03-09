@@ -7,267 +7,242 @@ import { headers } from 'next/headers';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
+// Direct server component without relying on headers detection
 export default async function AdminActivitiesPage() {
   try {
+    // Get cookie store for authentication
     const cookieStore = await cookies();
+    
+    // Create Supabase client for server component
     const supabase = createServerComponentClient({ 
       cookies: () => cookieStore,
     });
 
-    // Detect if this is a client-side rendered page for troubleshooting
-    let isBrowser = false;
-    try {
-      isBrowser = typeof window !== 'undefined';
-    } catch (e) {
-      // This will throw in server components, which is expected
-    }
-
-    // Initial loading state for better UX
-    if (isBrowser) {
-      return <div className="p-8 text-center">Loading admin activities...</div>;
-    }
-
-    // Chrome-specific optimization: use direct API call for profile
-    let isChrome = false;
-    let user;
-
-    try {
-      // Get user agent from request headers properly
-      const headersList = headers();
-      const userAgent = headersList.get('user-agent') || '';
-      isChrome = userAgent.includes('Chrome');
-      
-      console.log('AdminActivitiesPage: User agent:', userAgent);
-      console.log('AdminActivitiesPage: Is Chrome detected:', isChrome);
-
-      if (isChrome) {
-        console.log('AdminActivitiesPage: Chrome detected, using optimized auth');
-        
-        // Get server URL from request or env
-        const baseUrl = process.env.VERCEL_URL 
-          ? `https://${process.env.VERCEL_URL}` 
-          : process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-        
-        console.log('AdminActivitiesPage: Using API URL:', `${baseUrl}/api/profile`);
-        
-        // Try to make direct API call for profile (with better headers)
-        const allCookies = cookieStore.getAll();
-        const cookieHeader = allCookies.map(c => `${c.name}=${c.value}`).join('; ');
-        
-        try {
-          const response = await fetch(`${baseUrl}/api/profile`, {
-            method: 'GET',
-            headers: {
-              'Cookie': cookieHeader,
-              'Cache-Control': 'no-cache, no-store, must-revalidate',
-              'Pragma': 'no-cache',
-            },
-            cache: 'no-store'
-          });
-          
-          if (response.ok) {
-            const data = await response.json();
-            console.log('AdminActivitiesPage: API response successful:', !!data.user);
-            user = data.user;
-            
-            // Early admin check
-            if (data.profile?.role !== 'admin') {
-              console.log('AdminActivitiesPage: User is not admin via API, redirecting');
-              redirect('/');
-            }
-            
-            // If we have user and they're admin, we can skip the standard checks
-            if (user) {
-              console.log('AdminActivitiesPage: User is admin, fetching activities');
-              // Skip to activities fetching
-              const activities = await fetchActivities(supabase, true);
-              console.log('AdminActivitiesPage: Activities fetched, rendering');
-              return <AdminActivitiesClient activities={activities} />;
-            }
-          } else {
-            const text = await response.text();
-            console.error('AdminActivitiesPage: API response not OK:', response.status, text);
-          }
-        } catch (error) {
-          console.error('AdminActivitiesPage: Chrome API call failed, falling back to standard method', error);
-          // Fall through to standard method
-        }
-      }
-    } catch (error) {
-      console.error('AdminActivitiesPage: Error detecting Chrome:', error);
-      // Fall through to standard method
-    }
-
-    // Standard authentication check - will be used as fallback
-    console.log('AdminActivitiesPage: Using standard auth method');
+    // CRITICAL: Fetch the user directly from Supabase to bypass middleware
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
     
-    // Check if user is authenticated and is admin using the more secure getUser method with timeout
-    try {
-      const userPromise = supabase.auth.getUser();
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Auth getUser timeout')), 5000)
-      );
-      
-      const { data } = await Promise.race([
-        userPromise,
-        timeoutPromise as Promise<never>
-      ]) as { data: { user: any } };
-      
-      user = data.user;
-      
-      if (!user) {
-        console.log('AdminActivitiesPage: No user found, redirecting to signin');
-        redirect('/auth/signin');
-      }
-    } catch (error) {
-      console.error('AdminActivitiesPage: Error getting user:', error);
-      // Return a better error UI instead of redirecting in case it's just a timeout
-      return (
-        <div className="p-8 text-center">
-          <h2 className="text-xl font-bold mb-2">Authentication Error</h2>
-          <p className="mb-4">There was a problem verifying your login. Please try the following:</p>
-          <ul className="list-disc ml-8 text-left mb-4">
-            <li>Clear your browser cache and cookies</li>
-            <li>Try using a private/incognito window</li>
-            <li>Try logging in again</li>
-          </ul>
-          <a href="/auth/signin" className="text-rugby-teal hover:underline">Return to Login</a>
-        </div>
-      );
+    if (userError || !user) {
+      console.error('AdminActivitiesPage: Auth error or no user found:', userError);
+      redirect('/auth/signin');
     }
+    
+    console.log('AdminActivitiesPage: User authenticated:', user.id);
 
-    // Check if user is admin with timeout
-    let isAdmin = false;
-    try {
-      const profilePromise = supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .single();
+    // Direct database query for admin check (with timeout)
+    const adminCheckPromise = new Promise(async (resolve, reject) => {
+      try {
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single();
         
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Profile fetch timeout')), 5000)
-      );
-      
-      const { data: profile } = await Promise.race([
-        profilePromise,
-        timeoutPromise as Promise<never>
-      ]) as { data: { role: string } };
-
-      isAdmin = profile?.role === 'admin';
+        if (profileError) {
+          console.error('AdminActivitiesPage: Profile fetch error:', profileError);
+          reject(profileError);
+          return;
+        }
+        
+        const isAdmin = profile?.role === 'admin';
+        resolve(isAdmin);
+      } catch (error) {
+        reject(error);
+      }
+    });
+    
+    // Set a timeout for the admin check
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Admin check timeout')), 8000);
+    });
+    
+    try {
+      const isAdmin = await Promise.race([adminCheckPromise, timeoutPromise]);
       
       if (!isAdmin) {
-        console.log('AdminActivitiesPage: User is not admin, redirecting home');
+        console.log('AdminActivitiesPage: User is not admin:', user.id);
         redirect('/');
       }
+      
+      console.log('AdminActivitiesPage: Admin status confirmed, loading activities');
     } catch (error) {
-      console.error('AdminActivitiesPage: Error checking admin status:', error);
-      // Provide detailed error message for admin verification failures
+      console.error('AdminActivitiesPage: Admin check failed:', error);
+      // Return error component instead of redirecting to avoid infinite redirects
       return (
         <div className="p-8 text-center">
-          <h2 className="text-xl font-bold mb-2">Admin Verification Error</h2>
-          <p className="mb-4">We couldn't verify your admin privileges. Please try again later.</p>
-          <a href="/" className="text-rugby-teal hover:underline">Return to Home</a>
+          <h2 className="text-xl font-bold mb-2">Admin Verification Failed</h2>
+          <p className="mb-4">We couldn't verify your admin privileges.</p>
+          <p className="mb-6">This could be due to a temporary server issue.</p>
+          <div className="space-x-4">
+            <a href="/" className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded">
+              Return Home
+            </a>
+            <a 
+              href="/admin/activities" 
+              className="bg-rugby-teal hover:bg-rugby-teal/80 text-white font-semibold py-2 px-4 rounded"
+            >
+              Try Again
+            </a>
+          </div>
         </div>
       );
     }
-
-    // Fetch activities with less concurrency for Chrome
-    const activities = await fetchActivities(supabase, isChrome);
-    return <AdminActivitiesClient activities={activities} />;
+    
+    // Fetch activities directly
+    try {
+      const activities = await fetchActivitiesDirectly(supabase, user.id);
+      
+      if (!activities || activities.length === 0) {
+        return (
+          <div className="container mx-auto p-6">
+            <h1 className="text-2xl font-bold mb-6">Activity Management</h1>
+            <p className="mb-4">No activities found. Create a new activity to get started.</p>
+            <a 
+              href="/admin/activities/new" 
+              className="bg-rugby-teal hover:bg-rugby-teal/80 text-white font-semibold py-2 px-4 rounded"
+            >
+              Create New Activity
+            </a>
+          </div>
+        );
+      }
+      
+      return <AdminActivitiesClient activities={activities} />;
+    } catch (error) {
+      console.error('AdminActivitiesPage: Activities fetch error:', error);
+      return (
+        <div className="p-8 text-center">
+          <h2 className="text-xl font-bold mb-2">Data Loading Error</h2>
+          <p className="mb-4">We encountered a problem loading the activities data.</p>
+          <a 
+            href="/admin/activities" 
+            className="bg-rugby-teal hover:bg-rugby-teal/80 text-white font-semibold py-2 px-4 rounded"
+          >
+            Try Again
+          </a>
+        </div>
+      );
+    }
   } catch (error) {
-    console.error('Error in AdminActivitiesPage:', error);
+    console.error('AdminActivitiesPage: Unhandled error:', error);
+    // Return error component rather than redirecting
     return (
       <div className="p-8 text-center">
         <h2 className="text-xl font-bold mb-2">Something Went Wrong</h2>
-        <p className="mb-4">We encountered an error while loading the admin dashboard.</p>
-        <a href="/" className="text-rugby-teal hover:underline">Return to Home</a>
+        <p className="mb-4">We encountered an unexpected error.</p>
+        <p className="text-gray-600 mb-6">Technical details have been logged for investigation.</p>
+        <div className="space-x-4">
+          <a href="/" className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded">
+            Return Home
+          </a>
+          <a 
+            href="/admin/activities" 
+            className="bg-rugby-teal hover:bg-rugby-teal/80 text-white font-semibold py-2 px-4 rounded"
+          >
+            Try Again
+          </a>
+        </div>
       </div>
     );
   }
 }
 
-// Helper function to fetch activities with proper batching
-async function fetchActivities(supabase: any, isChrome = false) {
-  try {
-    // First fetch all activities with timeout
-    const activitiesPromise = supabase
-      .from('activities')
-      .select('*')
-      .order('date', { ascending: false });
+// Direct server-side activities fetch function
+async function fetchActivitiesDirectly(supabase: any, userId: string) {
+  // First get all activities with timeout
+  const activitiesFetchPromise = new Promise(async (resolve, reject) => {
+    try {
+      const { data: activities, error } = await supabase
+        .from('activities')
+        .select('*')
+        .order('date', { ascending: false });
       
-    const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Activities fetch timeout')), 8000)
-    );
+      if (error) {
+        reject(error);
+        return;
+      }
+      
+      resolve(activities || []);
+    } catch (error) {
+      reject(error);
+    }
+  });
+  
+  const timeoutPromise = new Promise((_, reject) => {
+    setTimeout(() => reject(new Error('Activities fetch timeout')), 10000);
+  });
+  
+  try {
+    const activities = await Promise.race([activitiesFetchPromise, timeoutPromise]) as any[];
     
-    const { data: activities } = await Promise.race([
-      activitiesPromise,
-      timeoutPromise as Promise<never>
-    ]) as { data: any[] };
-
     if (!activities || activities.length === 0) {
       return [];
     }
     
-    // Process in smaller batches for Chrome (2) or larger for other browsers (3)
-    const batchSize = isChrome ? 2 : 3;
+    // Process in small batches to avoid timeouts
+    const batchSize = 1; // Process one at a time to be extra safe
     const activitiesWithDetails = [];
     
     for (let i = 0; i < activities.length; i += batchSize) {
       const batch = activities.slice(i, i + batchSize);
+      
       const batchResults = await Promise.all(
         batch.map(async (activity) => {
           try {
-            // Get participants with their profile data
-            const { data: participants } = await supabase
+            // Get participants count directly with a single query
+            const { count: participantCount, error: countError } = await supabase
+              .from('activity_participants')
+              .select('*', { count: 'exact', head: true })
+              .eq('activity_id', activity.id);
+            
+            if (countError) {
+              console.error(`Error counting participants for activity ${activity.id}:`, countError);
+            }
+            
+            // Get just the basic participants list
+            const { data: participants, error: participantsError } = await supabase
               .from('activity_participants')
               .select('user_id')
               .eq('activity_id', activity.id);
-
-            let participantDetails = [];
             
-            if (participants && participants.length > 0) {
-              // Only fetch profiles if there are participants
-              const { data: profiles } = await supabase
-                .from('profiles')
-                .select('*')
-                .in('id', participants.map((p: any) => p.user_id));
-
-              participantDetails = participants.map((participant: any) => {
-                const profile = profiles?.find((p: any) => p.id === participant.user_id);
-                return {
-                  id: participant.user_id,
-                  email: profile?.email || 'Unknown Email',
-                  full_name: profile ? 
-                    [profile.first_name, profile.last_name].filter(Boolean).join(' ') || 'Unnamed User'
-                    : 'Unnamed User'
-                };
-              });
+            if (participantsError) {
+              console.error(`Error fetching participants for activity ${activity.id}:`, participantsError);
             }
-
+            
+            // Simplified approach - return basic info since detailed participant info is rarely needed immediately
             return {
               ...activity,
-              participants: [{ count: participants?.length || 0 }],
-              participant_details: participantDetails
+              participants: [{ count: participantCount || 0 }],
+              participant_details: participants || [],
+              // Add flags for admin UI
+              canEdit: true,
+              canDelete: true
             };
           } catch (error) {
             console.error(`Error processing activity ${activity.id}:`, error);
-            // Return activity with minimal data rather than failing
+            // Return basic activity with minimal data
             return {
               ...activity,
               participants: [{ count: 0 }],
-              participant_details: []
+              participant_details: [],
+              // Add flags for admin UI
+              canEdit: true,
+              canDelete: true
             };
           }
         })
       );
       
       activitiesWithDetails.push(...batchResults);
+      
+      // Add a small delay between batches to prevent overwhelming the connection
+      if (i + batchSize < activities.length) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
     }
     
     return activitiesWithDetails;
   } catch (error) {
-    console.error('Error fetching activities:', error);
-    return [];
+    console.error('Error in fetchActivitiesDirectly:', error);
+    throw error;
   }
 } 
