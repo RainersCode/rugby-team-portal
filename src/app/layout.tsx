@@ -6,6 +6,7 @@ import Footer from "@/components/layout/Footer/Footer";
 import { ThemeProvider } from "@/components/shared/ThemeProvider";
 import { Toaster } from "sonner";
 import { LanguageProvider } from "@/context/LanguageContext";
+import { AuthProvider } from "@/context/AuthContext";
 
 const jockeyOne = Jockey_One({ 
   weight: '400',
@@ -39,13 +40,15 @@ export default function RootLayout({
         className={`${jockeyOne.variable} ${roboto.variable} font-roboto bg-bg-light dark:bg-bg-dark text-content-light dark:text-content-dark`}
       >
         <ThemeProvider>
-          <LanguageProvider>
-            <div className="flex flex-col min-h-screen">
-              <Header />
-              <main className="flex-grow">{children}</main>
-              <Footer />
-            </div>
-          </LanguageProvider>
+          <AuthProvider>
+            <LanguageProvider>
+              <div className="flex flex-col min-h-screen">
+                <Header />
+                <main className="flex-grow">{children}</main>
+                <Footer />
+              </div>
+            </LanguageProvider>
+          </AuthProvider>
         </ThemeProvider>
         <Toaster position="top-right" />
       </body>

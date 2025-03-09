@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { supabase } from '@/utils/supabase';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { UserPlus, Mail, Lock, Loader2, ArrowLeft } from 'lucide-react';
@@ -33,24 +32,27 @@ export default function SignUpForm() {
     setLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
-          data: {
-            first_name: '',
-            last_name: '',
-            role: 'user'
-          }
+      // Call our API endpoint instead of using Supabase directly
+      const response = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
+        body: JSON.stringify({ 
+          email, 
+          password,
+          redirectUrl: `${window.location.origin}/auth/callback`
+        }),
       });
 
-      if (error) throw error;
+      const data = await response.json();
 
-      if (data.user && data.user.identities && data.user.identities.length === 0) {
-        setError(translations.emailAlreadyRegistered || 'This email is already registered. Please sign in instead.');
-        return;
+      if (!response.ok) {
+        if (response.status === 400 && data.error === 'user-exists') {
+          setError(translations.emailAlreadyRegistered || 'This email is already registered. Please sign in instead.');
+          return;
+        }
+        throw new Error(data.error || 'Failed to sign up');
       }
 
       // Show success message and redirect to verify email page

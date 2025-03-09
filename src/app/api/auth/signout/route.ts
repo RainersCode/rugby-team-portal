@@ -2,27 +2,31 @@ import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST() {
   try {
+    // Create a Supabase client configured to use cookies
     const supabase = createRouteHandlerClient({ cookies });
     
-    // Sign out on the server side
-    await supabase.auth.signOut();
+    // Sign out the user
+    const { error } = await supabase.auth.signOut();
     
-    // Clear all cookies
-    const response = new NextResponse(JSON.stringify({ success: true }), {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    // Clear auth cookie
-    response.cookies.delete('sb-access-token');
-    response.cookies.delete('sb-refresh-token');
+    if (error) {
+      console.error('Error during sign out:', error);
+      return NextResponse.json(
+        { error: error.message },
+        { status: 500 }
+      );
+    }
     
-    return response;
+    // Clear cookies and return success
+    return NextResponse.json({ success: true });
   } catch (error) {
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    console.error('Unexpected error during sign out:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 } 

@@ -1,13 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import type { User } from "@supabase/auth-helpers-nextjs";
 import { MobileNav } from "@/components/mobile-nav";
 import UserNav from "./UserNav";
 import { useLanguage } from "@/context/LanguageContext";
+import { useAuth } from "@/context/AuthContext";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,87 +30,8 @@ type MainNavItem = NavItem | DropdownNavItem;
 
 export function Header() {
   const pathname = usePathname();
-  const [user, setUser] = useState<User | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const supabase = createClientComponentClient();
+  const { user, isAdmin } = useAuth();
   const { language, setLanguage, translations } = useLanguage();
-
-  useEffect(() => {
-    const getUser = async () => {
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      
-      if (userError) {
-        console.error('Error getting user:', userError);
-        setUser(null);
-        setIsAdmin(false);
-        return;
-      }
-
-      setUser(user);
-
-      if (user) {
-        // Check if user is admin
-        const { data: profile, error: profileError } = await supabase
-          .from("profiles")
-          .select("role")
-          .eq("id", user.id)
-          .single();
-
-        if (profileError) {
-          console.error('Error getting profile:', profileError);
-          setIsAdmin(false);
-          return;
-        }
-
-        setIsAdmin(profile?.role === "admin");
-      } else {
-        setUser(null);
-        setIsAdmin(false);
-      }
-    };
-
-    // Initial user check
-    getUser();
-
-    // Set up auth state change listener
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Auth state changed:', event, session?.user?.id);
-      
-      if (event === 'SIGNED_OUT') {
-        setUser(null);
-        setIsAdmin(false);
-        return;
-      }
-
-      if (session?.user) {
-        setUser(session.user);
-        
-        // Check user role whenever auth state changes
-        const { data: profile, error: profileError } = await supabase
-          .from("profiles")
-          .select("role")
-          .eq("id", session.user.id)
-          .single();
-
-        if (profileError) {
-          console.error('Error getting profile:', profileError);
-          setIsAdmin(false);
-          return;
-        }
-
-        setIsAdmin(profile?.role === "admin");
-      } else {
-        setUser(null);
-        setIsAdmin(false);
-      }
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [supabase]);
 
   const isLinkActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);

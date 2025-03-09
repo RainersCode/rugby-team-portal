@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import type { User } from "@supabase/auth-helpers-nextjs";
 import UserNav from "@/components/layout/Header/UserNav";
+import { useAuth } from "@/context/AuthContext";
 import {
   Menu,
   Home,
@@ -79,64 +78,10 @@ const socialLinks = [
 
 export function MobileNav() {
   const [isOpen, setIsOpen] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
   const pathname = usePathname();
   const router = useRouter();
-  const supabase = createClientComponentClient();
+  const { user, isAdmin } = useAuth();
   const { language, setLanguage, translations } = useLanguage();
-
-  useEffect(() => {
-    checkUserRole();
-    getUser();
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      setUser(session?.user ?? null);
-      await checkUserRole(); // Re-check role when auth state changes
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const checkUserRole = async () => {
-    try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      if (!session) {
-        setIsAdmin(false);
-        return;
-      }
-
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", session.user.id)
-        .single();
-
-      setIsAdmin(profile?.role === "admin");
-    } catch (error) {
-      console.error("Error checking user role:", error);
-      setIsAdmin(false);
-    }
-  };
-
-  const getUser = async () => {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    setUser(user);
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
-
-    return () => subscription.unsubscribe();
-  };
 
   const LanguageSwitcher = () => {
     const handleLanguageChange = (newLang: 'en' | 'lv') => {

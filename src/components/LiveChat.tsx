@@ -1,13 +1,16 @@
-import { useState, useEffect, useRef } from 'react';
-import { Card } from './ui/card';
-import { Input } from './ui/input';
-import { Button } from './ui/button';
-import { ScrollArea } from './ui/scroll-area';
-import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
-import { format } from 'date-fns';
-import { Loader2 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { supabase } from '@/utils/supabase';
+"use client";
+
+import { useEffect, useState, useRef } from "react";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { useAuth } from "@/context/AuthContext";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Send, LogIn, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useLanguage } from "@/context/LanguageContext";
+import { formatDistanceToNow } from "date-fns";
+import { enUS, lv } from "date-fns/locale";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface ChatMessage {
   id: string;
@@ -37,169 +40,104 @@ const getAvatarColor = (userId: string) => {
 
 export default function LiveChat() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [newMessage, setNewMessage] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
+  const [newMessage, setNewMessage] = useState("");
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isSending, setIsSending] = useState(false);
-  const [user, setUser] = useState<any>(null);
-  const [isAuthChecking, setIsAuthChecking] = useState(true);
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { user, refreshAuth } = useAuth();
+  const supabase = createClientComponentClient();
   const router = useRouter();
-
-  useEffect(() => {
-    // Check auth state
-    const checkAuth = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        setUser(session?.user ?? null);
-      } catch (error) {
-        console.error('Error checking auth:', error);
-      } finally {
-        setIsAuthChecking(false);
-      }
-    };
-
-    checkAuth();
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
+  const chatEndRef = useRef<HTMLDivElement>(null);
+  const messagesRef = useRef<HTMLDivElement>(null);
+  const { language, translations } = useLanguage();
+  const locales = { en: enUS, lv };
+  
   // Auto scroll to bottom when new messages arrive
   useEffect(() => {
-    if (scrollAreaRef.current) {
-      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
+    if (messagesRef.current) {
+      messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
     }
   }, [messages]);
 
-  useEffect(() => {
-    if (!user) return; // Only fetch messages if user is authenticated
-
-    // Fetch existing messages
-    const fetchMessages = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        const { data, error: supabaseError } = await supabase
-          .from('messages')
-          .select('*')
-          .order('created_at', { ascending: true });
-        
-        if (supabaseError) throw supabaseError;
-        if (data) {
-          setMessages(data);
-        }
-      } catch (err) {
-        console.error('Error fetching messages:', err);
-        setError('Failed to load messages. Please try refreshing the page.');
-      } finally {
-        setIsLoading(false);
+  const fetchMessages = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const { data, error: messagesError } = await supabase
+        .from('chat_messages')
+        .select('*')
+        .order('created_at', { ascending: true });
+      
+      if (messagesError) throw messagesError;
+      
+      if (data) {
+        setMessages(data);
       }
-    };
+    } catch (err) {
+      console.error('Error fetching messages:', err);
+      setError('Failed to load messages. Please try refreshing the page.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchMessages();
 
-    // Subscribe to new messages
+    // Set up real-time listener
     const channel = supabase
-      .channel('public:messages')
+      .channel("live_chat_changes")
       .on(
-        'postgres_changes',
+        "postgres_changes",
         {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'messages',
+          event: "INSERT",
+          schema: "public",
+          table: "chat_messages",
         },
         (payload) => {
-          console.log('New message received:', payload);
-          const newMessage = payload.new as ChatMessage;
-          setMessages(prev => [...prev, newMessage]);
+          setMessages((prevMessages) => [...prevMessages, payload.new as ChatMessage]);
         }
       )
-      .subscribe((status) => {
-        console.log('Subscription status:', status);
-      });
+      .subscribe();
 
     return () => {
-      channel.unsubscribe();
+      supabase.removeChannel(channel);
     };
-  }, [user]);
+  }, [supabase]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || !newMessage.trim() || isSending) return;
+    if (!user || !newMessage.trim() || isSubmitting) return;
 
     try {
-      setIsSending(true);
+      setIsSubmitting(true);
       const messageData = {
         content: newMessage.trim(),
         user_id: user.id,
-        user_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Anonymous',
-        user_image: user.user_metadata?.avatar_url,
+        user_name: user.email?.split('@')[0] || 'Anonymous',
       };
 
-      // Add message to local state immediately
-      const optimisticMessage: ChatMessage = {
-        ...messageData,
-        id: crypto.randomUUID(),
-        created_at: new Date().toISOString(),
-      };
-      setMessages(prev => [...prev, optimisticMessage]);
-      setNewMessage(''); // Clear input immediately
+      const { error: insertError } = await supabase
+        .from('chat_messages')
+        .insert([messageData]);
 
-      const { data, error: sendError } = await supabase
-        .from('messages')
-        .insert([messageData])
-        .select()
-        .single();
-
-      if (sendError) {
-        // Remove optimistic message if there was an error
-        setMessages(prev => prev.filter(msg => msg.id !== optimisticMessage.id));
-        throw sendError;
-      }
-
-      // Update the optimistic message with the real one
-      if (data) {
-        setMessages(prev => 
-          prev.map(msg => msg.id === optimisticMessage.id ? data : msg)
-        );
-      }
+      if (insertError) throw insertError;
+      
+      setNewMessage("");
     } catch (err) {
       console.error('Error sending message:', err);
       setError('Failed to send message. Please try again.');
     } finally {
-      setIsSending(false);
+      setIsSubmitting(false);
     }
   };
 
   const handleSignIn = () => {
-    router.push('/auth/signin');
+    router.push('/auth/signin?redirect=/live');
   };
 
-  if (isAuthChecking) {
-    return (
-      <Card className="h-full flex items-center justify-center">
-        <Loader2 className="w-6 h-6 animate-spin text-rugby-teal" />
-        <span className="ml-2">Checking authentication...</span>
-      </Card>
-    );
-  }
-
-  if (!user) {
-    return (
-      <Card className="h-full p-4 flex items-center justify-center">
-        <Button onClick={handleSignIn} variant="primary">
-          Sign in to participate in chat
-        </Button>
-      </Card>
-    );
-  }
-
-  if (isLoading) {
+  if (loading) {
     return (
       <Card className="h-full flex items-center justify-center">
         <Loader2 className="w-6 h-6 animate-spin text-rugby-teal" />
@@ -210,95 +148,121 @@ export default function LiveChat() {
 
   if (error) {
     return (
-      <Card className="h-full p-4 flex items-center justify-center">
-        <p className="text-rugby-red">{error}</p>
+      <Card className="h-full">
+        <div className="p-4 text-center">
+          <p className="text-red-500">{error}</p>
+          <Button
+            onClick={fetchMessages}
+            className="mt-2 bg-rugby-teal hover:bg-rugby-teal/90 text-white"
+          >
+            Try Again
+          </Button>
+        </div>
+      </Card>
+    );
+  }
+
+  if (!user) {
+    return (
+      <Card className="h-full flex flex-col items-center justify-center p-6 text-center bg-white">
+        <h3 className="text-xl font-bold mb-2">Join the Conversation</h3>
+        <p className="text-gray-600 mb-4">
+          Sign in to participate in the live chat with other fans during matches.
+        </p>
+        <Button
+          onClick={handleSignIn}
+          className="bg-rugby-teal hover:bg-rugby-teal/90 text-white flex items-center gap-2"
+        >
+          <LogIn className="w-4 h-4" />
+          Sign In
+        </Button>
       </Card>
     );
   }
 
   return (
-    <Card className="h-full flex flex-col bg-white dark:bg-gray-900 shadow-xl">
-      <div className="p-4 border-b flex items-center justify-between bg-rugby-teal/5 dark:bg-rugby-teal/10">
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 bg-rugby-teal rounded-full animate-pulse" />
-          <h3 className="font-semibold text-lg">Live Chat</h3>
-        </div>
-        <p className="text-sm text-muted-foreground flex items-center gap-2">
-          <span className="hidden sm:inline">Logged in as</span>
-          <span className="font-medium text-rugby-teal">
-            {user.user_metadata?.full_name || user.email?.split('@')[0]}
-          </span>
-        </p>
+    <Card className="h-full flex flex-col bg-white">
+      <div className="p-3 bg-rugby-teal/5 border-b border-gray-100">
+        <h3 className="font-semibold text-rugby-teal">Live Chat</h3>
       </div>
       
-      <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
+      <ScrollArea className="flex-1 p-4" ref={messagesRef}>
         <div className="space-y-4">
-          {messages.map((message) => {
-            const isCurrentUser = message.user_id === user.id;
-            return (
-              <div 
-                key={message.id} 
-                className={`flex items-start gap-3 ${isCurrentUser ? 'flex-row-reverse' : ''}`}
+          {messages.map((message) => (
+            <div
+              key={message.id}
+              className={`flex ${
+                message.user_id === user.id ? 'justify-end' : 'justify-start'
+              }`}
+            >
+              <div
+                className={`max-w-[75%] p-3 rounded-md ${
+                  message.user_id === user.id
+                    ? 'bg-rugby-teal text-white'
+                    : 'bg-white border border-gray-100'
+                }`}
               >
-                <Avatar className={`w-8 h-8 ${isCurrentUser ? 'ml-2' : 'mr-2'}`}>
-                  <AvatarImage src={message.user_image} />
-                  <AvatarFallback className={
-                    isCurrentUser 
-                      ? "bg-rugby-teal/20 text-rugby-teal" 
-                      : getAvatarColor(message.user_id)
-                  }>
-                    {message.user_name[0]}
-                  </AvatarFallback>
-                </Avatar>
-                <div className={`flex-1 ${isCurrentUser ? 'text-right' : ''}`}>
-                  <div className={`flex items-center gap-2 ${isCurrentUser ? 'justify-end' : ''}`}>
-                    <span className="text-xs text-muted-foreground">
-                      {format(new Date(message.created_at), 'HH:mm')}
-                    </span>
-                    <p className={`text-sm font-medium ${
-                      isCurrentUser ? 'text-rugby-teal' : 'text-gray-700 dark:text-gray-200'
-                    }`}>
-                      {message.user_name}
-                    </p>
-                  </div>
-                  <div 
-                    className={`
-                      mt-1 inline-block rounded-lg px-4 py-2 max-w-[80%] break-words shadow-sm
-                      ${isCurrentUser 
-                        ? 'bg-rugby-teal/10 text-rugby-teal ml-auto border border-rugby-teal/20' 
-                        : 'bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700'
-                      }
-                    `}
+                <div className="flex items-center gap-2 mb-1">
+                  <div
+                    className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold"
+                    style={{
+                      backgroundColor:
+                        message.user_id === user.id
+                          ? 'rgba(255, 255, 255, 0.2)'
+                          : getAvatarColor(message.user_id),
+                      color:
+                        message.user_id === user.id ? 'white' : 'white',
+                    }}
                   >
-                    <p className="text-sm">{message.content}</p>
+                    {message.user_name.charAt(0).toUpperCase()}
                   </div>
+                  <span className={`text-xs font-medium ${
+                    message.user_id === user.id ? 'text-white/80' : 'text-gray-600'
+                  }`}>
+                    {message.user_name}
+                  </span>
+                  <span className={`text-xs ${
+                    message.user_id === user.id ? 'text-white/60' : 'text-gray-400'
+                  }`}>
+                    {formatDistanceToNow(new Date(message.created_at), {
+                      addSuffix: true,
+                      locale: locales[language as keyof typeof locales]
+                    })}
+                  </span>
                 </div>
+                <p className={message.user_id === user.id ? 'text-white' : 'text-gray-800'}>
+                  {message.content}
+                </p>
               </div>
-            );
-          })}
+            </div>
+          ))}
         </div>
+        <div ref={chatEndRef} />
       </ScrollArea>
 
-      <form onSubmit={handleSendMessage} className="p-4 border-t flex gap-2 bg-rugby-teal/5 dark:bg-rugby-teal/10">
-        <Input
+      <form onSubmit={handleSendMessage} className="p-3 border-t border-gray-100 flex gap-2">
+        <input
+          type="text"
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
           placeholder="Type a message..."
-          className="flex-1 bg-white dark:bg-gray-800 border-rugby-teal/20 focus:border-rugby-teal focus:ring-rugby-teal"
-          disabled={isSending}
+          className="flex-1 bg-white border border-rugby-teal/20 focus:border-rugby-teal focus:ring-rugby-teal"
+          disabled={isSubmitting}
         />
         <Button 
           type="submit" 
-          disabled={isSending}
+          disabled={isSubmitting}
           className="bg-rugby-teal hover:bg-rugby-teal/90 text-white px-6"
         >
-          {isSending ? (
+          {isSubmitting ? (
             <>
               <Loader2 className="w-4 h-4 animate-spin mr-2" />
-              Sending
+              Sending...
             </>
           ) : (
-            'Send'
+            <>
+              <Send className="w-4 h-4" />
+            </>
           )}
         </Button>
       </form>

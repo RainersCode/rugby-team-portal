@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/utils/supabase";
 import type { User } from "@supabase/supabase-js";
+import { useAuth } from "@/context/AuthContext";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,24 +27,29 @@ import {
 } from "lucide-react";
 
 interface UserNavProps {
-  user: User;
-  isAdmin?: boolean;
+  user?: User; // Make user optional since we'll get it from context if not provided
 }
 
-export default function UserNav({ user, isAdmin }: UserNavProps) {
+export default function UserNav({ user: propUser }: UserNavProps) {
   const router = useRouter();
   const [initials, setInitials] = useState("");
+  const { user: contextUser, isAdmin } = useAuth();
+  
+  // Use user from props if provided, otherwise from context
+  const user = propUser || contextUser;
 
   useEffect(() => {
-    checkUserRole();
-  }, []);
+    if (user) {
+      fetchUserProfile();
+    }
+  }, [user]);
 
-  async function checkUserRole() {
+  async function fetchUserProfile() {
     try {
       const { data: profile } = await supabase
         .from("profiles")
-        .select("first_name, last_name, role")
-        .eq("id", user.id)
+        .select("first_name, last_name")
+        .eq("id", user?.id)
         .single();
 
       if (profile) {
@@ -52,7 +58,7 @@ export default function UserNav({ user, isAdmin }: UserNavProps) {
         setInitials((firstInitial + lastInitial).toUpperCase() || "U");
       }
     } catch (error) {
-      console.error("Error checking user role:", error);
+      console.error("Error fetching user profile:", error);
     }
   }
 

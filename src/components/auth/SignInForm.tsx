@@ -1,11 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { supabase } from '@/utils/supabase';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { LogIn, Mail, Lock, Loader2 } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
+import { useAuth } from '@/context/AuthContext';
 
 export default function SignInForm() {
   const [email, setEmail] = useState('');
@@ -14,8 +14,9 @@ export default function SignInForm() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectTo = searchParams?.get('redirectTo') || '/';
+  const redirectTo = searchParams?.get('redirect') || '/';
   const { translations } = useLanguage();
+  const { refreshAuth } = useAuth();
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,8 +39,11 @@ export default function SignInForm() {
         throw new Error(data.error || 'Failed to sign in');
       }
 
-      // If successful, force a complete page refresh to ensure all components get the latest session
-      window.location.href = redirectTo;
+      // Successfully signed in - refresh the auth context
+      await refreshAuth();
+      
+      // Redirect to the specified page
+      router.push(redirectTo);
     } catch (error) {
       setError(error instanceof Error ? error.message : translations.error);
       setLoading(false);
