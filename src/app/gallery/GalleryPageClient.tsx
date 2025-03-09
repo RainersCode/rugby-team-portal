@@ -4,9 +4,13 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ImageIcon, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { ImageIcon, X, ChevronLeft, ChevronRight, Calendar } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/context/LanguageContext";
+import { SwiperContainer } from "@/components/ui/swiper-container";
+import { SwiperSlide } from "swiper/react";
+import { format } from "date-fns";
+import { lv, enUS } from "date-fns/locale";
 
 const galleryTranslations = {
   en: {
@@ -18,6 +22,7 @@ const galleryTranslations = {
     previousPhoto: "Previous Photo",
     nextPhoto: "Next Photo",
     photoOf: (current: number, total: number) => `Photo ${current} of ${total}`,
+    addedOn: "Added on"
   },
   lv: {
     title: "Galerija",
@@ -28,6 +33,7 @@ const galleryTranslations = {
     previousPhoto: "Iepriekšējā fotogrāfija",
     nextPhoto: "Nākamā fotogrāfija",
     photoOf: (current: number, total: number) => `Fotogrāfija ${current} no ${total}`,
+    addedOn: "Pievienots"
   }
 };
 
@@ -51,12 +57,29 @@ export default function GalleryPageClient() {
   const [selectedGallery, setSelectedGallery] = useState<Gallery | null>(null);
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number>(0);
   const [loading, setLoading] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
   const supabase = createClientComponentClient();
   const { language } = useLanguage();
   const t = galleryTranslations[language];
 
   useEffect(() => {
     fetchGalleries();
+    
+    // Check if the device is mobile
+    const checkIfMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    // Initial check
+    checkIfMobile();
+    
+    // Add event listener for resize
+    window.addEventListener('resize', checkIfMobile);
+    
+    // Cleanup
+    return () => {
+      window.removeEventListener('resize', checkIfMobile);
+    };
   }, []);
 
   const fetchGalleries = async () => {
@@ -85,6 +108,11 @@ export default function GalleryPageClient() {
     document.body.style.overflow = 'hidden';
   };
 
+  const closeGallery = () => {
+    setSelectedGallery(null);
+    document.body.style.overflow = '';
+  };
+
   const handleDragEnd = (e: any, { offset, velocity }: { offset: { x: number }, velocity: { x: number } }) => {
     const swipe = offset.x;
     
@@ -97,20 +125,10 @@ export default function GalleryPageClient() {
     }
   };
 
-  const safeCloseGallery = () => {
-    setSelectedPhotoIndex(0);
-    
-    document.body.style.overflow = 'auto';
-    document.body.style.pointerEvents = 'auto';
-    
-    document.documentElement.style.pointerEvents = 'auto';
-    
-    setSelectedGallery(null);
-    
-    window.requestAnimationFrame(() => {
-      document.body.style.overflow = 'auto';
-      document.body.style.pointerEvents = 'auto';
-    });
+  const handleSwiper = (newIndex: number) => {
+    if (selectedGallery && newIndex >= 0 && newIndex < selectedGallery.photos.length) {
+      setSelectedPhotoIndex(newIndex);
+    }
   };
 
   // Global escape key and navigation handler
@@ -125,7 +143,7 @@ export default function GalleryPageClient() {
         document.documentElement.style.pointerEvents = 'auto';
         
         // Close the gallery
-        safeCloseGallery();
+        closeGallery();
       } else if (e.key === 'ArrowRight' && selectedGallery && selectedPhotoIndex < selectedGallery.photos.length - 1) {
         setSelectedPhotoIndex(prev => prev + 1);
       } else if (e.key === 'ArrowLeft' && selectedGallery && selectedPhotoIndex > 0) {
@@ -275,6 +293,12 @@ export default function GalleryPageClient() {
                       {t.photoCount(gallery.photos?.length || 0)}
                     </span>
                   </CardTitle>
+                  <div className="flex items-center text-xs text-muted-foreground mt-1">
+                    <Calendar className="h-3 w-3 mr-1" />
+                    <span>
+                      {t.addedOn}: {format(new Date(gallery.created_at), 'MMM dd, yyyy', { locale: language === 'lv' ? lv : enUS })}
+                    </span>
+                  </div>
                 </CardHeader>
                 
                 <CardContent className="flex-grow flex flex-col">
@@ -334,128 +358,129 @@ export default function GalleryPageClient() {
           ))}
         </motion.div>
 
-        <AnimatePresence>
-          {selectedGallery && (
-            <div className="fixed inset-0 z-50">
-              <div 
-                className="fixed inset-0 bg-black/95 backdrop-blur-sm flex items-center justify-center p-4"
-                onClick={() => safeCloseGallery()}
+        {/* Lightbox */}
+        <div>
+          <AnimatePresence>
+            {selectedGallery && (
+              <div
+                className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center"
+                onClick={closeGallery}
               >
                 <div className="absolute top-4 right-4 z-50">
                   <button
-                    className="text-white hover:text-rugby-teal transition-colors p-2 rounded-none bg-black/30 hover:bg-black/50"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      safeCloseGallery();
-                    }}
+                    className="bg-black/30 hover:bg-black/50 p-2 rounded-none transition-colors"
+                    onClick={closeGallery}
                     aria-label={t.closeGallery}
                   >
-                    <X className="h-6 w-6" />
+                    <X className="h-6 w-6 text-white" />
                   </button>
                 </div>
 
-                <button
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-white hover:text-rugby-teal transition-colors disabled:opacity-50 disabled:hover:text-white p-2 rounded-none bg-black/30 hover:bg-black/50"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (selectedPhotoIndex > 0) {
-                      setSelectedPhotoIndex(prev => prev - 1);
-                    }
-                  }}
-                  disabled={selectedPhotoIndex === 0}
-                  aria-label={t.previousPhoto}
-                >
-                  <ChevronLeft className="h-6 w-6" />
-                </button>
+                {/* Desktop Navigation */}
+                <div className="hidden md:block">
+                  <button
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-white hover:text-rugby-teal transition-colors disabled:opacity-50 disabled:hover:text-white p-2 rounded-none bg-black/30 hover:bg-black/50"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (selectedPhotoIndex > 0) {
+                        setSelectedPhotoIndex(prev => prev - 1);
+                      }
+                    }}
+                    disabled={selectedPhotoIndex === 0}
+                    aria-label={t.previousPhoto}
+                  >
+                    <ChevronLeft className="h-6 w-6" />
+                  </button>
 
-                <button
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:text-rugby-teal transition-colors disabled:opacity-50 disabled:hover:text-white p-2 rounded-none bg-black/30 hover:bg-black/50"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (selectedPhotoIndex < selectedGallery.photos.length - 1) {
-                      setSelectedPhotoIndex(prev => prev + 1);
-                    }
-                  }}
-                  disabled={selectedPhotoIndex === selectedGallery.photos.length - 1}
-                  aria-label={t.nextPhoto}
-                >
-                  <ChevronRight className="h-6 w-6" />
-                </button>
-
-                <div
-                  className="relative w-full max-w-5xl h-[80vh]"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <div className="absolute inset-0 overflow-hidden shadow-2xl rounded-none">
-                    <Image
-                      src={selectedGallery.photos[selectedPhotoIndex].image_url}
-                      alt={selectedGallery.photos[selectedPhotoIndex].title}
-                      fill
-                      className="object-contain"
-                      sizes="(max-width: 1024px) 100vw, 75vw"
-                      priority
-                    />
-                  </div>
-                  
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-6 rounded-none">
-                    <div className="max-w-3xl mx-auto">
-                      <div className="flex items-center justify-between mb-2">
-                        <h3 className="text-white text-xl md:text-2xl font-medium">
-                          {selectedGallery.photos[selectedPhotoIndex].title}
-                        </h3>
-                        <span className="text-white/80 text-sm bg-black/30 px-3 py-1 rounded-none">
-                          {t.photoOf(selectedPhotoIndex + 1, selectedGallery.photos.length)}
-                        </span>
-                      </div>
-                      {selectedGallery.photos[selectedPhotoIndex].description && (
-                        <p className="text-white/90 text-sm md:text-base">
-                          {selectedGallery.photos[selectedPhotoIndex].description}
-                        </p>
-                      )}
-                    </div>
-                  </div>
+                  <button
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:text-rugby-teal transition-colors disabled:opacity-50 disabled:hover:text-white p-2 rounded-none bg-black/30 hover:bg-black/50"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (selectedPhotoIndex < selectedGallery.photos.length - 1) {
+                        setSelectedPhotoIndex(prev => prev + 1);
+                      }
+                    }}
+                    disabled={selectedPhotoIndex === selectedGallery.photos.length - 1}
+                    aria-label={t.nextPhoto}
+                  >
+                    <ChevronRight className="h-6 w-6" />
+                  </button>
                 </div>
 
-                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-black/30 backdrop-blur-sm px-3 py-2 rounded-none"
-                     onClick={(e) => e.stopPropagation()}>
-                  {selectedGallery.photos.length > 10 ? (
-                    <div className="flex items-center">
-                      <span className="text-white/90 text-sm mr-2">
-                        {selectedPhotoIndex + 1} / {selectedGallery.photos.length}
-                      </span>
-                      <input
-                        type="range"
-                        min="0"
-                        max={selectedGallery.photos.length - 1}
-                        value={selectedPhotoIndex}
-                        onChange={(e) => {
-                          e.stopPropagation();
-                          const newIndex = parseInt(e.target.value);
-                          if (!isNaN(newIndex) && newIndex >= 0 && newIndex < selectedGallery.photos.length) {
-                            setSelectedPhotoIndex(newIndex);
-                          }
-                        }}
-                        onClick={(e) => e.stopPropagation()}
-                        className="w-32 md:w-48 h-2 bg-gray-700 rounded-none appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:rounded-none [&::-webkit-slider-thumb]:bg-rugby-teal"
+                {/* Mobile Swiper */}
+                {isMobile ? (
+                  <div className="w-full h-full" onClick={(e) => e.stopPropagation()}>
+                    <SwiperContainer
+                      slidesPerView={1}
+                      spaceBetween={0}
+                      navigation={false}
+                      pagination={{ clickable: true }}
+                      className="h-full"
+                      // Set initial slide to the selected photo
+                    >
+                      {selectedGallery.photos.map((photo, index) => (
+                        <SwiperSlide key={photo.id} className="flex items-center justify-center">
+                          <div className="relative w-full h-[80vh]">
+                            <Image
+                              src={photo.image_url}
+                              alt={photo.title || `Photo ${index + 1}`}
+                              fill
+                              className="object-contain"
+                              sizes="100vw"
+                              priority
+                            />
+                          </div>
+                        </SwiperSlide>
+                      ))}
+                    </SwiperContainer>
+                  </div>
+                ) : (
+                  // Desktop view with draggable motion
+                  <div
+                    className="relative w-full max-w-5xl h-[80vh]"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <motion.div
+                      className="absolute inset-0 overflow-hidden shadow-2xl rounded-none"
+                      drag="x"
+                      dragConstraints={{ left: 0, right: 0 }}
+                      dragElastic={0.2}
+                      onDragEnd={handleDragEnd}
+                    >
+                      <Image
+                        src={selectedGallery.photos[selectedPhotoIndex].image_url}
+                        alt={selectedGallery.photos[selectedPhotoIndex].title || `Photo ${selectedPhotoIndex + 1}`}
+                        fill
+                        className="object-contain"
+                        sizes="(max-width: 1024px) 100vw, 75vw"
+                        priority
                       />
-                    </div>
-                  ) : (
-                    selectedGallery.photos.map((_, index) => (
-                      <button
-                        key={index}
-                        className={`w-2 h-2 rounded-none transition-all ${
-                          index === selectedPhotoIndex
-                            ? "bg-rugby-teal w-4"
-                            : "bg-white/50 hover:bg-rugby-teal/80"
-                        }`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedPhotoIndex(index);
-                        }}
-                        aria-label={`Go to photo ${index + 1}`}
-                      />
-                    ))
-                  )}
+                    </motion.div>
+                  </div>
+                )}
+
+                {/* Photo counter/indicator */}
+                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-white text-sm bg-black/50 px-4 py-2 rounded-none">
+                  {t.photoOf(selectedPhotoIndex + 1, selectedGallery.photos.length)}
+                </div>
+
+                {/* Thumbnail navigation - desktop only */}
+                <div className="absolute bottom-16 left-1/2 -translate-x-1/2 hidden md:flex space-x-2">
+                  {selectedGallery.photos.map((_, index) => (
+                    <button
+                      key={index}
+                      className={`w-2 h-2 rounded-none transition-all ${
+                        index === selectedPhotoIndex
+                          ? "bg-rugby-teal w-4"
+                          : "bg-white/50 hover:bg-rugby-teal/80"
+                      }`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedPhotoIndex(index);
+                      }}
+                      aria-label={`Go to photo ${index + 1}`}
+                    />
+                  ))}
                 </div>
                 
                 <div className="absolute top-4 left-4 z-50" onClick={(e) => e.stopPropagation()}>
@@ -463,12 +488,18 @@ export default function GalleryPageClient() {
                     <h2 className="text-white text-sm md:text-base font-normal">
                       {selectedGallery.title}
                     </h2>
+                    <div className="flex items-center text-xs text-white/80 mt-1">
+                      <Calendar className="h-3 w-3 mr-1" />
+                      <span>
+                        {format(new Date(selectedGallery.created_at), 'MMM dd, yyyy', { locale: language === 'lv' ? lv : enUS })}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          )}
-        </AnimatePresence>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
     </div>
   );
