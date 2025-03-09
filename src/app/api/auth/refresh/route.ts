@@ -30,10 +30,25 @@ export async function GET() {
       return NextResponse.json({ error: 'Failed to refresh session' }, { status: 500 });
     }
 
-    // Return the session data
+    // Get user's admin status from profiles table
+    let isAdmin = false;
+    if (refreshedSession?.user) {
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', refreshedSession.user.id)
+        .single();
+        
+      if (!profileError && profile) {
+        isAdmin = profile.role === 'admin';
+      }
+    }
+
+    // Return the session data with admin status
     return NextResponse.json({
       session: refreshedSession,
       user: refreshedSession?.user || null,
+      isAdmin
     });
   } catch (error) {
     console.error('Unexpected error during refresh:', error);

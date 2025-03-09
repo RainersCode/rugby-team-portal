@@ -46,19 +46,24 @@ export default function UserNav({ user: propUser }: UserNavProps) {
 
   async function fetchUserProfile() {
     try {
+      if (!user || !user.id) return;
+      
       const { data: profile } = await supabase
         .from("profiles")
         .select("first_name, last_name")
-        .eq("id", user?.id)
+        .eq("id", user.id)
         .single();
 
       if (profile) {
         const firstInitial = profile.first_name ? profile.first_name[0] : "";
         const lastInitial = profile.last_name ? profile.last_name[0] : "";
         setInitials((firstInitial + lastInitial).toUpperCase() || "U");
+      } else {
+        setInitials("U"); // Default fallback
       }
     } catch (error) {
       console.error("Error fetching user profile:", error);
+      setInitials("U"); // Set default on error
     }
   }
 
@@ -88,12 +93,17 @@ export default function UserNav({ user: propUser }: UserNavProps) {
     }
   };
 
+  // If no user is found, don't render anything
+  if (!user) {
+    return null;
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="focus:outline-none group">
         <Avatar className="h-8 w-8 bg-white/10 hover:bg-white/20 transition-all duration-300 ring-2 ring-white/20 group-hover:ring-white/40 rounded-none">
           <AvatarFallback className="text-white font-semibold bg-transparent">
-            {initials}
+            {initials || "U"}
           </AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>

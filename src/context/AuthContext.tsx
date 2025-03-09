@@ -72,6 +72,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
         
         // Fall back to direct Supabase call if API fails
+        console.log('API refresh failed, falling back to direct Supabase call');
         const { data: { session: newSession }, error } = await supabase.auth.getSession();
         
         if (error) {
@@ -96,11 +97,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       
       const data = await response.json();
+      console.log('Auth refresh response:', data);
       
       if (data.user) {
         setUser(data.user);
         setSession(data.session);
-        await checkAdminStatus(data.user.id);
+        // Use isAdmin from the response directly if available
+        if (typeof data.isAdmin === 'boolean') {
+          setIsAdmin(data.isAdmin);
+        } else {
+          await checkAdminStatus(data.user.id);
+        }
       } else {
         setUser(null);
         setSession(null);
@@ -111,6 +118,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       // Last resort fallback to direct Supabase call
       try {
+        console.log('Error during refresh, attempting final fallback');
         const { data: { session: fallbackSession } } = await supabase.auth.getSession();
         if (fallbackSession?.user) {
           setUser(fallbackSession.user);
@@ -133,7 +141,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
   
   const checkAdminStatus = async (userId: string) => {
+    if (!userId) {
+      setIsAdmin(false);
+      return;
+    }
+    
     try {
+      console.log('Checking admin status for user:', userId);
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('role')
@@ -144,7 +158,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.error('Error fetching user profile:', profileError);
         setIsAdmin(false);
       } else {
-        setIsAdmin(profile?.role === 'admin');
+        const adminStatus = profile?.role === 'admin';
+        console.log('User admin status:', adminStatus);
+        setIsAdmin(adminStatus);
       }
     } catch (error) {
       console.error('Error checking admin status:', error);
@@ -156,8 +172,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const initialCheck = async () => {
       setIsLoading(true);
-      await refreshAuth();
-      setIsLoading(false);
+      try {
+        await refreshAuth();
+      } catch (error) {
+        console.error('Error during initial auth check:', error);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     initialCheck();
@@ -165,33 +186,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Handle auth state changes
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, newSession) => {
-        console.log('Auth state changed:', event);
-        
-        if (event === 'SIGNED_OUT') {
-          setUser(null);
-          setSession(null);
-          setIsAdmin(false);
+    try {
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(
+        async (event, newSession) => {
+          console.log('Auth state changed:', event);
           
-          // If on an admin page, redirect to home
-          if (pathname.startsWith('/admin')) {
-            router.push('/');
+          if (event === 'SIGNED_OUT') {
+            setUser(null);
+            setSession(null);
+            setIsAdmin(false);
+            
+            // If on an admin page, redirect to home
+            if (pathname.startsWith('/admin')) {
+              router.push('/');
+            }
+            return;
           }
-          return;
+          
+          if (newSession?.user) {
+            setUser(newSession.user);
+            setSession(newSession);
+            await checkAdminStatus(newSession.user.id);
+          }
         }
-        
-        if (newSession?.user) {
-          setUser(newSession.user);
-          setSession(newSession);
-          await checkAdminStatus(newSession.user.id);
-        }
-      }
-    );
+      );
 
-    return () => {
-      subscription.unsubscribe();
-    };
+      return () => {
+        subscription.unsubscribe();
+      };
+    } catch (error) {
+      console.error('Error setting up auth state change listener:', error);
+    }
   }, [supabase, router, pathname]);
 
   // Periodically refresh token in the background

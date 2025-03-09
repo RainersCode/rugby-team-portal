@@ -30,7 +30,7 @@ type MainNavItem = NavItem | DropdownNavItem;
 
 export function Header() {
   const pathname = usePathname();
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, isLoading } = useAuth();
   const { language, setLanguage, translations } = useLanguage();
 
   const isLinkActive = (href: string) =>
@@ -171,6 +171,25 @@ export function Header() {
     );
   };
 
+  const renderAuthSection = () => {
+    if (isLoading) {
+      return <div className="h-8 w-8 rounded-none bg-white/10 animate-pulse"></div>;
+    }
+    
+    if (user) {
+      return <UserNav />;
+    }
+    
+    return (
+      <Link 
+        href="/auth/signin" 
+        className="inline-flex items-center justify-center rounded-none text-sm font-medium text-white bg-rugby-teal hover:bg-rugby-teal-light h-9 px-4 py-2 transition-colors"
+      >
+        {translations.signIn || 'Sign In'}
+      </Link>
+    );
+  };
+
   return (
     <header className="sticky top-0 z-50">
       <div className="absolute inset-0 bg-rugby-teal dark:bg-rugby-teal backdrop-blur-md border-b border-gray-200/20 dark:border-gray-800/20" />
@@ -218,18 +237,7 @@ export function Header() {
           </nav>
           <div className="flex items-center space-x-6 flex-shrink-0">
             <LanguageSwitcher />
-            {user ? (
-              <UserNav user={user} isAdmin={isAdmin} />
-            ) : (
-              <Link
-                href="/auth/signin"
-                className="inline-flex h-9 items-center justify-center rounded-none bg-white px-6 py-2 text-sm font-medium text-rugby-teal hover:bg-gray-100 transition-all duration-200"
-              >
-                <span className="font-semibold tracking-wide">
-                  {translations.signIn || 'Sign In'}
-                </span>
-              </Link>
-            )}
+            {renderAuthSection()}
           </div>
         </div>
       </div>

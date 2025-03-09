@@ -80,7 +80,7 @@ export function MobileNav() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, isLoading } = useAuth();
   const { language, setLanguage, translations } = useLanguage();
 
   const LanguageSwitcher = () => {
@@ -125,6 +125,28 @@ export function MobileNav() {
     );
   };
 
+  const renderAuthSection = () => {
+    if (isLoading) {
+      return <div className="h-8 w-8 rounded-none bg-white/10 animate-pulse"></div>;
+    }
+    
+    if (user) {
+      return <UserNav />;
+    }
+    
+    return (
+      <Button
+        onClick={() => {
+          setIsOpen(false);
+          router.push('/auth/signin');
+        }}
+        className="inline-flex items-center justify-center rounded-none text-sm font-medium text-white bg-rugby-teal hover:bg-rugby-teal-light h-9 px-4 py-2 transition-colors"
+      >
+        {translations.signIn || 'Sign In'}
+      </Button>
+    );
+  };
+
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
@@ -153,19 +175,7 @@ export function MobileNav() {
                 RK "Fēnikss"
               </SheetTitle>
               <div className="flex items-center">
-                {user ? (
-                  <UserNav user={user} />
-                ) : (
-                  <Button
-                    onClick={() => {
-                      setIsOpen(false);
-                      router.push('/auth/signin');
-                    }}
-                    className="inline-flex items-center justify-center rounded-none text-sm font-medium text-white bg-rugby-teal hover:bg-rugby-teal-light h-9 px-4 py-2 transition-colors"
-                  >
-                    {translations.signIn || 'Sign In'}
-                  </Button>
-                )}
+                {renderAuthSection()}
               </div>
             </div>
             <p className="text-sm font-medium text-white/80">
