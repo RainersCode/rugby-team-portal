@@ -42,11 +42,16 @@ export async function middleware(request: NextRequest) {
 
   // Refresh session if expired - with timeout
   try {
-    // Add browser compatibility header for Chrome
+    // Add browser compatibility header for Chrome - IMPORTANT for auth state consistency
     if (isChrome) {
+      // These headers prevent Chrome from caching authentication state
       res.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.headers.set('Pragma', 'no-cache');
       res.headers.set('Expires', '0');
+      // Add a strict transport security header
+      res.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+      // Prevent browser from using cached version of authentication state
+      res.headers.set('Vary', '*');
     }
     
     const sessionPromise = supabase.auth.getSession();
@@ -56,10 +61,22 @@ export async function middleware(request: NextRequest) {
       setTimeout(() => reject(new Error('Session fetch timeout')), sessionTimeout);
     });
     
+    // Define a proper type for session data
+    interface SessionData {
+      data: {
+        session: {
+          user: {
+            id: string;
+            email?: string;
+          };
+        } | null;
+      };
+    }
+    
     const { data: { session } } = await Promise.race([
       sessionPromise,
       timeoutPromise as Promise<never>
-    ]) as { data: { session: any } };
+    ]) as SessionData;
     
     // Protected routes that require authentication
     if (['/members', '/profile', '/settings'].some(path => request.nextUrl.pathname.startsWith(path))) {
@@ -92,10 +109,16 @@ export async function middleware(request: NextRequest) {
           setTimeout(() => reject(new Error('Profile fetch timeout')), profileTimeout);
         });
         
+        interface ProfileData {
+          data: {
+            role: string;
+          };
+        }
+        
         const { data: profile } = await Promise.race([
           profilePromise, 
           profileTimeoutPromise as Promise<never>
-        ]) as { data: { role: string } };
+        ]) as ProfileData;
 
         const isAdmin = profile?.role === 'admin';
         console.log('Middleware: Admin status:', isAdmin);
@@ -104,11 +127,11 @@ export async function middleware(request: NextRequest) {
           console.log('Middleware: User is not admin, redirecting home');
           return NextResponse.redirect(new URL('/', request.url));
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('Middleware: Error checking admin status:', error);
         // For admin routes, if we can't determine admin status within timeout,
         // let them proceed and let the page component handle the validation
-        if (isChrome || (error.message && error.message.includes('timeout'))) {
+        if (isChrome || (error instanceof Error && error.message.includes('timeout'))) {
           console.log('Middleware: Admin check timed out, letting page component handle validation');
           return res;
         }
@@ -123,12 +146,12 @@ export async function middleware(request: NextRequest) {
     }
     
     return res;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Middleware error:', error);
     
     // If there's a timeout on session check for admin routes on Chrome,
     // let the page component handle the validation
-    if ((isChrome || (error.message && error.message.includes('timeout'))) && request.nextUrl.pathname.startsWith('/admin')) {
+    if ((isChrome || (error instanceof Error && error.message.includes('timeout'))) && request.nextUrl.pathname.startsWith('/admin')) {
       console.log('Middleware: Session check timed out for admin route, proceeding to page');
       return res;
     }

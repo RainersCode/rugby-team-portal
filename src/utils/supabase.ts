@@ -4,6 +4,9 @@ import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
+// Consistent auth storage key to prevent conflicts
+const AUTH_STORAGE_KEY = 'rugby-portal-auth-storage';
+
 // Create Supabase clients with better browser compatibility
 export const supabase = createClientComponentClient({
   supabaseUrl: supabaseUrl,
@@ -13,8 +16,30 @@ export const supabase = createClientComponentClient({
       autoRefreshToken: true,
       persistSession: true,
       detectSessionInUrl: true,
-      storageKey: 'rugby-portal-auth', // Use consistent storage key
+      storageKey: AUTH_STORAGE_KEY, // Use consistent storage key
       flowType: 'pkce', // Use PKCE flow for better security and compatibility
+      // Disable localStorage to force cookie-only auth for better cross-browser consistency
+      storage: {
+        getItem: (key) => {
+          if (typeof document === 'undefined') return null;
+          const value = document.cookie
+            .split('; ')
+            .find((row) => row.startsWith(`${key}=`))
+            ?.split('=')[1];
+          if (value) return JSON.parse(decodeURIComponent(value));
+          return null;
+        },
+        setItem: (key, value) => {
+          if (typeof document === 'undefined') return;
+          const maxAge = 7 * 24 * 60 * 60; // 7 days
+          const encodedValue = encodeURIComponent(JSON.stringify(value));
+          document.cookie = `${key}=${encodedValue}; max-age=${maxAge}; path=/; samesite=lax`;
+        },
+        removeItem: (key) => {
+          if (typeof document === 'undefined') return;
+          document.cookie = `${key}=; max-age=0; path=/; samesite=lax`;
+        },
+      },
     },
     db: {
       schema: 'public',
