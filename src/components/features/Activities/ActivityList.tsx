@@ -37,18 +37,30 @@ export default function ActivityList({
   return (
     <section className="bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-950">
       <div className="container-width py-12">
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8">
           <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 uppercase tracking-wider border-l-4 border-rugby-teal pl-3 py-1">
             {title}
           </h2>
-          {viewAllLink && (
+          <div className="flex items-center gap-3 mt-4 md:mt-0">
+            {/* Calendar View Button */}
             <Link
-              href={viewAllLink}
-              className="group flex items-center gap-1 text-rugby-teal hover:text-rugby-teal/80 font-medium transition-colors bg-white dark:bg-gray-800 px-4 py-2 border-2 border-rugby-teal/30 hover:border-rugby-teal shadow-lg hover:shadow-xl rounded-none"
+              href="/activities?view=calendar"
+              className="group flex items-center gap-2 text-rugby-teal hover:text-rugby-teal/80 font-medium transition-colors bg-white dark:bg-gray-800 px-4 py-2 border-2 border-rugby-teal/30 hover:border-rugby-teal shadow-lg hover:shadow-xl rounded-none"
             >
-              <ChevronRight className="w-5 h-5 transform transition-transform group-hover:translate-x-1" />
+              <Calendar className="w-5 h-5" />
+              <span>{language === "en" ? "Calendar" : "Kalendārs"}</span>
             </Link>
-          )}
+            
+            {/* View All Button */}
+            {viewAllLink && (
+              <Link
+                href={viewAllLink}
+                className="group flex items-center gap-1 text-rugby-teal hover:text-rugby-teal/80 font-medium transition-colors bg-white dark:bg-gray-800 px-4 py-2 border-2 border-rugby-teal/30 hover:border-rugby-teal shadow-lg hover:shadow-xl rounded-none"
+              >
+                <ChevronRight className="w-5 h-5 transform transition-transform group-hover:translate-x-1" />
+              </Link>
+            )}
+          </div>
         </div>
 
         {displayActivities.length === 0 ? (
