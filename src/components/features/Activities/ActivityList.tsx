@@ -91,7 +91,7 @@ export default function ActivityList({
                           {language === "en" ? "Past" : "Pagātne"}
                         </Badge>
                       )}
-                      <CardTitle className="text-xl font-bold mb-4 line-clamp-1">
+                      <CardTitle className="text-xl font-medium mb-4 line-clamp-1">
                         {activity.title}
                       </CardTitle>
                       <p className="text-muted-foreground line-clamp-2 mb-4">
