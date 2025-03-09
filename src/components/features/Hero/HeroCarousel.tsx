@@ -16,12 +16,21 @@ interface HeroCarouselProps {
   nextMatch?: Match;
 }
 
+const heroTranslations = {
+  en: {
+    nextMatch: "Next Match",
+  },
+  lv: {
+    nextMatch: "Nākamā Spēle",
+  }
+};
+
 export default function HeroCarousel({
   articles,
   nextMatch,
 }: HeroCarouselProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const { translations } = useLanguage();
+  const { translations, language } = useLanguage();
 
   // Auto-slide every 5 seconds
   useEffect(() => {
@@ -138,7 +147,7 @@ export default function HeroCarousel({
             <div className="p-3 md:p-4">
               <div className="flex justify-between items-center mb-1.5 md:mb-3">
                 <span className="text-[10px] md:text-xs font-medium bg-rugby-teal text-white px-2 py-0.5 md:px-3 md:py-1 rounded-none shadow-sm">
-                  Next Match
+                  {heroTranslations[language].nextMatch}
                 </span>
                 <span className="text-[10px] md:text-xs font-bold text-gray-900 bg-white/80 px-2 py-0.5 rounded-none shadow-sm">
                   {format(new Date(nextMatch.match_date), "MMM d")}
