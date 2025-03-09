@@ -70,16 +70,16 @@ export default async function AboutPage() {
           <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-transparent" />
           
           {/* Decorative circles */}
-          <div className="absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full bg-rugby-yellow/10 blur-3xl" />
-          <div className="absolute -bottom-40 -left-40 w-[600px] h-[600px] rounded-full bg-rugby-yellow/10 blur-3xl" />
+          <div className="absolute -top-40 -right-40 w-[600px] h-[600px] rounded-none bg-rugby-yellow/10 blur-3xl" />
+          <div className="absolute -bottom-40 -left-40 w-[600px] h-[600px] rounded-none bg-rugby-yellow/10 blur-3xl" />
         </div>
 
         {/* Content Container */}
         <div className="container-width relative">
           <div className="flex flex-col items-start pt-32 pb-48 px-4">
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full pl-2 pr-4 py-1 mb-8">
-              <span className="bg-white text-rugby-teal text-sm font-semibold px-3 py-1 rounded-full">
+            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-none pl-2 pr-4 py-1 mb-8 border border-white/20">
+              <span className="bg-white text-rugby-teal text-sm font-semibold px-3 py-1 rounded-none">
                 Est. 1995
               </span>
               <span className="text-white/90 text-sm">
