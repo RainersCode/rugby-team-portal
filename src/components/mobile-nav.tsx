@@ -14,7 +14,6 @@ import {
   Newspaper,
   Info,
   Mail,
-  Twitter,
   Instagram,
   Facebook,
   ArrowRight,
@@ -67,19 +66,14 @@ const adminNavItems = [
 
 const socialLinks = [
   {
-    href: "https://twitter.com/rugbyteam",
-    icon: Twitter,
-    color: "text-blue-400 hover:text-blue-500",
-  },
-  {
-    href: "https://instagram.com/rugbyteam",
+    href: "https://www.instagram.com/rk_fenikss/",
     icon: Instagram,
-    color: "text-pink-500 hover:text-pink-600",
+    label: "Instagram",
   },
   {
-    href: "https://facebook.com/rugbyteam",
+    href: "https://www.facebook.com/RKFenikss",
     icon: Facebook,
-    color: "text-blue-600 hover:text-blue-700",
+    label: "Facebook",
   },
 ];
 
@@ -300,9 +294,10 @@ export function MobileNav() {
                   href={link.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="p-2 rounded-none bg-white/10 hover:bg-white/20 transition-colors"
+                  className="bg-white/10 hover:bg-white/20 text-white p-3 rounded-none transition-all duration-300"
+                  aria-label={link.label}
                 >
-                  <link.icon className={`h-5 w-5 ${link.color}`} />
+                  <link.icon className="h-5 w-5" />
                 </a>
               ))}
             </div>
