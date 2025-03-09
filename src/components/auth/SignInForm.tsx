@@ -24,7 +24,7 @@ export default function SignInForm() {
     setLoading(true);
 
     try {
-      console.log('Signing in user with email:', email);
+      console.log('SignInForm: Signing in user with email:', email);
       
       // Call our API endpoint
       const response = await fetch('/api/auth/signin', {
@@ -41,17 +41,20 @@ export default function SignInForm() {
         throw new Error(data.error || 'Failed to sign in');
       }
 
-      console.log('Sign in successful, refreshing auth context');
+      console.log('SignInForm: Sign in successful, refreshing auth context');
       
       // Successfully signed in - refresh the auth context
       await refreshAuth();
       
-      console.log('Auth context refreshed, redirecting to:', redirectTo);
+      console.log('SignInForm: Auth context refreshed, reloading page to:', redirectTo);
       
       // Force a full page reload to ensure all components get the latest session
-      window.location.href = redirectTo;
+      // Set a small delay to ensure the browser has time to process cookies
+      setTimeout(() => {
+        window.location.href = redirectTo;
+      }, 100);
     } catch (error) {
-      console.error('Sign in error:', error);
+      console.error('SignInForm: Sign in error:', error);
       setError(error instanceof Error ? error.message : translations.error);
       setLoading(false);
     }

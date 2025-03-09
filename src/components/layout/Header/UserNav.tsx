@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/utils/supabase";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import type { User } from "@supabase/supabase-js";
 import { useAuth } from "@/context/AuthContext";
 import {
@@ -33,42 +33,107 @@ interface UserNavProps {
 export default function UserNav({ user: propUser }: UserNavProps) {
   const router = useRouter();
   const [initials, setInitials] = useState("");
+  const [displayName, setDisplayName] = useState("");
   const { user: contextUser, isAdmin } = useAuth();
+  const supabase = createClientComponentClient();
   
   // Use user from props if provided, otherwise from context
   const user = propUser || contextUser;
 
   useEffect(() => {
     if (user) {
+      console.log("UserNav: User data available, fetching profile", user.id);
       fetchUserProfile();
+    } else {
+      console.log("UserNav: No user data available");
     }
   }, [user]);
 
   async function fetchUserProfile() {
     try {
-      if (!user || !user.id) return;
-      
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("first_name, last_name")
-        .eq("id", user.id)
-        .single();
-
-      if (profile) {
-        const firstInitial = profile.first_name ? profile.first_name[0] : "";
-        const lastInitial = profile.last_name ? profile.last_name[0] : "";
-        setInitials((firstInitial + lastInitial).toUpperCase() || "U");
-      } else {
-        setInitials("U"); // Default fallback
+      if (!user || !user.id) {
+        console.log("UserNav: No user ID, skipping profile fetch");
+        return;
       }
+      
+      console.log("UserNav: Fetching profile for user", user.id);
+      
+      // First check if we can get first name and last name from user metadata
+      let firstInitial = "";
+      let lastInitial = "";
+      
+      if (user.user_metadata && 
+          (user.user_metadata.first_name || user.user_metadata.last_name)) {
+        console.log("UserNav: Using metadata for initials");
+        firstInitial = user.user_metadata.first_name ? user.user_metadata.first_name[0] : "";
+        lastInitial = user.user_metadata.last_name ? user.user_metadata.last_name[0] : "";
+        setDisplayName(
+          [user.user_metadata.first_name, user.user_metadata.last_name]
+            .filter(Boolean)
+            .join(" ") || user.email?.split("@")[0] || ""
+        );
+      } else {
+        // Fetch from profiles table
+        console.log("UserNav: Fetching profile from database");
+        const { data: profile, error } = await supabase
+          .from("profiles")
+          .select("first_name, last_name")
+          .eq("id", user.id)
+          .single();
+
+        if (error) {
+          console.error("UserNav: Error fetching profile:", error);
+          throw error;
+        }
+
+        console.log("UserNav: Profile data:", profile);
+        
+        if (profile) {
+          firstInitial = profile.first_name ? profile.first_name[0] : "";
+          lastInitial = profile.last_name ? profile.last_name[0] : "";
+          setDisplayName(
+            [profile.first_name, profile.last_name]
+              .filter(Boolean)
+              .join(" ") || user.email?.split("@")[0] || ""
+          );
+        }
+      }
+
+      // If we still don't have initials, use email
+      if (!firstInitial && !lastInitial && user.email) {
+        console.log("UserNav: Using email for initials");
+        const nameParts = user.email.split("@")[0].split(/[._-]/);
+        if (nameParts.length > 1) {
+          firstInitial = nameParts[0][0] || "";
+          lastInitial = nameParts[1][0] || "";
+        } else {
+          firstInitial = nameParts[0][0] || "";
+          lastInitial = nameParts[0][1] || "";
+        }
+        setDisplayName(user.email.split("@")[0]);
+      }
+      
+      const userInitials = (firstInitial + lastInitial).toUpperCase();
+      console.log("UserNav: Setting initials to:", userInitials || "U");
+      setInitials(userInitials || "U");
+      
     } catch (error) {
-      console.error("Error fetching user profile:", error);
-      setInitials("U"); // Set default on error
+      console.error("UserNav: Error in fetchUserProfile:", error);
+      // Use email as fallback
+      if (user && user.email) {
+        const email = user.email.split("@")[0];
+        setInitials(email.substring(0, 2).toUpperCase());
+        setDisplayName(email);
+      } else {
+        setInitials("U");
+        setDisplayName("User");
+      }
     }
   }
 
   const handleSignOut = async () => {
     try {
+      console.log("UserNav: Signing out");
       // Call our API endpoint
       const response = await fetch('/api/auth/signout', {
         method: 'POST',
@@ -95,6 +160,7 @@ export default function UserNav({ user: propUser }: UserNavProps) {
 
   // If no user is found, don't render anything
   if (!user) {
+    console.log("UserNav: No user, not rendering");
     return null;
   }
 
@@ -103,7 +169,7 @@ export default function UserNav({ user: propUser }: UserNavProps) {
       <DropdownMenuTrigger className="focus:outline-none group">
         <Avatar className="h-8 w-8 bg-white/10 hover:bg-white/20 transition-all duration-300 ring-2 ring-white/20 group-hover:ring-white/40 rounded-none">
           <AvatarFallback className="text-white font-semibold bg-transparent">
-            {initials || "U"}
+            {initials || user.email?.[0]?.toUpperCase() || "U"}
           </AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
@@ -117,7 +183,9 @@ export default function UserNav({ user: propUser }: UserNavProps) {
               <Users className="w-4 h-4 text-white group-hover:text-rugby-teal" />
             </div>
             <div className="flex flex-col">
-              <span className="text-sm font-medium text-white group-hover:text-rugby-teal">{user.email}</span>
+              <span className="text-sm font-medium text-white group-hover:text-rugby-teal">
+                {displayName || user.email || "User"}
+              </span>
               <span className="text-xs text-white/70 group-hover:text-rugby-teal/70">View Profile</span>
             </div>
           </DropdownMenuItem>

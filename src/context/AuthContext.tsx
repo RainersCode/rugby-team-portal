@@ -5,8 +5,22 @@ import { User, Session } from '@supabase/supabase-js';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useRouter, usePathname } from 'next/navigation';
 
+// Add profile type
+interface UserProfile {
+  id: string;
+  first_name?: string;
+  last_name?: string;
+  role?: string;
+  [key: string]: any; // Allow for other fields
+}
+
+// Extended User type with profile
+interface ExtendedUser extends User {
+  profile?: UserProfile;
+}
+
 type AuthContextType = {
-  user: User | null;
+  user: ExtendedUser | null;
   isAdmin: boolean;
   isLoading: boolean;
   isAuthenticated: boolean;
@@ -28,7 +42,7 @@ const AuthContext = createContext<AuthContextType>({
 export const useAuth = () => useContext(AuthContext);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<ExtendedUser | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -43,14 +57,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const now = Date.now();
     // Only refresh if it's been at least 5 seconds since the last refresh
     if (now - lastRefresh < 5000) {
-      console.log('Skipping auth refresh - too soon since last refresh');
+      console.log('AuthContext: Skipping auth refresh - too soon since last refresh');
       return;
     }
     
     setLastRefresh(now);
     setCheckingSession(true);
     try {
-      console.log('Refreshing auth state...');
+      console.log('AuthContext: Refreshing auth state...');
       
       // Use the API endpoint for refreshing instead of direct Supabase call
       const response = await fetch('/api/auth/refresh', {
@@ -62,8 +76,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
       
       if (!response.ok) {
+        console.log(`AuthContext: Refresh API returned ${response.status}`);
+        
         if (response.status === 401) {
           // User is not authenticated
+          console.log('AuthContext: User not authenticated');
           setUser(null);
           setSession(null);
           setIsAdmin(false);
@@ -72,11 +89,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
         
         // Fall back to direct Supabase call if API fails
-        console.log('API refresh failed, falling back to direct Supabase call');
+        console.log('AuthContext: API refresh failed, falling back to direct Supabase call');
         const { data: { session: newSession }, error } = await supabase.auth.getSession();
         
         if (error) {
-          console.error('Error refreshing session:', error);
+          console.error('AuthContext: Error refreshing session:', error);
           setUser(null);
           setSession(null);
           setIsAdmin(false);
@@ -84,10 +101,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
         
         if (newSession?.user) {
-          setUser(newSession.user);
+          console.log('AuthContext: Got session from direct call for user:', newSession.user.id);
+          const extendedUser: ExtendedUser = newSession.user;
+          setUser(extendedUser);
           setSession(newSession);
           await checkAdminStatus(newSession.user.id);
         } else {
+          console.log('AuthContext: No session from direct call');
           setUser(null);
           setSession(null);
           setIsAdmin(false);
@@ -97,40 +117,51 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       
       const data = await response.json();
-      console.log('Auth refresh response:', data);
+      console.log('AuthContext: Auth refresh response success:', data.user?.id);
       
       if (data.user) {
-        setUser(data.user);
+        // Store user with profile data
+        const extendedUser: ExtendedUser = data.user;
+        console.log('AuthContext: Setting user with profile:', extendedUser.profile);
+        
+        setUser(extendedUser);
         setSession(data.session);
+        
         // Use isAdmin from the response directly if available
         if (typeof data.isAdmin === 'boolean') {
+          console.log('AuthContext: Setting admin status from API:', data.isAdmin);
           setIsAdmin(data.isAdmin);
         } else {
+          console.log('AuthContext: Admin status not provided by API, checking manually');
           await checkAdminStatus(data.user.id);
         }
       } else {
+        console.log('AuthContext: No user data in response');
         setUser(null);
         setSession(null);
         setIsAdmin(false);
       }
     } catch (error) {
-      console.error('Unexpected error during auth refresh:', error);
+      console.error('AuthContext: Unexpected error during auth refresh:', error);
       
       // Last resort fallback to direct Supabase call
       try {
-        console.log('Error during refresh, attempting final fallback');
+        console.log('AuthContext: Error during refresh, attempting final fallback');
         const { data: { session: fallbackSession } } = await supabase.auth.getSession();
         if (fallbackSession?.user) {
-          setUser(fallbackSession.user);
+          console.log('AuthContext: Got session from fallback for user:', fallbackSession.user.id);
+          const extendedUser: ExtendedUser = fallbackSession.user;
+          setUser(extendedUser);
           setSession(fallbackSession);
           await checkAdminStatus(fallbackSession.user.id);
         } else {
+          console.log('AuthContext: No session from fallback');
           setUser(null);
           setSession(null);
           setIsAdmin(false);
         }
       } catch (fallbackError) {
-        console.error('Fallback auth check failed:', fallbackError);
+        console.error('AuthContext: Fallback auth check failed:', fallbackError);
         setUser(null);
         setSession(null);
         setIsAdmin(false);
@@ -142,12 +173,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   
   const checkAdminStatus = async (userId: string) => {
     if (!userId) {
+      console.log('AuthContext: No userId provided for admin check');
       setIsAdmin(false);
       return;
     }
     
     try {
-      console.log('Checking admin status for user:', userId);
+      console.log('AuthContext: Checking admin status for user:', userId);
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('role')
@@ -155,15 +187,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .single();
         
       if (profileError) {
-        console.error('Error fetching user profile:', profileError);
+        console.error('AuthContext: Error fetching user profile:', profileError);
         setIsAdmin(false);
       } else {
         const adminStatus = profile?.role === 'admin';
-        console.log('User admin status:', adminStatus);
+        console.log('AuthContext: User admin status:', adminStatus);
         setIsAdmin(adminStatus);
+        
+        // Also update the user object with profile data if we don't already have it
+        if (profile && user && !user.profile) {
+          console.log('AuthContext: Updating user with profile data');
+          setUser({ 
+            ...user, 
+            profile: profile 
+          });
+        }
       }
     } catch (error) {
-      console.error('Error checking admin status:', error);
+      console.error('AuthContext: Error checking admin status:', error);
       setIsAdmin(false);
     }
   };
@@ -171,11 +212,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Initial auth check
   useEffect(() => {
     const initialCheck = async () => {
+      console.log('AuthContext: Performing initial auth check');
       setIsLoading(true);
       try {
         await refreshAuth();
       } catch (error) {
-        console.error('Error during initial auth check:', error);
+        console.error('AuthContext: Error during initial auth check:', error);
       } finally {
         setIsLoading(false);
       }
@@ -187,11 +229,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Handle auth state changes
   useEffect(() => {
     try {
+      console.log('AuthContext: Setting up auth state change listener');
       const { data: { subscription } } = supabase.auth.onAuthStateChange(
         async (event, newSession) => {
-          console.log('Auth state changed:', event);
+          console.log('AuthContext: Auth state changed:', event);
           
           if (event === 'SIGNED_OUT') {
+            console.log('AuthContext: User signed out');
             setUser(null);
             setSession(null);
             setIsAdmin(false);
@@ -203,41 +247,61 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             return;
           }
           
-          if (newSession?.user) {
-            setUser(newSession.user);
+          if (event === 'SIGNED_IN' && newSession?.user) {
+            console.log('AuthContext: User signed in:', newSession.user.id);
+            const extendedUser: ExtendedUser = newSession.user;
+            setUser(extendedUser);
             setSession(newSession);
             await checkAdminStatus(newSession.user.id);
+          }
+          
+          if (event === 'TOKEN_REFRESHED' && newSession?.user) {
+            console.log('AuthContext: Token refreshed for user:', newSession.user.id);
+            const extendedUser: ExtendedUser = newSession.user;
+            setUser(extendedUser);
+            setSession(newSession);
           }
         }
       );
 
       return () => {
+        console.log('AuthContext: Cleaning up auth state change listener');
         subscription.unsubscribe();
       };
     } catch (error) {
-      console.error('Error setting up auth state change listener:', error);
+      console.error('AuthContext: Error setting up auth state change listener:', error);
     }
   }, [supabase, router, pathname]);
 
   // Periodically refresh token in the background
   useEffect(() => {
+    console.log('AuthContext: Setting up refresh interval');
     // Refresh auth every 15 minutes to prevent token expiration (tokens expire after 1 hour)
     const intervalId = setInterval(() => {
+      console.log('AuthContext: Interval refresh triggered');
       refreshAuth();
     }, 15 * 60 * 1000); // 15 minutes
     
     // Also refresh on window focus
     const handleFocus = () => {
+      console.log('AuthContext: Window focus refresh triggered');
       refreshAuth();
     };
     
     window.addEventListener('focus', handleFocus);
     
     return () => {
+      console.log('AuthContext: Cleaning up refresh interval');
       clearInterval(intervalId);
       window.removeEventListener('focus', handleFocus);
     };
   }, []);
+
+  // For debugging
+  useEffect(() => {
+    console.log('AuthContext: Auth state updated -', 
+      user ? `User: ${user.id}, Admin: ${isAdmin}` : 'No user');
+  }, [user, isAdmin]);
 
   return (
     <AuthContext.Provider
