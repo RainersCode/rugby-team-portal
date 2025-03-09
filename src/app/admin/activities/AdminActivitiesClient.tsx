@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import {
@@ -11,6 +11,8 @@ import {
   Calendar,
   MapPin,
   Clock,
+  PlusCircle,
+  AlertCircle,
 } from "lucide-react";
 import {
   Card,
@@ -38,6 +40,8 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatDate } from "@/lib/utils";
 import CustomCalendar from "@/components/features/Calendar/CustomCalendar";
+import Link from "next/link";
+import { format } from "date-fns";
 
 interface Profile {
   id: string;
@@ -60,10 +64,12 @@ interface Activity {
 
 interface Props {
   activities: Activity[];
+  userId: string;
 }
 
 export default function AdminActivitiesClient({
   activities: initialActivities,
+  userId,
 }: Props) {
   const [activities, setActivities] = useState<Activity[]>(initialActivities);
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(
@@ -71,6 +77,66 @@ export default function AdminActivitiesClient({
   );
   const router = useRouter();
   const supabase = createClientComponentClient();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function loadParticipantDetails() {
+      if (!activities || activities.length === 0) return;
+      
+      setLoading(true);
+      setError(null);
+      
+      try {
+        const enrichedActivities = [...activities];
+        
+        for (let i = 0; i < enrichedActivities.length; i++) {
+          const activity = enrichedActivities[i];
+          
+          try {
+            const { count, error: countError } = await supabase
+              .from('activity_participants')
+              .select('*', { count: 'exact', head: true })
+              .eq('activity_id', activity.id);
+              
+            if (!countError) {
+              activity.participants = [{ count: count || 0 }];
+            }
+            
+            if (count && count > 0) {
+              const { data: participants, error: participantsError } = await supabase
+                .from('activity_participants')
+                .select('user_id')
+                .eq('activity_id', activity.id);
+                
+              if (!participantsError && participants) {
+                activity.participant_details = participants;
+              }
+            }
+          } catch (activityError) {
+            console.error(`Error processing activity ${activity.id}:`, activityError);
+          }
+          
+          if (i % 3 === 0 || i === enrichedActivities.length - 1) {
+            setActivities([...enrichedActivities]);
+          }
+          
+          if (i < enrichedActivities.length - 1) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+          }
+        }
+        
+        setActivities(enrichedActivities);
+      } catch (error) {
+        console.error('Error loading participant details:', error);
+        setError('Failed to load participant details');
+      } finally {
+        setLoading(false);
+      }
+    }
+    
+    loadParticipantDetails();
+  }, []);
 
   const handleDelete = async (id: string) => {
     const confirmed = window.confirm(
