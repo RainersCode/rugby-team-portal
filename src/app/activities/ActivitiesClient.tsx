@@ -15,7 +15,7 @@ import { Calendar, MapPin, Users, ChevronRight } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Activity as BaseActivity } from "@/types";
+import { Activity as BaseActivity, Match } from "@/types";
 import CustomCalendar from "@/components/features/Calendar/CustomCalendar";
 import { useLanguage } from "@/context/LanguageContext";
 import CountdownTimer from "@/components/features/Activities/CountdownTimer";
@@ -27,6 +27,7 @@ interface ActivityWithParticipation extends BaseActivity {
 
 interface Props {
   activities: ActivityWithParticipation[];
+  matches?: Match[];
   userId?: string;
   isAdmin?: boolean;
 }
@@ -74,6 +75,7 @@ const activityTranslations = {
 
 export default function ActivitiesClient({
   activities: initialActivities,
+  matches = [],
   userId,
   isAdmin = false,
 }: Props) {
@@ -340,7 +342,7 @@ export default function ActivitiesClient({
           </TabsContent>
 
           <TabsContent value="calendar">
-            <CustomCalendar activities={activities} isAdmin={isAdmin} />
+            <CustomCalendar activities={activities} matches={matches} isAdmin={isAdmin} />
           </TabsContent>
         </Tabs>
       </div>

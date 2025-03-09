@@ -1,0 +1,69 @@
+/* Make sure all dialog components have sharp edges */
+[role="dialog"] {
+  border-radius: 0 !important;
+}
+
+[role="dialog"] > * {
+  border-radius: 0 !important;
+}
+
+/* Style the close button to be more visible and position it better */
+[data-radix-popper-content-wrapper] button[type="button"] {
+  border-radius: 0 !important;
+  background-color: rgba(0, 0, 0, 0.1) !important;
+  padding: 4px !important;
+  position: absolute !important;
+  top: 10px !important;
+  right: 10px !important;
+  z-index: 50 !important;
+}
+
+[data-radix-popper-content-wrapper] button[type="button"]:hover {
+  background-color: rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Make sure dark mode has appropriate styling */
+.dark [data-radix-popper-content-wrapper] button[type="button"] {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.dark [data-radix-popper-content-wrapper] button[type="button"]:hover {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Ensure the dialog overlay also has sharp edges */
+.Dialog__overlay {
+  border-radius: 0 !important;
+}
+
+/* Make sure the close button is visible and has good contrast */
+[data-radix-popper-content-wrapper] button[type="button"] svg {
+  width: 18px !important;
+  height: 18px !important;
+  color: black !important;
+}
+
+.dark [data-radix-popper-content-wrapper] button[type="button"] svg {
+  color: white !important;
+}
+
+/* Make titles in the dialog use a lighter font weight */
+[role="dialog"] h2 {
+  font-weight: normal !important;
+}
+
+/* Ensure all badges have good contrast */
+.bg-green-600 {
+  color: white !important;
+  font-weight: 500 !important;
+}
+
+.bg-rugby-yellow {
+  color: black !important;
+  font-weight: 600 !important;
+}
+
+.bg-rugby-teal {
+  color: white !important;
+  font-weight: 500 !important;
+} 

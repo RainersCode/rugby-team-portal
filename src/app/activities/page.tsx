@@ -34,7 +34,15 @@ export default async function ActivitiesPage() {
     .gte('date', new Date().toISOString()) // Only show upcoming activities
     .order('date', { ascending: true });
 
-  // Transform the data to include user participation status
+  // Fetch upcoming matches
+  const { data: matches } = await supabase
+    .from('matches')
+    .select('*')
+    .or('status.eq.upcoming,status.eq.live')
+    .gte('match_date', new Date().toISOString())
+    .order('match_date', { ascending: true });
+
+  // Transform the activities data to include user participation status
   const transformedActivities = activities?.map(activity => ({
     ...activity,
     participant_count: activity.participants?.[0]?.count || 0,
@@ -44,6 +52,7 @@ export default async function ActivitiesPage() {
   return (
     <ActivitiesClient 
       activities={transformedActivities} 
+      matches={matches || []}
       userId={session?.user.id}
       isAdmin={isAdmin}
     />

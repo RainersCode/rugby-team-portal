@@ -84,7 +84,13 @@ export default async function MatchDetailsPage({
                   </h1>
                   <Badge 
                     variant={isLive ? "destructive" : isCompleted ? "secondary" : "default"}
-                    className={isLive ? 'animate-pulse bg-red-500 text-white' : ''}
+                    className={
+                      isLive 
+                        ? 'animate-pulse bg-red-500 text-white font-medium' 
+                        : isCompleted 
+                          ? 'bg-gray-200 text-gray-700 font-medium'
+                          : 'bg-green-600 text-white font-medium'
+                    }
                   >
                     {isLive ? 'LIVE NOW' : match.status.charAt(0).toUpperCase() + match.status.slice(1)}
                   </Badge>
