@@ -39,7 +39,30 @@ const nextConfig = {
   },
   compiler: {
     removeConsole: process.env.NODE_ENV === "production",
-  }
+  },
+  // Disable usage of symlinks which can cause issues in OneDrive
+  experimental: {
+    // Avoid symlinks which cause issues on Windows + OneDrive
+    disableSymlinkWarning: true,
+    // Use a stable cache directory not in OneDrive
+    outputFileTracingRoot: process.cwd(),
+  },
+  // Add a longer timeout for OneDrive operations
+  onDemandEntries: {
+    // period (in ms) where the server will keep pages in the buffer
+    maxInactiveAge: 60 * 1000,
+  },
+  // Optimize for Windows paths
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      // Don't resolve 'fs' module on the client to prevent this error on build
+      config.resolve.fallback = {
+        fs: false,
+        path: false,
+      };
+    }
+    return config;
+  },
 };
 
 module.exports = nextConfig;
