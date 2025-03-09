@@ -40,12 +40,11 @@ const nextConfig = {
   compiler: {
     removeConsole: process.env.NODE_ENV === "production",
   },
-  // Disable usage of symlinks which can cause issues in OneDrive
+  // Move outputFileTracingRoot to root level as per Next.js 15 requirements
+  outputFileTracingRoot: process.cwd(),
+  // Simplified experimental options for Next.js 15
   experimental: {
-    // Avoid symlinks which cause issues on Windows + OneDrive
-    disableSymlinkWarning: true,
-    // Use a stable cache directory not in OneDrive
-    outputFileTracingRoot: process.cwd(),
+    // Empty but maintained for future experimental features
   },
   // Add a longer timeout for OneDrive operations
   onDemandEntries: {

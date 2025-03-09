@@ -3,11 +3,8 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import dynamic from 'next/dynamic';
 
-// Use dynamic import for client component with no SSR
-const AdminActivitiesClient = dynamic(
-  () => import('./AdminActivitiesClient'),
-  { ssr: false }
-);
+// Import client component directly to avoid reference errors in build
+import AdminActivitiesClient from './AdminActivitiesClient';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -24,18 +21,18 @@ function LoadingFallback() {
   );
 }
 
-// Direct server component without relying on headers detection
+// Simple server-side component for admin activities page
 export default async function AdminActivitiesPage() {
-  // Get cookie store for authentication
-  const cookieStore = cookies();
-  
-  // Create Supabase client for server component
-  const supabase = createServerComponentClient({ 
-    cookies: () => cookieStore,
-  });
-
   try {
-    // CRITICAL: Fetch the user directly
+    // Get cookie store for authentication
+    const cookieStore = cookies();
+    
+    // Create Supabase client for server component
+    const supabase = createServerComponentClient({ 
+      cookies: () => cookieStore,
+    });
+
+    // Fetch the user
     const { data: userData, error: userError } = await supabase.auth.getUser();
     
     if (userError || !userData.user) {
@@ -59,18 +56,8 @@ export default async function AdminActivitiesPage() {
           <h2 className="text-xl font-bold mb-3">Access Error</h2>
           <p className="mb-4">We couldn't verify your account information.</p>
           <div className="flex justify-center space-x-4">
-            <a 
-              href="/" 
-              className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded"
-            >
-              Return Home
-            </a>
-            <a 
-              href="/auth/signin" 
-              className="px-4 py-2 bg-rugby-teal text-white hover:bg-rugby-teal/80 rounded"
-            >
-              Sign In Again
-            </a>
+            <a href="/" className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded">Return Home</a>
+            <a href="/auth/signin" className="px-4 py-2 bg-rugby-teal text-white hover:bg-rugby-teal/80 rounded">Sign In Again</a>
           </div>
         </div>
       );
@@ -82,7 +69,7 @@ export default async function AdminActivitiesPage() {
       return redirect('/');
     }
     
-    // Fetch minimal activities data first - just get the list
+    // Fetch basic activities data
     const { data: activities, error: activitiesError } = await supabase
       .from('activities')
       .select('*')
@@ -94,32 +81,20 @@ export default async function AdminActivitiesPage() {
         <div className="p-8 text-center">
           <h2 className="text-xl font-bold mb-3">Data Loading Error</h2>
           <p className="mb-4">We encountered a problem loading the activities.</p>
-          <a 
-            href="/admin/activities" 
-            className="px-4 py-2 bg-rugby-teal text-white hover:bg-rugby-teal/80 rounded"
-          >
-            Try Again
-          </a>
+          <a href="/admin/activities" className="px-4 py-2 bg-rugby-teal text-white hover:bg-rugby-teal/80 rounded">Try Again</a>
         </div>
       );
     }
     
-    // Pass admin and activities to client component
-    // Use minimal formatting for activities data to avoid serialization issues
-    const simpleActivities = activities.map(activity => ({
+    // Transform activities data for the client component
+    const simpleActivities = activities ? activities.map(activity => ({
       ...activity,
-      // Add empty placeholders for data that will be fetched client-side
       participants: [{ count: 0 }],
       participant_details: []
-    }));
+    })) : [];
     
-    // Return the client component
-    return (
-      <AdminActivitiesClient 
-        activities={simpleActivities} 
-        userId={user.id}
-      />
-    );
+    // Return the client component with activities data
+    return <AdminActivitiesClient activities={simpleActivities} userId={user.id} />;
   } catch (error) {
     console.error('AdminActivitiesPage: Unhandled error:', error);
     // Return error component
@@ -128,18 +103,8 @@ export default async function AdminActivitiesPage() {
         <h2 className="text-xl font-bold mb-3">Something Went Wrong</h2>
         <p className="mb-4">We've encountered an unexpected error.</p>
         <div className="flex justify-center space-x-4">
-          <a 
-            href="/" 
-            className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded"
-          >
-            Return Home
-          </a>
-          <a 
-            href="/admin/activities" 
-            className="px-4 py-2 bg-rugby-teal text-white hover:bg-rugby-teal/80 rounded"
-          >
-            Try Again
-          </a>
+          <a href="/" className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded">Return Home</a>
+          <a href="/admin/activities" className="px-4 py-2 bg-rugby-teal text-white hover:bg-rugby-teal/80 rounded">Try Again</a>
         </div>
       </div>
     );
