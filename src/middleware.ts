@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export const config = {
-  matcher: ['/members/:path*', '/profile/:path*', '/settings/:path*', '/admin/:path*', '/auth/:path*'],
+  matcher: ['/members/:path*', '/profile/:path*', '/settings/:path*', '/admin/:path*', '/auth/:path*', '/api/profile'],
 };
 
 export async function middleware(request: NextRequest) {
@@ -17,6 +17,12 @@ export async function middleware(request: NextRequest) {
   const isSafari = userAgent.includes('Safari') && !isChrome; // Chrome also includes Safari in UA
   
   console.log(`Middleware: Browser detected - Chrome: ${isChrome}, Safari: ${isSafari}`);
+  
+  // Special handling for Chrome profile API
+  if (isChrome && request.nextUrl.pathname === '/api/profile') {
+    console.log('Middleware: Chrome profile API request, skipping auth check');
+    return res;
+  }
   
   // Create client with appropriate timeout based on browser
   const supabase = createMiddlewareClient({ 
@@ -32,13 +38,19 @@ export async function middleware(request: NextRequest) {
 
   // Add caching headers for API routes
   if (request.nextUrl.pathname.startsWith('/api/')) {
-    res.headers.set('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
-    return res;
+    // No caching for API routes
+    res.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.headers.set('Pragma', 'no-cache');
+    res.headers.set('Expires', '0');
+    // Allow API calls to proceed without auth for some endpoints
+    if (request.nextUrl.pathname === '/api/profile') {
+      return res;
+    }
   }
 
   // Longer timeout for Chrome browsers which may need it
-  const sessionTimeout = isChrome ? 5000 : 3000;
-  const profileTimeout = isChrome ? 5000 : 3000;
+  const sessionTimeout = isChrome ? 8000 : 3000; // Longer timeout for Chrome
+  const profileTimeout = isChrome ? 8000 : 3000; // Longer timeout for Chrome
 
   // Refresh session if expired - with timeout
   try {
@@ -96,6 +108,38 @@ export async function middleware(request: NextRequest) {
       }
       
       console.log('Middleware: Checking admin status for:', session.user.id);
+      
+      // For Chrome browsers, we'll be more lenient to avoid timeouts
+      if (isChrome) {
+        console.log('Middleware: Chrome detected, using optimized admin check');
+        try {
+          // Use a direct API call for Chrome
+          const apiUrl = new URL('/api/profile', request.url);
+          const response = await fetch(apiUrl.toString(), {
+            method: 'GET',
+            headers: {
+              'Cookie': request.headers.get('cookie') || '',
+            },
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            if (data.profile?.role === 'admin') {
+              console.log('Middleware: Admin status confirmed via API');
+              return res;
+            } else {
+              console.log('Middleware: Not admin via API, redirecting');
+              return NextResponse.redirect(new URL('/', request.url));
+            }
+          } else {
+            // If API fails, fall back to database check
+            console.log('Middleware: API check failed, falling back to DB check');
+          }
+        } catch (error) {
+          console.error('Middleware: Error in Chrome-specific admin check:', error);
+          // Fall through to standard check
+        }
+      }
       
       try {
         // Use a more efficient query with a timeout

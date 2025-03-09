@@ -39,9 +39,81 @@ export default function UserNav({ user: propUser }: UserNavProps) {
   const { user: contextUser, isAdmin, isLoading } = useAuth();
   const supabase = createClientComponentClient();
   const fetchingRef = useRef(false);
+  const [isChromeSetup, setIsChromeSetup] = useState(false);
+  
+  // Check if running in Chrome
+  const isChrome = () => {
+    if (typeof window !== 'undefined') {
+      return window.navigator.userAgent.indexOf('Chrome') > -1;
+    }
+    return false;
+  };
   
   // Use user from props if provided, otherwise from context
   const user = propUser || contextUser;
+
+  // Chrome-specific direct fetch optimization
+  useEffect(() => {
+    const setupChromeProfile = async () => {
+      if (isChrome() && user?.id && !isChromeSetup) {
+        console.log("UserNav: Chrome detected, setting up direct profile fetch");
+        setIsChromeSetup(true);
+        
+        try {
+          // Direct fetch for Chrome to ensure we get profile data
+          const response = await fetch('/api/profile', {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+          });
+          
+          if (response.ok) {
+            const profileData = await response.json();
+            if (profileData?.profile) {
+              console.log("UserNav: Got profile from API:", profileData.profile);
+              const first = profileData.profile.first_name?.[0] || '';
+              const last = profileData.profile.last_name?.[0] || '';
+              const fullInitials = (first + last).toUpperCase();
+              
+              if (fullInitials) {
+                console.log("UserNav: Setting Chrome initials:", fullInitials);
+                setInitials(fullInitials);
+                setDisplayName([
+                  profileData.profile.first_name, 
+                  profileData.profile.last_name
+                ].filter(Boolean).join(' '));
+                
+                // Cache for Chrome
+                storeProfileCache(user.id, fullInitials, displayName);
+              }
+            }
+          }
+        } catch (error) {
+          console.error("UserNav: Error in Chrome setup:", error);
+        }
+      }
+    };
+    
+    setupChromeProfile();
+  }, [user?.id, isChromeSetup]);
+  
+  // Store profile in cache
+  const storeProfileCache = (userId: string, userInitials: string, userName: string) => {
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem(USER_CACHE_KEY, JSON.stringify({
+          userId,
+          initials: userInitials,
+          displayName: userName,
+          timestamp: Date.now()
+        }));
+      } catch (error) {
+        console.error("UserNav: Error writing to cache:", error);
+      }
+    }
+  };
 
   // Check for cached profile data first to avoid flicker
   useEffect(() => {
@@ -62,7 +134,7 @@ export default function UserNav({ user: propUser }: UserNavProps) {
         console.error("UserNav: Error reading from cache:", error);
       }
     }
-  }, []);
+  }, [user?.id]);
 
   // Set initial values based on email to prevent blank avatar
   useEffect(() => {
@@ -149,22 +221,12 @@ export default function UserNav({ user: propUser }: UserNavProps) {
         // Update state in a single batch to prevent flicker
         // Only update if different to avoid unnecessary renders
         if (userInitials !== initials || userDisplayName !== displayName) {
+          console.log("UserNav: Updating initials to:", userInitials);
           setInitials(userInitials);
           setDisplayName(userDisplayName);
           
           // Cache the result to avoid flickering on next load
-          if (typeof window !== 'undefined') {
-            try {
-              localStorage.setItem(USER_CACHE_KEY, JSON.stringify({
-                userId: user.id,
-                initials: userInitials,
-                displayName: userDisplayName,
-                timestamp: Date.now()
-              }));
-            } catch (error) {
-              console.error("UserNav: Error writing to cache:", error);
-            }
-          }
+          storeProfileCache(user.id, userInitials, userDisplayName);
         }
       }
       
@@ -189,11 +251,13 @@ export default function UserNav({ user: propUser }: UserNavProps) {
         }
       }
       
-      // Call our API endpoint
-      const response = await fetch('/api/auth/signout', {
+      // Call our API endpoint with cache-busting parameter
+      const response = await fetch(`/api/auth/signout?_=${Date.now()}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
         },
         credentials: 'include'
       });
@@ -207,11 +271,11 @@ export default function UserNav({ user: propUser }: UserNavProps) {
       setDisplayName("");
       
       // Redirect to home page and force a full page reload
-      window.location.href = '/';
+      window.location.href = '/?_=' + Date.now();
     } catch (error) {
       console.error('Error during sign out:', error);
       // If there's an error, still try to refresh the page
-      window.location.href = '/';
+      window.location.href = '/?_=' + Date.now();
     }
   };
 

@@ -13,43 +13,33 @@ export async function GET() {
     const { data: { session }, error: sessionError } = await supabase.auth.getSession();
     
     if (sessionError || !session) {
-      console.error('API: Auth refresh - No session', sessionError);
+      console.error('API: Profile error - No session', sessionError);
       return NextResponse.json(
         { error: 'Not authenticated' },
-        { 
-          status: 401, 
-          headers: { 
-            'Cache-Control': 'no-cache, no-store, must-revalidate',
-            'Pragma': 'no-cache',
-            'Expires': '0'
-          } 
-        }
+        { status: 401, headers: { 'Cache-Control': 'no-store' } }
       );
     }
     
     // Get profile data
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('role, first_name, last_name')
+      .select('*')
       .eq('id', session.user.id)
       .single();
       
     if (profileError) {
-      console.error('API: Auth refresh - Profile error', profileError);
+      console.error('API: Profile error -', profileError);
+      return NextResponse.json(
+        { error: 'Failed to fetch profile' },
+        { status: 500, headers: { 'Cache-Control': 'no-store' } }
+      );
     }
-    
-    // Check admin status
-    const isAdmin = profile?.role === 'admin';
     
     // Return with no-cache headers
     return NextResponse.json(
       { 
-        user: {
-          ...session.user,
-          profile: profile || null
-        },
-        session,
-        isAdmin
+        profile,
+        user: session.user
       },
       { 
         status: 200,
@@ -61,17 +51,10 @@ export async function GET() {
       }
     );
   } catch (error) {
-    console.error('API: Auth refresh - Unexpected error', error);
+    console.error('API: Profile unexpected error -', error);
     return NextResponse.json(
       { error: 'Internal server error' },
-      { 
-        status: 500, 
-        headers: { 
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Pragma': 'no-cache',
-          'Expires': '0'
-        } 
-      }
+      { status: 500, headers: { 'Cache-Control': 'no-store' } }
     );
   }
 } 
