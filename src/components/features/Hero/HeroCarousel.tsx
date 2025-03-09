@@ -9,6 +9,7 @@ import { format } from "date-fns";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/context/LanguageContext";
+import MatchCountdownTimer from "@/components/features/Matches/MatchCountdownTimer";
 
 interface HeroCarouselProps {
   articles: Article[];
@@ -168,6 +169,7 @@ export default function HeroCarousel({
                   <span className="text-[8px] md:text-xs font-medium text-gray-800 mt-0.5 md:mt-1">
                     {format(new Date(nextMatch.match_date), "HH:mm")}
                   </span>
+                  <MatchCountdownTimer matchDate={nextMatch.match_date} compact={true} />
                 </div>
 
                 {/* Away Team */}

@@ -18,6 +18,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Activity as BaseActivity } from "@/types";
 import CustomCalendar from "@/components/features/Calendar/CustomCalendar";
 import { useLanguage } from "@/context/LanguageContext";
+import CountdownTimer from "@/components/features/Activities/CountdownTimer";
 
 interface ActivityWithParticipation extends BaseActivity {
   participant_count: number;
@@ -139,7 +140,7 @@ export default function ActivitiesClient({
     if (activity.is_participating) {
       return {
         badge: (
-          <Badge className="bg-rugby-teal/10 text-rugby-teal hover:bg-rugby-teal/20 transition-colors">
+          <Badge className="bg-rugby-teal text-white">
             {activityTranslations[language].participation.youreIn}
           </Badge>
         ),
@@ -161,13 +162,14 @@ export default function ActivitiesClient({
     }
     return {
       badge: (
-        <Badge className="bg-rugby-yellow/10 text-rugby-yellow hover:bg-rugby-yellow/20 transition-colors">
+        <Badge className="bg-rugby-teal text-white">
           {activityTranslations[language].participation.spotsAvailable}
         </Badge>
       ),
       button: {
         variant: "default" as const,
         text: activityTranslations[language].participation.joinActivity,
+        disabled: false,
       },
     };
   };
@@ -255,7 +257,7 @@ export default function ActivitiesClient({
                       }
                     `}
                   >
-                    <div className="absolute top-0 left-0 w-1 h-full bg-rugby-red" />
+                    <div className="absolute top-0 left-0 w-1 h-full bg-rugby-teal" />
                     <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background/10 pointer-events-none" />
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 dark:group-hover:bg-black/20 transition-colors duration-300 pointer-events-none" />
 
@@ -281,21 +283,29 @@ export default function ActivitiesClient({
                     <CardContent>
                       <div className="space-y-4">
                         <div className="flex items-center text-sm">
-                          <Calendar className="mr-2 h-4 w-4 text-rugby-yellow" />
+                          <Calendar className="mr-2 h-4 w-4 text-rugby-teal" />
                           <time
                             dateTime={activity.date}
                             className="text-muted-foreground"
                           >
-                            {formatDate(activity.date)}
+                            {formatDate(activity.date, language)}
                           </time>
                         </div>
 
                         <div className="flex items-center text-sm">
-                          <MapPin className="mr-2 h-4 w-4 text-rugby-red" />
+                          <MapPin className="mr-2 h-4 w-4 text-rugby-teal" />
                           <span className="text-muted-foreground">
                             {activity.location}
                           </span>
                         </div>
+                        
+                        {/* Countdown Timer for upcoming activities */}
+                        {isUpcoming && (
+                          <CountdownTimer 
+                            targetDate={activity.date} 
+                            targetTime={activity.time} 
+                          />
+                        )}
 
                         <div className="pt-4">
                           <Button

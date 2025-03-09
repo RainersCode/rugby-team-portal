@@ -10,6 +10,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { MatchEventList, PlayerCardList } from './MatchDetails';
 import { useLanguage } from '@/context/LanguageContext';
+import MatchCountdownTimer from './MatchCountdownTimer';
 
 interface MatchCardProps {
   match: Match;
@@ -91,7 +92,7 @@ export default function MatchCard({ match, isLocalMatch, variant = 'default' }: 
               </span>
             </div>
           ) : (
-            <div className="text-base font-semibold text-rugby-yellow tracking-widest">VS</div>
+            <div className="text-base font-semibold text-rugby-teal tracking-widest">VS</div>
           )}
         </div>
 
@@ -120,10 +121,17 @@ export default function MatchCard({ match, isLocalMatch, variant = 'default' }: 
           </span>
         </div>
         <div className="flex items-center gap-1">
-          <MapPin className="w-3.5 h-3.5 text-rugby-red" />
+          <MapPin className="w-3.5 h-3.5 text-rugby-teal" />
           <span className="font-medium truncate max-w-[80px]">{match.venue}</span>
         </div>
       </div>
+      
+      {/* Countdown Timer - show only for upcoming matches */}
+      {!isCompleted && !isLive && (
+        <div className="mt-2">
+          <MatchCountdownTimer matchDate={match.match_date} />
+        </div>
+      )}
 
       {/* Expandable Match Details */}
       {hasDetails && (
