@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Phone, Mail, MapPin, Send, ArrowRight } from "lucide-react";
+import { Phone, Mail, MapPin, Send, ArrowRight, Clock, Users, Info } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import Map from "@/components/features/Contact/Map";
+import { Button } from "@/components/ui/button";
+import Image from "next/image";
 
 const contactTranslations = {
   en: {
@@ -119,13 +121,13 @@ export default function ContactPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
           {/* Contact Information */}
           <div className="space-y-8 animate-fade-in-left">
-            <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg border-l-4 border-rugby-teal transition-all duration-300 hover:shadow-xl">
+            <div className="bg-white dark:bg-gray-800 p-8 rounded-none shadow-lg border-l-4 border-rugby-teal transition-all duration-300 hover:shadow-xl">
               <h3 className="text-2xl font-semibold mb-6 text-rugby-teal border-b border-rugby-teal/20 pb-3">
                 {contactTranslations[language].contactInfo}
               </h3>
               <div className="space-y-8">
                 <div className="flex items-start space-x-5 group">
-                  <div className="flex-shrink-0 p-3 bg-rugby-teal/10 rounded-full group-hover:bg-rugby-teal/20 transition-all duration-300">
+                  <div className="flex-shrink-0 p-3 bg-rugby-teal/10 rounded-none group-hover:bg-rugby-teal/20 transition-all duration-300">
                     <Phone className="w-6 h-6 text-rugby-teal" />
                   </div>
                   <div>
@@ -138,7 +140,7 @@ export default function ContactPage() {
                   </div>
                 </div>
                 <div className="flex items-start space-x-5 group">
-                  <div className="flex-shrink-0 p-3 bg-rugby-teal/10 rounded-full group-hover:bg-rugby-teal/20 transition-all duration-300">
+                  <div className="flex-shrink-0 p-3 bg-rugby-teal/10 rounded-none group-hover:bg-rugby-teal/20 transition-all duration-300">
                     <Mail className="w-6 h-6 text-rugby-teal" />
                   </div>
                   <div>
@@ -151,7 +153,7 @@ export default function ContactPage() {
                   </div>
                 </div>
                 <div className="flex items-start space-x-5 group">
-                  <div className="flex-shrink-0 p-3 bg-rugby-teal/10 rounded-full group-hover:bg-rugby-teal/20 transition-all duration-300">
+                  <div className="flex-shrink-0 p-3 bg-rugby-teal/10 rounded-none group-hover:bg-rugby-teal/20 transition-all duration-300">
                     <MapPin className="w-6 h-6 text-rugby-teal" />
                   </div>
                   <div>
@@ -167,21 +169,21 @@ export default function ContactPage() {
             </div>
 
             {/* Map */}
-            <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg border-l-4 border-rugby-teal transition-all duration-300 hover:shadow-xl">
+            <div className="bg-white dark:bg-gray-800 p-8 rounded-none shadow-lg border-l-4 border-rugby-teal transition-all duration-300 hover:shadow-xl">
               <h3 className="text-2xl font-semibold mb-6 text-rugby-teal border-b border-rugby-teal/20 pb-3">
                 {contactTranslations[language].trainingGround}
               </h3>
               <p className="text-gray-600 dark:text-gray-400 mb-6">
                 {contactTranslations[language].trainingGroundDesc}
               </p>
-              <div className="aspect-video rounded-lg overflow-hidden shadow-md">
+              <div className="aspect-video rounded-none overflow-hidden shadow-md">
                 <Map center={{ lat: 57.54624299315826, lng: 25.546570490001447 }} zoom={14} />
               </div>
             </div>
           </div>
 
           {/* Contact Form */}
-          <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg border-l-4 border-rugby-teal transition-all duration-300 hover:shadow-xl animate-fade-in-right">
+          <div className="bg-white dark:bg-gray-800 p-8 rounded-none shadow-lg border-l-4 border-rugby-teal transition-all duration-300 hover:shadow-xl animate-fade-in-right">
             <h3 className="text-2xl font-semibold mb-6 text-rugby-teal border-b border-rugby-teal/20 pb-3">
               {contactTranslations[language].sendMessage}
             </h3>
@@ -199,7 +201,7 @@ export default function ContactPage() {
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-md border border-rugby-teal/20 bg-white/80 dark:bg-gray-800/80 focus:ring-2 focus:ring-rugby-teal focus:border-rugby-teal transition-all duration-300"
+                  className="w-full px-4 py-3 rounded-none border border-rugby-teal/20 bg-white/80 dark:bg-gray-800/80 focus:ring-2 focus:ring-rugby-teal focus:border-rugby-teal transition-all duration-300"
                   required
                 />
               </div>
@@ -216,7 +218,7 @@ export default function ContactPage() {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-md border border-rugby-teal/20 bg-white/80 dark:bg-gray-800/80 focus:ring-2 focus:ring-rugby-teal focus:border-rugby-teal transition-all duration-300"
+                  className="w-full px-4 py-3 rounded-none border border-rugby-teal/20 bg-white/80 dark:bg-gray-800/80 focus:ring-2 focus:ring-rugby-teal focus:border-rugby-teal transition-all duration-300"
                   required
                 />
               </div>
@@ -233,7 +235,7 @@ export default function ContactPage() {
                   name="subject"
                   value={formData.subject}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-md border border-rugby-teal/20 bg-white/80 dark:bg-gray-800/80 focus:ring-2 focus:ring-rugby-teal focus:border-rugby-teal transition-all duration-300"
+                  className="w-full px-4 py-3 rounded-none border border-rugby-teal/20 bg-white/80 dark:bg-gray-800/80 focus:ring-2 focus:ring-rugby-teal focus:border-rugby-teal transition-all duration-300"
                   required
                 />
               </div>
@@ -250,14 +252,14 @@ export default function ContactPage() {
                   value={formData.message}
                   onChange={handleChange}
                   rows={5}
-                  className="w-full px-4 py-3 rounded-md border border-rugby-teal/20 bg-white/80 dark:bg-gray-800/80 focus:ring-2 focus:ring-rugby-teal focus:border-rugby-teal transition-all duration-300"
+                  className="w-full px-4 py-3 rounded-none border border-rugby-teal/20 bg-white/80 dark:bg-gray-800/80 focus:ring-2 focus:ring-rugby-teal focus:border-rugby-teal transition-all duration-300"
                   required
                 ></textarea>
               </div>
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className={`w-full flex items-center justify-center gap-2 bg-gradient-to-r from-rugby-teal to-rugby-teal-dark hover:from-rugby-teal-dark hover:to-rugby-teal text-white font-semibold py-3 px-6 rounded-md transition-all duration-300 relative overflow-hidden ${
+                className={`w-full flex items-center justify-center gap-2 bg-gradient-to-r from-rugby-teal to-rugby-teal-dark hover:from-rugby-teal-dark hover:to-rugby-teal text-white font-semibold py-3 px-6 rounded-none transition-all duration-300 relative overflow-hidden ${
                   isSubmitting ? "opacity-70 cursor-not-allowed" : ""
                 } ${
                   submitSuccess ? "bg-green-500" : ""
