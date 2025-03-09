@@ -5,19 +5,19 @@ import ActivitiesClient from './ActivitiesClient';
 export const dynamic = 'force-dynamic';
 
 export default async function ActivitiesPage() {
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const supabase = createServerComponentClient({ cookies: () => cookieStore });
 
-  // Get current user session
-  const { data: { session } } = await supabase.auth.getSession();
+  // Get current user using the more secure getUser method
+  const { data: { user } } = await supabase.auth.getUser();
 
   // Get user role if logged in
   let isAdmin = false;
-  if (session?.user.id) {
+  if (user?.id) {
     const { data: profile } = await supabase
       .from('profiles')
       .select('role')
-      .eq('id', session.user.id)
+      .eq('id', user.id)
       .single();
     
     isAdmin = profile?.role === 'admin';
@@ -46,14 +46,14 @@ export default async function ActivitiesPage() {
   const transformedActivities = activities?.map(activity => ({
     ...activity,
     participant_count: activity.participants?.[0]?.count || 0,
-    is_participating: activity.user_participation?.some(p => p.user_id === session?.user.id) || false
+    is_participating: activity.user_participation?.some(p => p.user_id === user?.id) || false
   })) || [];
 
   return (
     <ActivitiesClient 
       activities={transformedActivities} 
       matches={matches || []}
-      userId={session?.user.id}
+      userId={user?.id}
       isAdmin={isAdmin}
     />
   );

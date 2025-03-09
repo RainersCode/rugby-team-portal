@@ -6,7 +6,7 @@ export const revalidate = 3600 // Revalidate every hour
 export const dynamic = 'force-dynamic'
 
 export default async function TeamPage() {
-  const cookieStore = cookies()
+  const cookieStore = await cookies()
   const supabase = createServerComponentClient({ cookies: () => cookieStore })
 
   const { data: players, error } = await supabase

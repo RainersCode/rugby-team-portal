@@ -1,10 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import { Users, FileText, Calendar, Settings, BarChart, CalendarDays, Dumbbell, Image as ImageIcon, Play, Trophy } from "lucide-react";
+import { Users, FileText, Calendar, Settings, BarChart, CalendarDays, Dumbbell, Image as ImageIcon, Play, Trophy, Loader2 } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -12,8 +11,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useRequireAdmin } from "@/hooks/useRequireAdmin";
 
 export default function AdminDashboard() {
+  const { isReady, isAdmin, user } = useRequireAdmin();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     players: 0,
@@ -30,83 +31,83 @@ export default function AdminDashboard() {
     cup_teams: 0,
   });
 
-  const router = useRouter();
   const supabase = createClientComponentClient();
 
+  // Only fetch stats when we know the user is an admin
   useEffect(() => {
-    checkAdmin();
-    fetchStats();
-  }, []);
-
-  const checkAdmin = async () => {
-    try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      if (!session) {
-        router.push("/auth/signin");
-        return;
-      }
-
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", session.user.id)
-        .single();
-
-      if (profile?.role !== "admin") {
-        router.push("/");
-      }
-    } catch (error) {
-      console.error("Error checking admin status:", error);
-      router.push("/");
+    if (isReady && isAdmin) {
+      console.log("AdminDashboard: User is admin, fetching stats");
+      fetchStats();
     }
-  };
+  }, [isReady, isAdmin]);
 
   const fetchStats = async () => {
     try {
+      console.log("AdminDashboard: Fetching stats");
+      
+      // Use try-catch for each count to prevent one failure from stopping all stats
+      const fetchCount = async (table: string) => {
+        try {
+          const { count, error } = await supabase
+            .from(table)
+            .select('*', { count: 'exact', head: true });
+          
+          if (error) {
+            console.error(`Error fetching ${table} count:`, error);
+            return 0;
+          }
+          
+          return count || 0;
+        } catch (e) {
+          console.error(`Error in fetchCount for ${table}:`, e);
+          return 0;
+        }
+      };
+      
       const [
-        { count: playersCount },
-        { count: articlesCount },
-        { count: matchesCount },
-        { count: usersCount },
-        { count: activitiesCount },
-        { count: exercisesCount },
-        { count: trainingProgramsCount },
-        { count: liveStreamsCount },
-        { count: championshipTeamsCount },
-        { count: sevensTeamsCount },
-        { count: cupTeamsCount },
+        playersCount,
+        articlesCount,
+        matchesCount,
+        usersCount,
+        activitiesCount,
+        exercisesCount,
+        trainingProgramsCount,
+        liveStreamsCount,
+        championshipTeamsCount,
+        sevensTeamsCount,
+        cupTeamsCount,
       ] = await Promise.all([
-        supabase.from("players").select("*", { count: "exact", head: true }),
-        supabase.from("articles").select("*", { count: "exact", head: true }),
-        supabase.from("matches").select("*", { count: "exact", head: true }),
-        supabase.from("profiles").select("*", { count: "exact", head: true }),
-        supabase.from("activities").select("*", { count: "exact", head: true }),
-        supabase.from("exercises").select("*", { count: "exact", head: true }),
-        supabase.from("training_programs").select("*", { count: "exact", head: true }),
-        supabase.from("live_streams").select("*", { count: "exact", head: true }),
-        supabase.from("championship_teams").select("*", { count: "exact", head: true }),
-        supabase.from("sevens_teams").select("*", { count: "exact", head: true }),
-        supabase.from("cup_teams").select("*", { count: "exact", head: true }),
+        fetchCount("players"),
+        fetchCount("articles"),
+        fetchCount("matches"),
+        fetchCount("profiles"),
+        fetchCount("activities"),
+        fetchCount("exercises"),
+        fetchCount("training_programs"),
+        fetchCount("live_streams"),
+        fetchCount("championship_teams"),
+        fetchCount("sevens_teams"),
+        fetchCount("cup_teams"),
       ]);
 
       setStats({
-        players: playersCount || 0,
-        articles: articlesCount || 0,
-        matches: matchesCount || 0,
-        users: usersCount || 0,
-        activities: activitiesCount || 0,
-        exercises: exercisesCount || 0,
-        training_programs: trainingProgramsCount || 0,
-        live_streams: liveStreamsCount || 0,
-        tournaments: (championshipTeamsCount || 0) + (sevensTeamsCount || 0) + (cupTeamsCount || 0),
-        championship_teams: championshipTeamsCount || 0,
-        sevens_teams: sevensTeamsCount || 0,
-        cup_teams: cupTeamsCount || 0,
+        players: playersCount,
+        articles: articlesCount,
+        matches: matchesCount,
+        users: usersCount,
+        activities: activitiesCount,
+        exercises: exercisesCount,
+        training_programs: trainingProgramsCount,
+        live_streams: liveStreamsCount,
+        tournaments: championshipTeamsCount + sevensTeamsCount + cupTeamsCount,
+        championship_teams: championshipTeamsCount,
+        sevens_teams: sevensTeamsCount,
+        cup_teams: cupTeamsCount,
       });
+      
+      console.log("AdminDashboard: Stats fetched successfully");
     } catch (error) {
-      console.error("Error fetching stats:", error);
+      console.error("AdminDashboard: Error fetching stats:", error);
     } finally {
       setLoading(false);
     }
@@ -187,10 +188,12 @@ export default function AdminDashboard() {
     },
   ];
 
-  if (loading) {
+  // Show loading state while checking admin status OR while fetching stats
+  if (!isReady || loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <Loader2 className="animate-spin h-8 w-8 text-rugby-teal mb-4" />
+        <p className="text-muted-foreground">Loading dashboard...</p>
       </div>
     );
   }

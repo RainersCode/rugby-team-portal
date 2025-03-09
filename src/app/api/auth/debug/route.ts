@@ -9,8 +9,11 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    // Create a Supabase client configured to use cookies
-    const supabase = createRouteHandlerClient({ cookies });
+    // Properly await cookies() before using it
+    const cookieStore = cookies();
+    
+    // Create a Supabase client with the awaited cookie store
+    const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
 
     // Get the current session
     const { data: { session }, error: sessionError } = await supabase.auth.getSession();
@@ -20,7 +23,7 @@ export async function GET() {
       return NextResponse.json({ 
         status: 'error',
         sessionError: sessionError.message,
-        cookies: [...cookies().getAll()].map(c => ({ name: c.name, value: '***' }))
+        cookies: [...cookieStore.getAll()].map(c => ({ name: c.name, value: '***' }))
       });
     }
 
@@ -28,7 +31,7 @@ export async function GET() {
       // No session exists
       return NextResponse.json({ 
         status: 'no-session',
-        cookies: [...cookies().getAll()].map(c => ({ name: c.name, value: '***' }))
+        cookies: [...cookieStore.getAll()].map(c => ({ name: c.name, value: '***' }))
       });
     }
 
@@ -63,14 +66,16 @@ export async function GET() {
         // Include other non-sensitive fields
       } : null,
       profileError: profileError ? String(profileError) : null,
-      cookies: [...cookies().getAll()].map(c => ({ name: c.name, value: '***' }))
+      cookies: [...cookieStore.getAll()].map(c => ({ name: c.name, value: '***' }))
     });
   } catch (error) {
     console.error('Unexpected error during debug:', error);
+    // Get cookies safely
+    const safeStore = cookies();
     return NextResponse.json({ 
       status: 'error',
       error: String(error),
-      cookies: [...cookies().getAll()].map(c => ({ name: c.name, value: '***' }))
+      cookies: [...safeStore.getAll()].map(c => ({ name: c.name, value: '***' }))
     });
   }
 } 

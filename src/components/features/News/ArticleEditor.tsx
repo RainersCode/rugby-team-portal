@@ -319,6 +319,7 @@ export default function ArticleEditor({ onSubmit, initialData, isSubmitting, aut
             value={mainImage}
             onChange={setMainImage}
             onUpload={onImageUpload}
+            onUploadComplete={(url) => setMainImage(url)}
             disabled={isSubmitting}
           />
           {mainImage && (
@@ -329,7 +330,7 @@ export default function ArticleEditor({ onSubmit, initialData, isSubmitting, aut
               className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white"
               onClick={handleMainImageDelete}
             >
-              <Trash2 className="h-4 w-4" />
+              Delete
             </Button>
           )}
         </div>

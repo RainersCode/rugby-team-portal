@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/utils/supabase';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/context/AuthContext';
+import { Loader2 } from 'lucide-react';
 
 interface UserProfile {
   id: string;
@@ -18,30 +20,57 @@ interface UserProfile {
 
 export default function ProfilePage() {
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
-  const [email, setEmail] = useState<string>('');
+  const { user, isAuthenticated, isLoading, refreshAuth } = useAuth();
+  const [saveLoading, setSaveLoading] = useState(false);
+  const [profileLoading, setProfileLoading] = useState(true);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [address, setAddress] = useState('');
   const [birthDate, setBirthDate] = useState('');
   const [bio, setBio] = useState('');
+  const supabase = createClientComponentClient();
 
+  // Check if user is authenticated
   useEffect(() => {
-    getProfile();
-  }, []);
+    if (!isLoading && !isAuthenticated) {
+      console.log("Profile: User not authenticated, redirecting to login");
+      router.push('/auth/signin?redirect=/profile');
+    }
+  }, [isLoading, isAuthenticated, router]);
+
+  // Load profile data when user is available
+  useEffect(() => {
+    if (user && user.id) {
+      console.log("Profile: User authenticated, fetching profile data");
+      getProfile();
+    }
+  }, [user]);
 
   async function getProfile() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      setProfileLoading(true);
+      console.log("Profile: Fetching profile for user", user?.id);
 
-      if (!user) {
-        router.push('/auth/signin');
+      if (!user?.id) {
+        console.log("Profile: No user ID available");
         return;
       }
 
-      setEmail(user.email || '');
+      // First check if profile data is already in the user object
+      if (user.profile) {
+        console.log("Profile: Using profile data from user object");
+        setProfile(user.profile as UserProfile);
+        setFirstName(user.profile.first_name || '');
+        setLastName(user.profile.last_name || '');
+        setAddress(user.profile.address || '');
+        setBirthDate(user.profile.birth_date || '');
+        setBio(user.profile.bio || '');
+        return;
+      }
 
+      // Otherwise fetch from the database
+      console.log("Profile: Fetching profile from database");
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -49,30 +78,37 @@ export default function ProfilePage() {
         .single();
 
       if (error) {
-        console.warn(error);
+        console.error("Profile: Error fetching profile:", error);
+        return;
       }
 
       if (data) {
+        console.log("Profile: Profile data retrieved successfully");
         setProfile(data);
         setFirstName(data.first_name || '');
         setLastName(data.last_name || '');
         setAddress(data.address || '');
         setBirthDate(data.birth_date || '');
         setBio(data.bio || '');
+      } else {
+        console.log("Profile: No profile data found");
       }
     } catch (error) {
-      console.log(error);
+      console.error("Profile: Unexpected error:", error);
     } finally {
-      setLoading(false);
+      setProfileLoading(false);
     }
   }
 
   async function updateProfile() {
+    if (!user) {
+      console.error("Profile: Cannot update profile, no user");
+      return;
+    }
+    
     try {
-      setLoading(true);
-      const { data: { user } } = await supabase.auth.getUser();
-
-      if (!user) throw new Error('No user');
+      console.log("Profile: Updating profile for user", user.id);
+      setSaveLoading(true);
 
       const updates = {
         id: user.id,
@@ -86,14 +122,37 @@ export default function ProfilePage() {
 
       const { error } = await supabase.from('profiles').upsert(updates);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Profile: Error updating profile:", error);
+        throw error;
+      }
+      
+      // Refresh auth context to get updated profile
+      console.log("Profile: Profile updated, refreshing auth context");
+      await refreshAuth();
+      
       alert('Profile updated!');
     } catch (error) {
       alert('Error updating the data!');
-      console.log(error);
+      console.error("Profile: Error in updateProfile:", error);
     } finally {
-      setLoading(false);
+      setSaveLoading(false);
     }
+  }
+
+  // Show loading while checking auth or fetching profile
+  if (isLoading || profileLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <Loader2 className="animate-spin h-8 w-8 text-rugby-teal mb-4" />
+        <p className="text-muted-foreground">Loading profile...</p>
+      </div>
+    );
+  }
+
+  // If not authenticated, don't render anything (redirect handled in useEffect)
+  if (!user) {
+    return null;
   }
 
   return (
@@ -109,7 +168,7 @@ export default function ProfilePage() {
             <input
               id="email"
               type="text"
-              value={email}
+              value={user?.email || ''}
               disabled
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-blue focus:border-primary-blue bg-gray-100 dark:bg-gray-700"
             />
@@ -183,9 +242,17 @@ export default function ProfilePage() {
           <div className="flex justify-end">
             <Button
               onClick={updateProfile}
-              disabled={loading}
+              disabled={saveLoading}
+              className="flex items-center"
             >
-              {loading ? 'Saving...' : 'Save Changes'}
+              {saveLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                'Save Changes'
+              )}
             </Button>
           </div>
         </div>

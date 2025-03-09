@@ -11,23 +11,28 @@ export const metadata: Metadata = {
 export const dynamic = 'force-dynamic';
 
 export default async function LivePage() {
-  const cookieStore = cookies();
-  const supabase = createServerComponentClient({ cookies: () => cookieStore });
+  try {
+    const cookieStore = await cookies();
+    const supabase = createServerComponentClient({ cookies: () => cookieStore });
 
-  // Fetch active live stream data from database
-  const { data: liveStream } = await supabase
-    .from('live_streams')
-    .select('*')
-    .eq('status', 'active')
-    .single();
+    // Fetch active live stream data from database
+    const { data: liveStream } = await supabase
+      .from('live_streams')
+      .select('*')
+      .eq('status', 'active')
+      .single();
 
-  // Fetch recent past broadcasts
-  const { data: pastStreams } = await supabase
-    .from('live_streams')
-    .select('*')
-    .eq('status', 'completed')
-    .order('stream_date', { ascending: false })
-    .limit(6);
+    // Fetch recent past broadcasts
+    const { data: pastStreams } = await supabase
+      .from('live_streams')
+      .select('*')
+      .eq('status', 'completed')
+      .order('stream_date', { ascending: false })
+      .limit(6);
 
-  return <LivePageClient activeStream={liveStream} pastStreams={pastStreams || []} />;
+    return <LivePageClient activeStream={liveStream} pastStreams={pastStreams || []} />;
+  } catch (error) {
+    console.error("Error fetching live page data:", error);
+    return <div>Error fetching live page data.</div>;
+  }
 } 

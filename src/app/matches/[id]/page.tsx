@@ -11,21 +11,26 @@ import { MatchEventList, PlayerCardList } from '@/components/features/Matches/Ma
 
 export const dynamic = 'force-dynamic';
 
-async function getMatch(id: string) {
-  const cookieStore = cookies();
-  const supabase = createServerComponentClient({ cookies: () => cookieStore });
-  
-  const { data: match, error } = await supabase
-    .from('matches')
-    .select('*')
-    .eq('id', id)
-    .single();
+async function getMatch(id: string): Promise<Match | null> {
+  try {
+    const cookieStore = await cookies();
+    const supabase = createServerComponentClient({ cookies: () => cookieStore });
+    
+    const { data: match, error } = await supabase
+      .from('matches')
+      .select('*')
+      .eq('id', id)
+      .single();
 
-  if (error || !match) {
+    if (error || !match) {
+      return null;
+    }
+
+    return match as Match;
+  } catch (error) {
+    console.error('Error getting match:', error);
     return null;
   }
-
-  return match as Match;
 }
 
 async function getRelatedMatches() {
@@ -60,173 +65,179 @@ export default async function MatchDetailsPage({
 }: {
   params: { id: string }
 }) {
-  const match = await getMatch(params.id);
-  if (!match) {
-    notFound();
-  }
+  try {
+    const cookieStore = await cookies();
+    const match = await getMatch(params.id);
+    if (!match) {
+      notFound();
+    }
 
-  const { upcomingMatches, pastMatches } = await getRelatedMatches();
-  const isCompleted = match.status === 'completed';
-  const isLive = match.status === 'live';
+    const { upcomingMatches, pastMatches } = await getRelatedMatches();
+    const isCompleted = match.status === 'completed';
+    const isLive = match.status === 'live';
 
-  return (
-    <div className="container mx-auto px-4 sm:px-6">
-      <div className="flex flex-col lg:flex-row min-h-screen">
-        {/* Main Content - 2/3 width */}
-        <div className="lg:w-2/3 py-6 lg:pr-6 lg:border-r border-gray-200 dark:border-gray-700">
-          <div className="max-w-2xl mx-auto space-y-6">
-            {/* Match Header */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
-              <div className="bg-gray-50 dark:bg-gray-800 px-6 py-4 border-b dark:border-gray-700">
-                <div className="flex justify-between items-center mb-4">
-                  <h1 className="text-xl font-semibold text-primary-blue">
-                    {match.competition}
-                  </h1>
-                  <Badge 
-                    variant={isLive ? "destructive" : isCompleted ? "secondary" : "default"}
-                    className={
-                      isLive 
-                        ? 'animate-pulse bg-red-500 text-white font-medium' 
-                        : isCompleted 
-                          ? 'bg-gray-200 text-gray-700 font-medium'
-                          : 'bg-green-600 text-white font-medium'
-                    }
-                  >
-                    {isLive ? 'LIVE NOW' : match.status.charAt(0).toUpperCase() + match.status.slice(1)}
-                  </Badge>
-                </div>
-                <div className="flex items-center gap-4 text-sm text-gray-500">
-                  <div className="flex items-center gap-2">
-                    <CalendarDays className="w-4 h-4" />
-                    <span>{format(new Date(match.match_date), 'PPP • HH:mm')}</span>
+    return (
+      <div className="container mx-auto px-4 sm:px-6">
+        <div className="flex flex-col lg:flex-row min-h-screen">
+          {/* Main Content - 2/3 width */}
+          <div className="lg:w-2/3 py-6 lg:pr-6 lg:border-r border-gray-200 dark:border-gray-700">
+            <div className="max-w-2xl mx-auto space-y-6">
+              {/* Match Header */}
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+                <div className="bg-gray-50 dark:bg-gray-800 px-6 py-4 border-b dark:border-gray-700">
+                  <div className="flex justify-between items-center mb-4">
+                    <h1 className="text-xl font-semibold text-primary-blue">
+                      {match.competition}
+                    </h1>
+                    <Badge 
+                      variant={isLive ? "destructive" : isCompleted ? "secondary" : "default"}
+                      className={
+                        isLive 
+                          ? 'animate-pulse bg-red-500 text-white font-medium' 
+                          : isCompleted 
+                            ? 'bg-gray-200 text-gray-700 font-medium'
+                            : 'bg-green-600 text-white font-medium'
+                      }
+                    >
+                      {isLive ? 'LIVE NOW' : match.status.charAt(0).toUpperCase() + match.status.slice(1)}
+                    </Badge>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <MapPin className="w-4 h-4" />
-                    <span>{match.venue}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Teams & Score */}
-              <div className="p-4 sm:p-8">
-                <div className="flex items-center justify-between gap-4 sm:gap-8">
-                  {/* Home Team */}
-                  <div className="flex-1 flex flex-col items-center text-center">
-                    <div className="relative w-20 h-20 sm:w-32 sm:h-32 mb-2 sm:mb-4">
-                      <Image
-                        src={match.home_team_image}
-                        alt={match.home_team}
-                        fill
-                        className="object-contain"
-                      />
+                  <div className="flex items-center gap-4 text-sm text-gray-500">
+                    <div className="flex items-center gap-2">
+                      <CalendarDays className="w-4 h-4" />
+                      <span>{format(new Date(match.match_date), 'PPP • HH:mm')}</span>
                     </div>
-                    <h2 className="text-base sm:text-xl font-semibold text-gray-900 dark:text-gray-100">
-                      {match.home_team}
-                    </h2>
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-4 h-4" />
+                      <span>{match.venue}</span>
+                    </div>
                   </div>
+                </div>
 
-                  {/* Score */}
-                  <div className="text-center px-2 sm:px-4">
-                    {isCompleted || isLive ? (
-                      <div className="text-3xl sm:text-5xl font-bold text-gray-900 dark:text-gray-100 space-x-3 sm:space-x-6">
-                        <span>{match.home_score}</span>
-                        <span className="text-gray-400">-</span>
-                        <span>{match.away_score}</span>
+                {/* Teams & Score */}
+                <div className="p-4 sm:p-8">
+                  <div className="flex items-center justify-between gap-4 sm:gap-8">
+                    {/* Home Team */}
+                    <div className="flex-1 flex flex-col items-center text-center">
+                      <div className="relative w-20 h-20 sm:w-32 sm:h-32 mb-2 sm:mb-4">
+                        <Image
+                          src={match.home_team_image}
+                          alt={match.home_team}
+                          fill
+                          className="object-contain"
+                        />
                       </div>
-                    ) : (
-                      <div className="text-2xl sm:text-3xl font-medium text-gray-500">VS</div>
-                    )}
-                  </div>
-
-                  {/* Away Team */}
-                  <div className="flex-1 flex flex-col items-center text-center">
-                    <div className="relative w-20 h-20 sm:w-32 sm:h-32 mb-2 sm:mb-4">
-                      <Image
-                        src={match.away_team_image}
-                        alt={match.away_team}
-                        fill
-                        className="object-contain"
-                      />
+                      <h2 className="text-base sm:text-xl font-semibold text-gray-900 dark:text-gray-100">
+                        {match.home_team}
+                      </h2>
                     </div>
-                    <h2 className="text-base sm:text-xl font-semibold text-gray-900 dark:text-gray-100">
-                      {match.away_team}
-                    </h2>
+
+                    {/* Score */}
+                    <div className="text-center px-2 sm:px-4">
+                      {isCompleted || isLive ? (
+                        <div className="text-3xl sm:text-5xl font-bold text-gray-900 dark:text-gray-100 space-x-3 sm:space-x-6">
+                          <span>{match.home_score}</span>
+                          <span className="text-gray-400">-</span>
+                          <span>{match.away_score}</span>
+                        </div>
+                      ) : (
+                        <div className="text-2xl sm:text-3xl font-medium text-gray-500">VS</div>
+                      )}
+                    </div>
+
+                    {/* Away Team */}
+                    <div className="flex-1 flex flex-col items-center text-center">
+                      <div className="relative w-20 h-20 sm:w-32 sm:h-32 mb-2 sm:mb-4">
+                        <Image
+                          src={match.away_team_image}
+                          alt={match.away_team}
+                          fill
+                          className="object-contain"
+                        />
+                      </div>
+                      <h2 className="text-base sm:text-xl font-semibold text-gray-900 dark:text-gray-100">
+                        {match.away_team}
+                      </h2>
+                    </div>
                   </div>
                 </div>
               </div>
+
+              {/* Match Details */}
+              {match.description && (
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+                  <h3 className="text-lg font-semibold mb-4">Match Summary</h3>
+                  <p className="text-gray-600 dark:text-gray-300 whitespace-pre-line">
+                    {match.description}
+                  </p>
+                </div>
+              )}
+
+              {/* Match Events */}
+              {match.match_events?.length > 0 && (
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+                  <MatchEventList events={match.match_events} />
+                </div>
+              )}
+
+              {/* Player Cards */}
+              {match.player_cards?.length > 0 && (
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+                  <PlayerCardList cards={match.player_cards} />
+                </div>
+              )}
             </div>
-
-            {/* Match Details */}
-            {match.description && (
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-                <h3 className="text-lg font-semibold mb-4">Match Summary</h3>
-                <p className="text-gray-600 dark:text-gray-300 whitespace-pre-line">
-                  {match.description}
-                </p>
-              </div>
-            )}
-
-            {/* Match Events */}
-            {match.match_events?.length > 0 && (
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-                <MatchEventList events={match.match_events} />
-              </div>
-            )}
-
-            {/* Player Cards */}
-            {match.player_cards?.length > 0 && (
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-                <PlayerCardList cards={match.player_cards} />
-              </div>
-            )}
           </div>
-        </div>
 
-        {/* Sidebar - 1/3 width */}
-        <div className="lg:w-1/3 py-6 px-4 lg:px-0 lg:pl-6 bg-gray-50 dark:bg-gray-800/50">
-          <div className="max-w-sm space-y-8">
-            {/* Upcoming Matches */}
-            <div>
-              <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">
-                Upcoming Matches
-              </h3>
-              <div className="space-y-3">
-                {upcomingMatches.map((match) => (
-                  <MatchCard 
-                    key={match.id} 
-                    match={match} 
-                    isLocalMatch={true}
-                    variant="compact"
-                  />
-                ))}
-                {upcomingMatches.length === 0 && (
-                  <p className="text-gray-500">No upcoming matches scheduled.</p>
-                )}
+          {/* Sidebar - 1/3 width */}
+          <div className="lg:w-1/3 py-6 px-4 lg:px-0 lg:pl-6 bg-gray-50 dark:bg-gray-800/50">
+            <div className="max-w-sm space-y-8">
+              {/* Upcoming Matches */}
+              <div>
+                <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">
+                  Upcoming Matches
+                </h3>
+                <div className="space-y-3">
+                  {upcomingMatches.map((match) => (
+                    <MatchCard 
+                      key={match.id} 
+                      match={match} 
+                      isLocalMatch={true}
+                      variant="compact"
+                    />
+                  ))}
+                  {upcomingMatches.length === 0 && (
+                    <p className="text-gray-500">No upcoming matches scheduled.</p>
+                  )}
+                </div>
               </div>
-            </div>
 
-            {/* Recent Matches */}
-            <div>
-              <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">
-                Recent Matches
-              </h3>
-              <div className="space-y-3">
-                {pastMatches.map((match) => (
-                  <MatchCard 
-                    key={match.id} 
-                    match={match} 
-                    isLocalMatch={true}
-                    variant="compact"
-                  />
-                ))}
-                {pastMatches.length === 0 && (
-                  <p className="text-gray-500">No past matches available.</p>
-                )}
+              {/* Recent Matches */}
+              <div>
+                <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">
+                  Recent Matches
+                </h3>
+                <div className="space-y-3">
+                  {pastMatches.map((match) => (
+                    <MatchCard 
+                      key={match.id} 
+                      match={match} 
+                      isLocalMatch={true}
+                      variant="compact"
+                    />
+                  ))}
+                  {pastMatches.length === 0 && (
+                    <p className="text-gray-500">No past matches available.</p>
+                  )}
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  } catch (error) {
+    console.error('Error in MatchDetailsPage:', error);
+    notFound();
+  }
 } 

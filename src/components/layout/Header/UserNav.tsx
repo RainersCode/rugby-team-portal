@@ -34,25 +34,31 @@ export default function UserNav({ user: propUser }: UserNavProps) {
   const router = useRouter();
   const [initials, setInitials] = useState("");
   const [displayName, setDisplayName] = useState("");
-  const { user: contextUser, isAdmin } = useAuth();
+  const { user: contextUser, isAdmin, isLoading } = useAuth();
   const supabase = createClientComponentClient();
   
   // Use user from props if provided, otherwise from context
   const user = propUser || contextUser;
 
+  // Set initial values based on email to prevent blank avatar
   useEffect(() => {
-    if (user) {
-      console.log("UserNav: User data available, fetching profile", user.id);
-      fetchUserProfile();
-    } else {
-      console.log("UserNav: No user data available");
+    if (user?.email) {
+      const emailInitial = user.email[0].toUpperCase();
+      setInitials(emailInitial);
+      setDisplayName(user.email.split('@')[0]);
     }
-  }, [user]);
+  }, [user?.email]);
+
+  // Then fetch complete profile data
+  useEffect(() => {
+    if (user && !isLoading) {
+      fetchUserProfile();
+    }
+  }, [user?.id, isLoading]);
 
   async function fetchUserProfile() {
     try {
       if (!user || !user.id) {
-        console.log("UserNav: No user ID, skipping profile fetch");
         return;
       }
       
@@ -113,21 +119,15 @@ export default function UserNav({ user: propUser }: UserNavProps) {
         setDisplayName(user.email.split("@")[0]);
       }
       
+      // Only set initials if we actually have some
       const userInitials = (firstInitial + lastInitial).toUpperCase();
-      console.log("UserNav: Setting initials to:", userInitials || "U");
-      setInitials(userInitials || "U");
+      if (userInitials) {
+        setInitials(userInitials);
+      }
       
     } catch (error) {
       console.error("UserNav: Error in fetchUserProfile:", error);
-      // Use email as fallback
-      if (user && user.email) {
-        const email = user.email.split("@")[0];
-        setInitials(email.substring(0, 2).toUpperCase());
-        setDisplayName(email);
-      } else {
-        setInitials("U");
-        setDisplayName("User");
-      }
+      // Email fallback already set in initial useEffect
     }
   }
 
@@ -160,7 +160,6 @@ export default function UserNav({ user: propUser }: UserNavProps) {
 
   // If no user is found, don't render anything
   if (!user) {
-    console.log("UserNav: No user, not rendering");
     return null;
   }
 
@@ -169,7 +168,7 @@ export default function UserNav({ user: propUser }: UserNavProps) {
       <DropdownMenuTrigger className="focus:outline-none group">
         <Avatar className="h-8 w-8 bg-white/10 hover:bg-white/20 transition-all duration-300 ring-2 ring-white/20 group-hover:ring-white/40 rounded-none">
           <AvatarFallback className="text-white font-semibold bg-transparent">
-            {initials || user.email?.[0]?.toUpperCase() || "U"}
+            {initials || (user.email?.[0]?.toUpperCase() || "U")}
           </AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
@@ -184,7 +183,7 @@ export default function UserNav({ user: propUser }: UserNavProps) {
             </div>
             <div className="flex flex-col">
               <span className="text-sm font-medium text-white group-hover:text-rugby-teal">
-                {displayName || user.email || "User"}
+                {displayName || user.email?.split("@")[0] || "User"}
               </span>
               <span className="text-xs text-white/70 group-hover:text-rugby-teal/70">View Profile</span>
             </div>

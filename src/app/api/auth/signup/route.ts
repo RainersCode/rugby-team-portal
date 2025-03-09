@@ -16,8 +16,11 @@ export async function POST(request: Request) {
       );
     }
     
-    // Create a Supabase client configured to use cookies
-    const supabase = createRouteHandlerClient({ cookies });
+    // Properly await cookies() before using it
+    const cookieStore = cookies();
+    
+    // Create a Supabase client with the awaited cookie store
+    const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
     
     // Attempt to sign up the user
     const { data, error } = await supabase.auth.signUp({

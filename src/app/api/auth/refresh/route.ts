@@ -7,8 +7,12 @@ export const dynamic = 'force-dynamic';
 export async function GET() {
   try {
     console.log('API: Refreshing auth session');
-    // Create a Supabase client configured to use cookies
-    const supabase = createRouteHandlerClient({ cookies });
+    
+    // Properly await cookies() before using it
+    const cookieStore = cookies();
+    
+    // Create a Supabase client with the awaited cookie store
+    const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
 
     // Get the current session
     const { data: { session }, error: sessionError } = await supabase.auth.getSession();

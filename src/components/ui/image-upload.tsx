@@ -1,22 +1,40 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import Image from 'next/image';
 import { Loader2 } from 'lucide-react';
 
 interface ImageUploadProps {
-  onUploadComplete: (url: string) => void;
+  onUploadComplete?: (url: string) => void;
   defaultImage?: string;
   id?: string;
+  value?: string;
+  onChange?: (url: string) => void;
+  onUpload?: (file: File) => Promise<string | null>;
+  disabled?: boolean;
 }
 
-export function ImageUpload({ onUploadComplete, defaultImage, id = 'default' }: ImageUploadProps) {
+export function ImageUpload({ 
+  onUploadComplete, 
+  defaultImage, 
+  id = 'default',
+  value,
+  onChange,
+  onUpload,
+  disabled = false
+}: ImageUploadProps) {
   const [uploading, setUploading] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(defaultImage || null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(value || defaultImage || null);
   const [error, setError] = useState<string | null>(null);
   const supabase = createClientComponentClient();
+
+  useEffect(() => {
+    if (value !== undefined) {
+      setPreviewUrl(value);
+    }
+  }, [value]);
 
   const inputId = `imageInput-${id}`;
 
@@ -24,13 +42,11 @@ export function ImageUpload({ onUploadComplete, defaultImage, id = 'default' }: 
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Check file type
     if (!file.type.startsWith('image/')) {
       setError('Please upload an image file');
       return;
     }
 
-    // Check file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       setError('Image must be less than 5MB');
       return;
@@ -40,32 +56,51 @@ export function ImageUpload({ onUploadComplete, defaultImage, id = 'default' }: 
     setError(null);
 
     try {
-      // Create a unique file name
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
-      const filePath = `article-images/${fileName}`;
+      if (typeof onUpload === 'function') {
+        const url = await onUpload(file);
+        if (url) {
+          setPreviewUrl(url);
+          
+          if (typeof onChange === 'function') {
+            onChange(url);
+          }
+          
+          if (typeof onUploadComplete === 'function') {
+            onUploadComplete(url);
+          }
+        } else {
+          throw new Error('Failed to upload image');
+        }
+      } else {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+        const filePath = `article-images/${fileName}`;
 
-      // Upload the file to Supabase storage
-      const { error: uploadError, data } = await supabase.storage
-        .from('articles')
-        .upload(filePath, file);
+        const { error: uploadError, data } = await supabase.storage
+          .from('articles')
+          .upload(filePath, file);
 
-      if (uploadError) throw uploadError;
+        if (uploadError) throw uploadError;
 
-      // Get the public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('articles')
-        .getPublicUrl(filePath);
+        const { data: { publicUrl } } = supabase.storage
+          .from('articles')
+          .getPublicUrl(filePath);
 
-      // Set preview and notify parent
-      setPreviewUrl(publicUrl);
-      onUploadComplete(publicUrl);
+        setPreviewUrl(publicUrl);
+        
+        if (typeof onChange === 'function') {
+          onChange(publicUrl);
+        }
+        
+        if (typeof onUploadComplete === 'function') {
+          onUploadComplete(publicUrl);
+        }
+      }
     } catch (error) {
       console.error('Error uploading image:', error);
       setError('Failed to upload image');
     } finally {
       setUploading(false);
-      // Clear the input value to allow uploading the same file again
       const input = document.getElementById(inputId) as HTMLInputElement;
       if (input) input.value = '';
     }
@@ -77,7 +112,7 @@ export function ImageUpload({ onUploadComplete, defaultImage, id = 'default' }: 
         <Button
           type="button"
           variant="outline"
-          disabled={uploading}
+          disabled={uploading || disabled}
           onClick={() => document.getElementById(inputId)?.click()}
         >
           {uploading ? (
@@ -95,6 +130,7 @@ export function ImageUpload({ onUploadComplete, defaultImage, id = 'default' }: 
           accept="image/*"
           onChange={handleFileChange}
           className="hidden"
+          disabled={disabled}
         />
       </div>
 

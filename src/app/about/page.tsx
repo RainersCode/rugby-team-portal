@@ -7,19 +7,17 @@ export const revalidate = 3600
 export const dynamic = 'force-dynamic'
 
 export default async function AboutPage() {
-  const cookieStore = cookies()
+  const cookieStore = await cookies()
   const supabase = createServerComponentClient({ cookies: () => cookieStore })
   
-  // Check if user is admin
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
+  // Check if user is admin using the more secure getUser method
+  const { data: { user } } = await supabase.auth.getUser()
 
-  const { data: profile } = session
+  const { data: profile } = user
     ? await supabase
         .from('profiles')
         .select('role')
-        .eq('id', session.user.id)
+        .eq('id', user.id)
         .single()
     : { data: null }
 

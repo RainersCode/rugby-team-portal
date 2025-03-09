@@ -11,7 +11,7 @@ interface Props {
 
 async function getArticle(slug: string): Promise<Article | null> {
   try {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const supabase = createServerComponentClient({ cookies: () => cookieStore });
     
     // First fetch the article without the user relationship
@@ -74,9 +74,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export const dynamic = 'force-dynamic';
 export const fetchCache = 'force-no-store';
 
-export default async function NewsPage() {
+export default async function NewsPage({
+  searchParams,
+}: {
+  searchParams: { category?: string; page?: string };
+}) {
   try {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const supabase = createServerComponentClient({ cookies: () => cookieStore });
     
     // Fetch articles without the user relationship for now

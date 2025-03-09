@@ -6,8 +6,11 @@ export const dynamic = 'force-dynamic';
 
 export async function POST() {
   try {
-    // Create a Supabase client configured to use cookies
-    const supabase = createRouteHandlerClient({ cookies });
+    // Properly await cookies() before using it
+    const cookieStore = cookies();
+    
+    // Create a Supabase client with the awaited cookie store
+    const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
     
     // Sign out the user
     const { error } = await supabase.auth.signOut();
