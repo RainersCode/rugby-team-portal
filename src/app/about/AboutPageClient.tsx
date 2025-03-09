@@ -90,13 +90,13 @@ export default function AboutPageClient({ aboutData, teamMembers = [], isAdmin }
 
       {/* Mission and Values Section */}
       <section className="relative">
-        <div className="absolute inset-0 bg-gradient-to-l from-rugby-teal/5 to-transparent rounded-none" />
+        <div className="absolute inset-0 bg-gradient-to-l from-rugby-teal/5 to-transparent rounded-3xl" />
         <div className="relative grid md:grid-cols-2 gap-12 p-8 md:p-12 items-start">
           <motion.div 
             className="space-y-8"
             {...fadeInUp}
           >
-            <div className="inline-flex items-center gap-2 bg-rugby-teal/10 text-rugby-teal rounded-none px-4 py-1">
+            <div className="inline-flex items-center gap-2 bg-rugby-teal/10 text-rugby-teal rounded-full px-4 py-1">
               <Target className="w-4 h-4" />
               <span className="text-sm font-medium">{aboutTranslations[language].ourPurpose}</span>
             </div>
@@ -114,7 +114,7 @@ export default function AboutPageClient({ aboutData, teamMembers = [], isAdmin }
             {...fadeInUp}
             transition={{ delay: 0.2 }}
           >
-            <div className="inline-flex items-center gap-2 bg-rugby-teal/10 text-rugby-teal rounded-none px-4 py-1">
+            <div className="inline-flex items-center gap-2 bg-rugby-teal/10 text-rugby-teal rounded-full px-4 py-1">
               <Heart className="w-4 h-4" />
               <span className="text-sm font-medium">{aboutTranslations[language].whatWeStandFor}</span>
             </div>
@@ -132,13 +132,13 @@ export default function AboutPageClient({ aboutData, teamMembers = [], isAdmin }
 
       {/* History Section */}
       <section className="relative">
-        <div className="absolute inset-0 bg-gradient-to-l from-rugby-teal/5 to-transparent rounded-none" />
+        <div className="absolute inset-0 bg-gradient-to-l from-rugby-teal/5 to-transparent rounded-3xl" />
         <div className="relative grid md:grid-cols-2 gap-12 p-8 md:p-12 items-start">
           <motion.div 
             className="space-y-8"
             {...fadeInUp}
           >
-            <div className="inline-flex items-center gap-2 bg-rugby-teal/10 text-rugby-teal rounded-none px-4 py-1">
+            <div className="inline-flex items-center gap-2 bg-rugby-teal/10 text-rugby-teal rounded-full px-4 py-1">
               <Calendar className="w-4 h-4" />
               <span className="text-sm font-medium">{aboutTranslations[language].ourJourney}</span>
             </div>
@@ -156,7 +156,7 @@ export default function AboutPageClient({ aboutData, teamMembers = [], isAdmin }
             {...fadeInUp}
             transition={{ delay: 0.2 }}
           >
-            <div className="inline-flex items-center gap-2 bg-rugby-teal/10 text-rugby-teal rounded-none px-4 py-1">
+            <div className="inline-flex items-center gap-2 bg-rugby-teal/10 text-rugby-teal rounded-full px-4 py-1">
               <Star className="w-4 h-4" />
               <span className="text-sm font-medium">{aboutTranslations[language].keyAchievements}</span>
             </div>
@@ -168,7 +168,7 @@ export default function AboutPageClient({ aboutData, teamMembers = [], isAdmin }
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.1 * index }}
-                  className="bg-white dark:bg-gray-800 rounded-none p-6 shadow-sm hover:shadow-md transition-shadow border border-rugby-teal/20 hover:border-rugby-teal/50"
+                  className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow border border-rugby-teal/20"
                 >
                   <h3 className="font-semibold text-lg mb-2">{highlight.title}</h3>
                   <p className="text-gray-600 dark:text-gray-400">{highlight.description}</p>
@@ -195,13 +195,13 @@ export default function AboutPageClient({ aboutData, teamMembers = [], isAdmin }
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8">
             {teamMembers.map((member) => (
-              <div key={member.id} className="text-center bg-white dark:bg-gray-800 p-6 shadow-sm hover:shadow-md transition-all border border-gray-200 dark:border-gray-700 hover:border-rugby-teal/50 rounded-none">
-                <div className="relative w-32 h-32 mx-auto mb-4 overflow-hidden rounded-none border-2 border-rugby-teal/20">
+              <div key={member.id} className="text-center">
+                <div className="relative w-48 h-48 mx-auto mb-4">
                   <Image
                     src={member.image}
                     alt={member.name}
                     fill
-                    className="object-cover"
+                    className="object-cover rounded-full"
                   />
                 </div>
                 <h3 className="text-xl font-semibold">{member.name}</h3>
