@@ -9,7 +9,22 @@ export const revalidate = 0;
 export default async function AdminActivitiesPage() {
   try {
     const cookieStore = await cookies();
-    const supabase = createServerComponentClient({ cookies: () => cookieStore });
+    const supabase = createServerComponentClient({ 
+      cookies: () => cookieStore,
+    });
+
+    // Detect if this is a client-side rendered page for troubleshooting
+    let isBrowser = false;
+    try {
+      isBrowser = typeof window !== 'undefined';
+    } catch (e) {
+      // This will throw in server components, which is expected
+    }
+
+    // Initial loading state for better UX
+    if (isBrowser) {
+      return <div className="p-8 text-center">Loading admin activities...</div>;
+    }
 
     // Check if user is authenticated and is admin using the more secure getUser method with timeout
     let user;
@@ -32,7 +47,19 @@ export default async function AdminActivitiesPage() {
       }
     } catch (error) {
       console.error('AdminActivitiesPage: Error getting user:', error);
-      redirect('/auth/signin');
+      // Return a better error UI instead of redirecting in case it's just a timeout
+      return (
+        <div className="p-8 text-center">
+          <h2 className="text-xl font-bold mb-2">Authentication Error</h2>
+          <p className="mb-4">There was a problem verifying your login. Please try the following:</p>
+          <ul className="list-disc ml-8 text-left mb-4">
+            <li>Clear your browser cache and cookies</li>
+            <li>Try using a private/incognito window</li>
+            <li>Try logging in again</li>
+          </ul>
+          <a href="/auth/signin" className="text-rugby-teal hover:underline">Return to Login</a>
+        </div>
+      );
     }
 
     // Check if user is admin with timeout
@@ -61,7 +88,14 @@ export default async function AdminActivitiesPage() {
       }
     } catch (error) {
       console.error('AdminActivitiesPage: Error checking admin status:', error);
-      redirect('/');
+      // Provide detailed error message for admin verification failures
+      return (
+        <div className="p-8 text-center">
+          <h2 className="text-xl font-bold mb-2">Admin Verification Error</h2>
+          <p className="mb-4">We couldn't verify your admin privileges. Please try again later.</p>
+          <a href="/" className="text-rugby-teal hover:underline">Return to Home</a>
+        </div>
+      );
     }
 
     // First fetch all activities with timeout
@@ -73,7 +107,7 @@ export default async function AdminActivitiesPage() {
         .order('date', { ascending: false });
         
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Activities fetch timeout')), 5000)
+        setTimeout(() => reject(new Error('Activities fetch timeout')), 8000)
       );
       
       const { data, error } = await Promise.race([
@@ -83,21 +117,31 @@ export default async function AdminActivitiesPage() {
 
       if (error) {
         console.error('AdminActivitiesPage: Error fetching activities:', error);
-        return <div className="p-8 text-center">Error loading activities. Please try again later.</div>;
+        return (
+          <div className="p-8 text-center">
+            <h2 className="text-xl font-bold mb-2">Data Loading Error</h2>
+            <p>Unable to load activities. Please try refreshing the page.</p>
+          </div>
+        );
       }
       
       activities = data;
     } catch (error) {
       console.error('AdminActivitiesPage: Error fetching activities:', error);
-      return <div className="p-8 text-center">Error loading activities. Please try again later.</div>;
+      return (
+        <div className="p-8 text-center">
+          <h2 className="text-xl font-bold mb-2">Data Loading Error</h2>
+          <p>Unable to load activities. Please try refreshing the page.</p>
+        </div>
+      );
     }
 
     // Then fetch participant details for each activity with limited concurrency
     const activitiesWithDetails = [];
     
-    // Process in batches of 3 to avoid overwhelming the database
-    for (let i = 0; i < activities.length; i += 3) {
-      const batch = activities.slice(i, i + 3);
+    // Process in batches of 2 for Chrome to avoid overwhelming the connection
+    for (let i = 0; i < activities.length; i += 2) {
+      const batch = activities.slice(i, i + 2);
       const batchResults = await Promise.all(
         batch.map(async (activity) => {
           try {
@@ -151,6 +195,12 @@ export default async function AdminActivitiesPage() {
     return <AdminActivitiesClient activities={activitiesWithDetails} />;
   } catch (error) {
     console.error('Error in AdminActivitiesPage:', error);
-    return <div className="p-8 text-center">An error occurred. Please try again later.</div>;
+    return (
+      <div className="p-8 text-center">
+        <h2 className="text-xl font-bold mb-2">Something Went Wrong</h2>
+        <p className="mb-4">We encountered an error while loading the admin dashboard.</p>
+        <a href="/" className="text-rugby-teal hover:underline">Return to Home</a>
+      </div>
+    );
   }
 } 

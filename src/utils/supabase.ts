@@ -4,8 +4,7 @@ import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
-// Create Supabase clients directly to avoid React hook rule violations
-// This works better with the Next.js and React lifecycle
+// Create Supabase clients with better browser compatibility
 export const supabase = createClientComponentClient({
   supabaseUrl: supabaseUrl,
   supabaseKey: supabaseAnonKey,
@@ -13,7 +12,9 @@ export const supabase = createClientComponentClient({
     auth: {
       autoRefreshToken: true,
       persistSession: true,
-      detectSessionInUrl: true
+      detectSessionInUrl: true,
+      storageKey: 'rugby-portal-auth', // Use consistent storage key
+      flowType: 'pkce', // Use PKCE flow for better security and compatibility
     },
     db: {
       schema: 'public',
@@ -23,7 +24,9 @@ export const supabase = createClientComponentClient({
     },
     global: {
       fetch: (...args) => {
+        // Use a custom fetch with credentials included
         return fetch(...args, {
+          credentials: 'include',
           // Add shorter timeout for fetch operations to prevent hanging in production
           signal: args[1]?.signal || new AbortController().signal,
           // @ts-ignore - custom option for shorter timeout
@@ -39,7 +42,8 @@ export const supabaseAdmin = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: true
+    detectSessionInUrl: true,
+    flowType: 'pkce', // Use PKCE flow for better security and compatibility
   },
   db: {
     schema: 'public',
@@ -50,6 +54,7 @@ export const supabaseAdmin = createClient(supabaseUrl, supabaseAnonKey, {
   global: {
     fetch: (...args) => {
       return fetch(...args, {
+        credentials: 'include',
         // Add shorter timeout for fetch operations to prevent hanging in production
         signal: args[1]?.signal || new AbortController().signal,
         // @ts-ignore - custom option for shorter timeout

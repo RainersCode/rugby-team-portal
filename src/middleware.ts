@@ -10,7 +10,19 @@ export async function middleware(request: NextRequest) {
   console.log('Middleware: Processing route:', request.nextUrl.pathname);
   
   const res = NextResponse.next();
-  const supabase = createMiddlewareClient({ req: request, res });
+  
+  // Identify browser for debugging
+  const userAgent = request.headers.get('user-agent') || '';
+  const isChrome = userAgent.includes('Chrome');
+  const isSafari = userAgent.includes('Safari') && !isChrome; // Chrome also includes Safari in UA
+  
+  console.log(`Middleware: Browser detected - Chrome: ${isChrome}, Safari: ${isSafari}`);
+  
+  // Create client with appropriate timeout based on browser
+  const supabase = createMiddlewareClient({ 
+    req: request, 
+    res 
+  });
 
   // Add caching headers for static assets
   if (request.nextUrl.pathname.match(/\.(jpg|jpeg|png|webp|gif|css|js)$/)) {
@@ -24,13 +36,24 @@ export async function middleware(request: NextRequest) {
     return res;
   }
 
+  // Longer timeout for Chrome browsers which may need it
+  const sessionTimeout = isChrome ? 5000 : 3000;
+  const profileTimeout = isChrome ? 5000 : 3000;
+
   // Refresh session if expired - with timeout
   try {
+    // Add browser compatibility header for Chrome
+    if (isChrome) {
+      res.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.headers.set('Pragma', 'no-cache');
+      res.headers.set('Expires', '0');
+    }
+    
     const sessionPromise = supabase.auth.getSession();
     
     // Add a timeout to the session fetch to prevent hanging
     const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('Session fetch timeout')), 3000);
+      setTimeout(() => reject(new Error('Session fetch timeout')), sessionTimeout);
     });
     
     const { data: { session } } = await Promise.race([
@@ -66,7 +89,7 @@ export async function middleware(request: NextRequest) {
           .single();
           
         const profileTimeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error('Profile fetch timeout')), 3000);
+          setTimeout(() => reject(new Error('Profile fetch timeout')), profileTimeout);
         });
         
         const { data: profile } = await Promise.race([
@@ -81,11 +104,11 @@ export async function middleware(request: NextRequest) {
           console.log('Middleware: User is not admin, redirecting home');
           return NextResponse.redirect(new URL('/', request.url));
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('Middleware: Error checking admin status:', error);
         // For admin routes, if we can't determine admin status within timeout,
         // let them proceed and let the page component handle the validation
-        if (error.message?.includes('timeout')) {
+        if (isChrome || (error.message && error.message.includes('timeout'))) {
           console.log('Middleware: Admin check timed out, letting page component handle validation');
           return res;
         }
@@ -100,12 +123,12 @@ export async function middleware(request: NextRequest) {
     }
     
     return res;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Middleware error:', error);
     
-    // If there's a timeout on session check for admin routes,
+    // If there's a timeout on session check for admin routes on Chrome,
     // let the page component handle the validation
-    if (error.message?.includes('timeout') && request.nextUrl.pathname.startsWith('/admin')) {
+    if ((isChrome || (error.message && error.message.includes('timeout'))) && request.nextUrl.pathname.startsWith('/admin')) {
       console.log('Middleware: Session check timed out for admin route, proceeding to page');
       return res;
     }
