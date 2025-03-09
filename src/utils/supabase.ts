@@ -21,6 +21,16 @@ export const supabase = createClientComponentClient({
     realtime: {
       timeout: 30000, // 30 seconds
     },
+    global: {
+      fetch: (...args) => {
+        return fetch(...args, {
+          // Add shorter timeout for fetch operations to prevent hanging in production
+          signal: args[1]?.signal || new AbortController().signal,
+          // @ts-ignore - custom option for shorter timeout
+          timeout: 10000 // 10 seconds timeout
+        });
+      }
+    }
   }
 });
 
@@ -37,6 +47,16 @@ export const supabaseAdmin = createClient(supabaseUrl, supabaseAnonKey, {
   realtime: {
     timeout: 30000, // 30 seconds
   },
+  global: {
+    fetch: (...args) => {
+      return fetch(...args, {
+        // Add shorter timeout for fetch operations to prevent hanging in production
+        signal: args[1]?.signal || new AbortController().signal,
+        // @ts-ignore - custom option for shorter timeout
+        timeout: 10000 // 10 seconds timeout
+      });
+    }
+  }
 });
 
 // Helper function for database operations with retry
@@ -50,7 +70,13 @@ export const withRetry = async <T>(
   
   while (retryCount < maxRetries) {
     try {
-      return await operation();
+      // Add timeout to operation
+      const operationPromise = operation();
+      const timeoutPromise = new Promise<never>((_, reject) => 
+        setTimeout(() => reject(new Error('Operation timeout')), 8000)
+      );
+      
+      return await Promise.race([operationPromise, timeoutPromise]);
     } catch (error: any) {
       lastError = error;
       

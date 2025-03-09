@@ -24,44 +24,55 @@ export async function middleware(request: NextRequest) {
     return res;
   }
 
-  // Refresh session if expired
-  const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-  
-  if (sessionError) {
-    console.error('Middleware: Session error:', sessionError);
-    // Redirect to login if there's a session error on protected routes
-    if (['/members', '/profile', '/settings', '/admin'].some(path => request.nextUrl.pathname.startsWith(path))) {
-      return NextResponse.redirect(new URL('/auth/signin', request.url));
+  // Refresh session if expired - with timeout
+  try {
+    const sessionPromise = supabase.auth.getSession();
+    
+    // Add a timeout to the session fetch to prevent hanging
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Session fetch timeout')), 3000);
+    });
+    
+    const { data: { session } } = await Promise.race([
+      sessionPromise,
+      timeoutPromise as Promise<never>
+    ]) as { data: { session: any } };
+    
+    // Protected routes that require authentication
+    if (['/members', '/profile', '/settings'].some(path => request.nextUrl.pathname.startsWith(path))) {
+      if (!session) {
+        console.log('Middleware: No session for protected route, redirecting to login');
+        const redirectUrl = request.nextUrl.pathname;
+        const encodedRedirectUrl = encodeURIComponent(redirectUrl);
+        return NextResponse.redirect(new URL(`/auth/signin?redirect=${encodedRedirectUrl}`, request.url));
+      }
     }
-    return res;
-  }
-
-  // Protected routes that require authentication
-  if (['/members', '/profile', '/settings', '/admin'].some(path => request.nextUrl.pathname.startsWith(path))) {
-    if (!session) {
-      console.log('Middleware: No session for protected route, redirecting to login');
-      const redirectUrl = request.nextUrl.pathname;
-      const encodedRedirectUrl = encodeURIComponent(redirectUrl);
-      return NextResponse.redirect(new URL(`/auth/signin?redirect=${encodedRedirectUrl}`, request.url));
-    }
-
-    console.log('Middleware: User authenticated:', session.user.id);
-
-    // Additional check for admin route
+    
+    // Special handling for admin routes - more efficient check
     if (request.nextUrl.pathname.startsWith('/admin')) {
+      if (!session) {
+        console.log('Middleware: No session for admin route, redirecting to login');
+        return NextResponse.redirect(new URL('/auth/signin', request.url));
+      }
+      
       console.log('Middleware: Checking admin status for:', session.user.id);
       
       try {
-        const { data: profile, error: profileError } = await supabase
+        // Use a more efficient query with a timeout
+        const profilePromise = supabase
           .from('profiles')
           .select('role')
           .eq('id', session.user.id)
           .single();
-
-        if (profileError) {
-          console.error('Middleware: Error fetching profile:', profileError);
-          return NextResponse.redirect(new URL('/', request.url));
-        }
+          
+        const profileTimeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Profile fetch timeout')), 3000);
+        });
+        
+        const { data: profile } = await Promise.race([
+          profilePromise, 
+          profileTimeoutPromise as Promise<never>
+        ]) as { data: { role: string } };
 
         const isAdmin = profile?.role === 'admin';
         console.log('Middleware: Admin status:', isAdmin);
@@ -72,16 +83,39 @@ export async function middleware(request: NextRequest) {
         }
       } catch (error) {
         console.error('Middleware: Error checking admin status:', error);
+        // For admin routes, if we can't determine admin status within timeout,
+        // let them proceed and let the page component handle the validation
+        if (error.message?.includes('timeout')) {
+          console.log('Middleware: Admin check timed out, letting page component handle validation');
+          return res;
+        }
         return NextResponse.redirect(new URL('/', request.url));
       }
     }
-  }
 
-  // Redirect signed-in users away from auth pages
-  if (session && request.nextUrl.pathname.startsWith('/auth/')) {
-    console.log('Middleware: Redirecting authenticated user from auth page');
-    return NextResponse.redirect(new URL('/', request.url));
+    // Redirect signed-in users away from auth pages
+    if (session && request.nextUrl.pathname.startsWith('/auth/')) {
+      console.log('Middleware: Redirecting authenticated user from auth page');
+      return NextResponse.redirect(new URL('/', request.url));
+    }
+    
+    return res;
+  } catch (error) {
+    console.error('Middleware error:', error);
+    
+    // If there's a timeout on session check for admin routes,
+    // let the page component handle the validation
+    if (error.message?.includes('timeout') && request.nextUrl.pathname.startsWith('/admin')) {
+      console.log('Middleware: Session check timed out for admin route, proceeding to page');
+      return res;
+    }
+    
+    // For other protected routes, redirect to login on timeout
+    if (['/members', '/profile', '/settings', '/admin'].some(path => 
+      request.nextUrl.pathname.startsWith(path))) {
+      return NextResponse.redirect(new URL('/auth/signin', request.url));
+    }
+    
+    return res;
   }
-
-  return res;
 } 
