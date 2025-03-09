@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import {
   Card,
@@ -81,8 +81,12 @@ export default function ActivitiesClient({
 }: Props) {
   const [activities, setActivities] = useState(initialActivities);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const supabase = createClientComponentClient();
   const { language } = useLanguage();
+
+  // Get the view from URL parameters (default to "grid" if not specified)
+  const defaultView = searchParams.get("view") === "calendar" ? "calendar" : "grid";
 
   const handleParticipation = async (
     activityId: string,
@@ -221,7 +225,7 @@ export default function ActivitiesClient({
 
       {/* Content */}
       <div className="container-width py-12">
-        <Tabs defaultValue="grid" className="space-y-8">
+        <Tabs defaultValue={defaultView} className="space-y-8">
           <div className="flex justify-center">
             <TabsList className="grid grid-cols-2 w-[400px] border-2 border-rugby-teal/30">
               <TabsTrigger
