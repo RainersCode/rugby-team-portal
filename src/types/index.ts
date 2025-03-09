@@ -155,6 +155,7 @@ export interface Activity {
   title: string;
   description: string;
   date: string;
+  time?: string;
   location: string;
   max_participants: number;
   created_at: string;

@@ -1,6 +1,7 @@
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { format } from "date-fns"
+import { lv, enUS } from "date-fns/locale"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -18,6 +19,7 @@ export function slugify(text: string): string {
     .replace(/-+$/, '');         // Trim - from end of text
 }
 
-export function formatDate(date: string) {
-  return format(new Date(date), 'MMMM d, yyyy');
+export function formatDate(date: string, language: string = 'en') {
+  const locale = language === 'lv' ? lv : enUS;
+  return format(new Date(date), 'MMMM d, yyyy', { locale });
 } 

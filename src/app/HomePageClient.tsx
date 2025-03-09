@@ -4,10 +4,11 @@ import { Suspense, lazy } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 import HeroCarousel from "@/components/features/Hero/HeroCarousel";
 import LatestNews from "@/components/features/News/LatestNews";
-import { TrainingProgram, Article, Match, Player } from "@/types";
+import { TrainingProgram, Article, Match, Player, Activity } from "@/types";
 import MatchList from "@/components/features/Matches/MatchList";
 import TrainingList from "@/components/features/Training/TrainingList";
 import TeamSection from "@/components/features/Team/TeamSection";
+import ActivityList from "@/components/features/Activities/ActivityList";
 import Link from "next/link";
 import Image from "next/image";
 import { Card } from "@/components/ui/card";
@@ -25,6 +26,7 @@ interface HomePageClientProps {
   completedMatches: Match[];
   programs: TrainingProgram[];
   players: Player[];
+  activities: Activity[];
 }
 
 export default function HomePageClient({
@@ -34,8 +36,9 @@ export default function HomePageClient({
   completedMatches,
   programs,
   players,
+  activities = [],
 }: HomePageClientProps) {
-  const { translations } = useLanguage();
+  const { translations, language } = useLanguage();
 
   return (
     <div className="space-y-0">
@@ -46,6 +49,14 @@ export default function HomePageClient({
 
       {/* News Grid Section */}
       <LatestNews articles={articles} />
+
+      {/* Upcoming Activities Section */}
+      {activities.length > 0 && (
+        <ActivityList 
+          activities={activities} 
+          title={language === "en" ? "Upcoming Activities" : "Gaidāmās Aktivitātes"}
+        />
+      )}
 
       {/* Call to Action Section */}
       <section className="bg-rugby-teal/5 dark:bg-rugby-teal/10">

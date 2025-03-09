@@ -49,6 +49,14 @@ export default async function Home() {
     .select("*")
     .order("number");
 
+  // Fetch upcoming activities (next 3)
+  const { data: activities } = await supabase
+    .from("activities")
+    .select("*")
+    .gte("date", new Date().toISOString())
+    .order("date", { ascending: true })
+    .limit(3);
+
   // Map the players data
   const mappedPlayers = players?.map(player => ({
     id: player.id.toString(),
@@ -79,6 +87,7 @@ export default async function Home() {
       completedMatches={completedMatches || []}
       programs={programs as TrainingProgram[]}
       players={mappedPlayers}
+      activities={activities || []}
     />
   );
 }
