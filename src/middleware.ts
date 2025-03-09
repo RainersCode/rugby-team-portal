@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export const config = {
-  matcher: ['/members/:path*', '/profile/:path*', '/settings/:path*', '/admin/:path*', '/auth/:path*', '/api/profile'],
+  matcher: ['/members/:path*', '/profile/:path*', '/settings/:path*', '/admin/:path*', '/auth/:path*', '/api/profile', '/api/settings'],
 };
 
 export async function middleware(request: NextRequest) {
@@ -18,9 +18,9 @@ export async function middleware(request: NextRequest) {
   
   console.log(`Middleware: Browser detected - Chrome: ${isChrome}, Safari: ${isSafari}`);
   
-  // Special handling for Chrome profile API
-  if (isChrome && request.nextUrl.pathname === '/api/profile') {
-    console.log('Middleware: Chrome profile API request, skipping auth check');
+  // Skip auth check for API routes in Chrome
+  if (isChrome && (request.nextUrl.pathname === '/api/profile' || request.nextUrl.pathname === '/api/settings')) {
+    console.log('Middleware: Chrome API request, skipping auth check');
     return res;
   }
   
@@ -43,7 +43,7 @@ export async function middleware(request: NextRequest) {
     res.headers.set('Pragma', 'no-cache');
     res.headers.set('Expires', '0');
     // Allow API calls to proceed without auth for some endpoints
-    if (request.nextUrl.pathname === '/api/profile') {
+    if (request.nextUrl.pathname === '/api/profile' || request.nextUrl.pathname === '/api/settings') {
       return res;
     }
   }
@@ -119,7 +119,10 @@ export async function middleware(request: NextRequest) {
             method: 'GET',
             headers: {
               'Cookie': request.headers.get('cookie') || '',
+              'Cache-Control': 'no-cache, no-store, must-revalidate',
+              'Pragma': 'no-cache',
             },
+            cache: 'no-store'
           });
           
           if (response.ok) {

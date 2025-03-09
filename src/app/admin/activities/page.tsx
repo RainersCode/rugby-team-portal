@@ -2,6 +2,7 @@ import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import AdminActivitiesClient from './AdminActivitiesClient';
+import { headers } from 'next/headers';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -29,27 +30,44 @@ export default async function AdminActivitiesPage() {
     // Chrome-specific optimization: use direct API call for profile
     let isChrome = false;
     let user;
+
     try {
-      // Get user agent from headers
-      const headers = new Headers();
-      const userAgent = headers.get('user-agent') || '';
+      // Get user agent from request headers properly
+      const headersList = headers();
+      const userAgent = headersList.get('user-agent') || '';
       isChrome = userAgent.includes('Chrome');
+      
+      console.log('AdminActivitiesPage: User agent:', userAgent);
+      console.log('AdminActivitiesPage: Is Chrome detected:', isChrome);
 
       if (isChrome) {
         console.log('AdminActivitiesPage: Chrome detected, using optimized auth');
         
-        // Try to make direct API call for profile
+        // Get server URL from request or env
+        const baseUrl = process.env.VERCEL_URL 
+          ? `https://${process.env.VERCEL_URL}` 
+          : process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+        
+        console.log('AdminActivitiesPage: Using API URL:', `${baseUrl}/api/profile`);
+        
+        // Try to make direct API call for profile (with better headers)
+        const allCookies = cookieStore.getAll();
+        const cookieHeader = allCookies.map(c => `${c.name}=${c.value}`).join('; ');
+        
         try {
-          const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/profile`, {
+          const response = await fetch(`${baseUrl}/api/profile`, {
             method: 'GET',
             headers: {
-              'Cookie': cookieStore.toString(),
+              'Cookie': cookieHeader,
               'Cache-Control': 'no-cache, no-store, must-revalidate',
+              'Pragma': 'no-cache',
             },
+            cache: 'no-store'
           });
           
           if (response.ok) {
             const data = await response.json();
+            console.log('AdminActivitiesPage: API response successful:', !!data.user);
             user = data.user;
             
             // Early admin check
@@ -60,10 +78,15 @@ export default async function AdminActivitiesPage() {
             
             // If we have user and they're admin, we can skip the standard checks
             if (user) {
+              console.log('AdminActivitiesPage: User is admin, fetching activities');
               // Skip to activities fetching
-              const activities = await fetchActivities(supabase);
+              const activities = await fetchActivities(supabase, true);
+              console.log('AdminActivitiesPage: Activities fetched, rendering');
               return <AdminActivitiesClient activities={activities} />;
             }
+          } else {
+            const text = await response.text();
+            console.error('AdminActivitiesPage: API response not OK:', response.status, text);
           }
         } catch (error) {
           console.error('AdminActivitiesPage: Chrome API call failed, falling back to standard method', error);
@@ -75,6 +98,9 @@ export default async function AdminActivitiesPage() {
       // Fall through to standard method
     }
 
+    // Standard authentication check - will be used as fallback
+    console.log('AdminActivitiesPage: Using standard auth method');
+    
     // Check if user is authenticated and is admin using the more secure getUser method with timeout
     try {
       const userPromise = supabase.auth.getUser();
