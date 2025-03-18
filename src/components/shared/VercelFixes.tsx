@@ -51,8 +51,72 @@ export default function VercelFixes() {
       };
     };
     
+    // Fix for React error #418 related to MessagePort
+    const fixReactMessagePortError = () => {
+      // Check if we're in a development environment
+      const isDev = process.env.NODE_ENV !== 'production';
+      
+      if (!isDev) {
+        // In production, monkey-patch the MessagePort to handle communication errors
+        const originalMessagePort = window.MessagePort;
+        if (originalMessagePort && originalMessagePort.prototype) {
+          const originalPostMessage = originalMessagePort.prototype.postMessage;
+          
+          // Override postMessage to catch errors
+          originalMessagePort.prototype.postMessage = function(...args) {
+            try {
+              return originalPostMessage.apply(this, args);
+            } catch (error) {
+              console.warn('Suppressed MessagePort error:', error);
+              // Just return undefined instead of crashing
+              return undefined;
+            }
+          };
+        }
+      }
+    };
+    
     // Apply message channel fix
     fixMessageChannelIssues();
+    
+    // Apply React error #418 fix (safely try)
+    try {
+      fixReactMessagePortError();
+    } catch (e) {
+      console.warn('Could not apply MessagePort fix:', e);
+    }
+    
+    // Fix for Next.js RSC loading issues
+    const fixRscLoadingIssues = () => {
+      // Monkey patch fetch to avoid errors with RSC routes
+      const originalFetch = window.fetch;
+      window.fetch = function(...args) {
+        const url = args[0]?.toString() || '';
+        
+        // Check if this is an RSC request (containing _rsc parameter)
+        if (url.includes('_rsc=')) {
+          // Modify the request to avoid 404 errors
+          try {
+            const urlObj = new URL(url);
+            // Clean up the RSC parameter
+            urlObj.searchParams.delete('_rsc');
+            args[0] = urlObj.toString();
+            
+            // Add special header to indicate this was an RSC request
+            if (!args[1]) args[1] = {};
+            if (!args[1].headers) args[1].headers = {};
+            args[1].headers['x-nextjs-data'] = '1';
+          } catch (e) {
+            console.warn('Error parsing RSC URL:', e);
+          }
+        }
+        
+        return originalFetch.apply(this, args);
+      };
+    };
+    
+    // Apply RSC fix
+    fixRscLoadingIssues();
     
     // Apply Vercel specific fixes
     if (window.location.hostname.includes('vercel.app')) {
@@ -83,6 +147,56 @@ export default function VercelFixes() {
           }, 5000);
         }
       };
+      
+      // Add special handler for prefetching to prevent 404 errors
+      const fixPrefetchIssues = () => {
+        // Find all link elements and update their prefetch behavior
+        const updatePrefetchLinks = () => {
+          const links = document.querySelectorAll('a[href^="/admin"]');
+          links.forEach(link => {
+            // Remove any existing prefetch attributes
+            link.removeAttribute('prefetch');
+            
+            // Add data attribute to indicate no prefetching
+            link.setAttribute('data-no-prefetch', 'true');
+            
+            // Add event listener to forcibly remove prefetch before navigation
+            link.addEventListener('click', (e) => {
+              // Find and remove any prefetch link elements
+              const prefetchLinks = document.querySelectorAll('link[rel="prefetch"][href*="_rsc"]');
+              prefetchLinks.forEach(pl => pl.remove());
+            });
+          });
+        };
+        
+        // Run immediately
+        updatePrefetchLinks();
+        
+        // And also set up a mutation observer to handle dynamically added links
+        const observer = new MutationObserver(mutations => {
+          let shouldUpdate = false;
+          mutations.forEach(mutation => {
+            if (mutation.type === 'childList' && mutation.addedNodes.length) {
+              shouldUpdate = true;
+            }
+          });
+          
+          if (shouldUpdate) {
+            updatePrefetchLinks();
+          }
+        });
+        
+        // Start observing the document
+        observer.observe(document.body, { 
+          childList: true,
+          subtree: true 
+        });
+        
+        return () => observer.disconnect();
+      };
+      
+      // Apply prefetch fix with a delay to ensure DOM is ready
+      setTimeout(fixPrefetchIssues, 1000);
       
       // Run the cookie fix with slight delay to ensure other initialization happens first
       setTimeout(fixSupabaseCookies, 1000);

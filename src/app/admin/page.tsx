@@ -136,12 +136,26 @@ export default function AdminDashboard() {
       abortController.current = new AbortController();
       const signal = abortController.current.signal;
       
-      // Use try-catch for each count to prevent one failure from stopping all stats
-      const fetchCount = async (table: string) => {
+      // Simplified approach - fetch each table one by one to avoid timeout issues
+      let statsData = {
+        players: 0,
+        articles: 0,
+        matches: 0,
+        users: 0,
+        activities: 0,
+        exercises: 0,
+        training_programs: 0,
+        live_streams: 0,
+        championship_teams: 0,
+        sevens_teams: 0,
+        cup_teams: 0,
+      };
+      
+      // Helper function to safely fetch count
+      const fetchSingleCount = async (table: string) => {
+        if (!isMounted.current || signal.aborted) return 0;
+        
         try {
-          // Check if component is still mounted
-          if (!isMounted.current || signal.aborted) return 0;
-          
           const { count, error } = await supabase
             .from(table)
             .select('*', { count: 'exact', head: true });
@@ -152,66 +166,63 @@ export default function AdminDashboard() {
           }
           
           return count || 0;
-        } catch (e) {
-          console.error(`Error in fetchCount for ${table}:`, e);
+        } catch (err) {
+          console.warn(`Could not fetch count for ${table}:`, err);
           return 0;
         }
       };
       
-      // Use Promise.all with a timeout
-      const fetchWithTimeout = async () => {
-        const timeoutPromise = new Promise<never>((_, reject) => {
-          setTimeout(() => reject(new Error('Stats fetch timeout')), 10000);
-        });
-        
-        const statsPromise = Promise.all([
-          fetchCount("players"),
-          fetchCount("articles"),
-          fetchCount("matches"),
-          fetchCount("profiles"),
-          fetchCount("activities"),
-          fetchCount("exercises"),
-          fetchCount("training_programs"),
-          fetchCount("live_streams"),
-          fetchCount("championship_teams"),
-          fetchCount("sevens_teams"),
-          fetchCount("cup_teams"),
-        ]);
-        
-        return Promise.race([statsPromise, timeoutPromise]);
-      };
-      
-      const [
-        playersCount,
-        articlesCount,
-        matchesCount,
-        usersCount,
-        activitiesCount,
-        exercisesCount,
-        trainingProgramsCount,
-        liveStreamsCount,
-        championshipTeamsCount,
-        sevensTeamsCount,
-        cupTeamsCount,
-      ] = await fetchWithTimeout();
-      
-      // Check if component is still mounted before updating state
+      // Fetch one by one rather than in parallel to avoid overwhelming connections
+      statsData.players = await fetchSingleCount("players");
       if (!isMounted.current) return;
       
-      setStats({
-        players: playersCount,
-        articles: articlesCount,
-        matches: matchesCount,
-        users: usersCount,
-        activities: activitiesCount,
-        exercises: exercisesCount,
-        training_programs: trainingProgramsCount,
-        live_streams: liveStreamsCount,
-        tournaments: championshipTeamsCount + sevensTeamsCount + cupTeamsCount,
-        championship_teams: championshipTeamsCount,
-        sevens_teams: sevensTeamsCount,
-        cup_teams: cupTeamsCount,
-      });
+      statsData.articles = await fetchSingleCount("articles");
+      if (!isMounted.current) return;
+      
+      statsData.matches = await fetchSingleCount("matches");
+      if (!isMounted.current) return;
+      
+      statsData.users = await fetchSingleCount("profiles");
+      if (!isMounted.current) return;
+      
+      statsData.activities = await fetchSingleCount("activities");
+      if (!isMounted.current) return;
+      
+      // Only continue if we're still mounted
+      if (!isMounted.current) return;
+      
+      // Try to fetch the rest in parallel but don't fail if some fail
+      try {
+        const [exercises, programs, streams, championship, sevens, cup] = await Promise.allSettled([
+          fetchSingleCount("exercises"),
+          fetchSingleCount("training_programs"),
+          fetchSingleCount("live_streams"),
+          fetchSingleCount("championship_teams"),
+          fetchSingleCount("sevens_teams"),
+          fetchSingleCount("cup_teams")
+        ]);
+        
+        // Only use results that were fulfilled
+        statsData.exercises = exercises.status === 'fulfilled' ? exercises.value : 0;
+        statsData.training_programs = programs.status === 'fulfilled' ? programs.value : 0;
+        statsData.live_streams = streams.status === 'fulfilled' ? streams.value : 0;
+        statsData.championship_teams = championship.status === 'fulfilled' ? championship.value : 0;
+        statsData.sevens_teams = sevens.status === 'fulfilled' ? sevens.value : 0;
+        statsData.cup_teams = cup.status === 'fulfilled' ? cup.value : 0;
+      } catch (e) {
+        console.warn('Failed to fetch some additional stats:', e);
+      }
+      
+      if (!isMounted.current) return;
+      
+      // Calculate the tournaments total
+      statsData.tournaments = 
+        statsData.championship_teams + 
+        statsData.sevens_teams + 
+        statsData.cup_teams;
+      
+      // Update the state with the new stats
+      setStats(statsData);
       
       console.log("AdminDashboard: Stats fetched successfully");
     } catch (error) {

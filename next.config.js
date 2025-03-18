@@ -42,15 +42,6 @@ const nextConfig = {
   },
   // Move outputFileTracingRoot to root level as per Next.js 15 requirements
   outputFileTracingRoot: process.cwd(),
-  // Simplified experimental options for Next.js 15
-  experimental: {
-    // Empty but maintained for future experimental features
-  },
-  // Add a longer timeout for OneDrive operations
-  onDemandEntries: {
-    // period (in ms) where the server will keep pages in the buffer
-    maxInactiveAge: 60 * 1000,
-  },
   // Optimize for Windows paths
   webpack: (config, { isServer }) => {
     if (!isServer) {
@@ -61,6 +52,27 @@ const nextConfig = {
       };
     }
     return config;
+  },
+  // Fix issues with Vercel deployment
+  async rewrites() {
+    return [
+      // Properly handle RSC requests with query parameters
+      {
+        source: '/:path*/_rsc/:slug*',
+        destination: '/:path*/:slug*',
+      },
+      {
+        source: '/:path*\\?_rsc=:slug*',
+        destination: '/:path*',
+      }
+    ]
+  },
+  // Increase timeout for Vercel builds
+  onDemandEntries: {
+    // Period (in ms) where the server will keep pages in the buffer
+    maxInactiveAge: 60 * 1000,
+    // Number of pages that should be kept simultaneously without being disposed
+    pagesBufferLength: 5,
   },
 };
 
