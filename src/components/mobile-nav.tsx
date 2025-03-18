@@ -218,22 +218,17 @@ export function MobileNav() {
                   <div className="text-sm font-medium text-white/80 mb-3">
                     {translations.adminPanel}
                   </div>
-                  <div className="flex flex-col space-y-2">
-                    {adminNavItems.map((item) => (
-                      <Link
-                        key={item.href}
-                        href={item.href}
-                        onClick={() => setIsOpen(false)}
-                        className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-none transition-colors ${
-                          pathname === item.href
-                            ? "bg-white text-rugby-teal"
-                            : "text-white hover:bg-white/10"
-                        }`}
-                      >
-                        <span>{translations[item.label]}</span>
-                      </Link>
-                    ))}
-                  </div>
+                  <Link
+                    href="/admin"
+                    onClick={() => setIsOpen(false)}
+                    className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-none transition-colors ${
+                      pathname === "/admin"
+                        ? "bg-white text-rugby-teal"
+                        : "text-white hover:bg-white/10"
+                    }`}
+                  >
+                    <span>{translations.adminPanel}</span>
+                  </Link>
                 </div>
               )}
             </div>
