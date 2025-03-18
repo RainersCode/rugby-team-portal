@@ -1,8 +1,5 @@
 'use client';
 
-import { Box, Flex, SimpleGrid, Stat, StatLabel, StatNumber } from '@chakra-ui/react';
-import { useColorModeValue } from '@chakra-ui/hooks';
-
 interface StatProps {
   name: string;
   value: number;
@@ -14,38 +11,27 @@ interface StatsGroupProps {
 
 export default function StatsGroup({ stats }: StatsGroupProps) {
   return (
-    <SimpleGrid columns={{ base: 1, md: 3 }} spacing={{ base: 5, lg: 8 }}>
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-5 lg:gap-8">
       {stats.map((stat) => (
         <StatCard key={stat.name} name={stat.name} value={stat.value} />
       ))}
-    </SimpleGrid>
+    </div>
   );
 }
 
 function StatCard({ name, value }: StatProps) {
-  const bgColor = useColorModeValue('white', 'gray.700');
-  const textColor = useColorModeValue('gray.800', 'white');
-
   return (
-    <Stat
-      px={{ base: 4, md: 8 }}
-      py={5}
-      shadow="xl"
-      border="1px solid"
-      borderColor={useColorModeValue('gray.200', 'gray.500')}
-      rounded="lg"
-      bg={bgColor}
-    >
-      <Flex justifyContent="space-between">
-        <Box pl={{ base: 2, md: 4 }}>
-          <StatLabel fontWeight="medium" isTruncated color={textColor}>
+    <div className="px-4 md:px-8 py-5 shadow-xl border border-gray-200 rounded-lg bg-white">
+      <div className="flex justify-between">
+        <div className="pl-2 md:pl-4">
+          <div className="text-sm font-medium text-gray-800 truncate">
             {name}
-          </StatLabel>
-          <StatNumber fontSize="2xl" fontWeight="bold" color={textColor}>
+          </div>
+          <div className="text-2xl font-bold text-gray-800">
             {value}
-          </StatNumber>
-        </Box>
-      </Flex>
-    </Stat>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 } 

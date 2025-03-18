@@ -1,7 +1,5 @@
 'use client';
 
-import { Box } from '@chakra-ui/react';
-import { useColorModeValue } from '@chakra-ui/hooks';
 import { useEffect, useRef } from 'react';
 
 interface DataPoint {
@@ -15,9 +13,9 @@ interface LineGraphProps {
 
 export default function LineGraph({ data }: LineGraphProps) {
   const chartRef = useRef<HTMLDivElement>(null);
-  const lineColor = useColorModeValue('#3182CE', '#63B3ED');
-  const gridColor = useColorModeValue('#E2E8F0', '#2D3748');
-  const textColor = useColorModeValue('#2D3748', '#E2E8F0');
+  const lineColor = '#3182CE';
+  const gridColor = '#E2E8F0';
+  const textColor = '#2D3748';
 
   useEffect(() => {
     if (!chartRef.current || !data.length) return;
@@ -186,15 +184,17 @@ export default function LineGraph({ data }: LineGraphProps) {
       });
     });
 
-  }, [data, lineColor, gridColor, textColor]);
+  }, [data]);
 
   return (
-    <Box 
+    <div 
       ref={chartRef} 
-      width="100%" 
-      height="100%"
-      overflow="hidden"
-      position="relative"
+      style={{
+        width: '100%',
+        height: '100%',
+        overflow: 'hidden',
+        position: 'relative'
+      }}
     />
   );
 } 

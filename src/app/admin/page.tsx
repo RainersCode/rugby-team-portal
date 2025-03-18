@@ -1,7 +1,5 @@
 "use client";
 
-import { Container, Heading, Spinner, Text, VStack, Button, HStack, Box, SimpleGrid } from '@chakra-ui/react';
-import { useToast } from '@chakra-ui/hooks';
 import { useEffect, useState, useCallback, useRef, Suspense } from 'react';
 import LineGraph from '@/components/stats/LineGraph';
 import StatsGroup from '@/components/stats/StatsGroup';
@@ -47,7 +45,22 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(!hasAdminCache());
   const [error, setError] = useState<string | null>(null);
   const lastFetchRef = useRef<number>(0);
-  const toast = useToast();
+  const [toastMessage, setToastMessage] = useState<{
+    title: string;
+    message: string;
+    type: 'success' | 'error' | 'info';
+    visible: boolean;
+  } | null>(null);
+
+  // Function to show toast
+  const showToast = (title: string, message: string, type: 'success' | 'error' | 'info') => {
+    setToastMessage({ title, message, type, visible: true });
+    
+    // Auto hide after 5 seconds
+    setTimeout(() => {
+      setToastMessage(null);
+    }, 5000);
+  };
 
   // Stable version of fetchStats to avoid dependency issues
   const fetchStatsStable = useCallback(async () => {
@@ -112,17 +125,15 @@ export default function AdminPage() {
       console.error('Error fetching stats:', error);
       setError(error.message || 'Failed to fetch stats');
       
-      toast({
-        title: 'Error fetching stats',
-        description: error.message || 'There was a problem loading the admin dashboard',
-        status: 'error',
-        duration: 5000,
-        isClosable: true,
-      });
+      showToast(
+        'Error fetching stats',
+        error.message || 'There was a problem loading the admin dashboard',
+        'error'
+      );
     } finally {
       setLoading(false);
     }
-  }, [isAdmin, toast]);
+  }, [isAdmin]);
 
   // Function to handle admin page return
   const handleAdminReturn = useCallback(() => {
@@ -182,103 +193,122 @@ export default function AdminPage() {
 
   if (!isAdmin) {
     return (
-      <Container maxW="container.xl" py={10}>
-        <VStack spacing={6} align="center">
-          <Heading as="h1" size="xl">Admin Dashboard</Heading>
-          <Text>You do not have permission to access this page.</Text>
-        </VStack>
-      </Container>
+      <div className="container mx-auto py-10 px-4">
+        <div className="flex flex-col items-center space-y-6">
+          <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+          <p>You do not have permission to access this page.</p>
+        </div>
+      </div>
     );
   }
 
   if (loading && !stats) {
     return (
-      <Container maxW="container.xl" py={10}>
-        <VStack spacing={6} align="center">
-          <Heading as="h1" size="xl">Admin Dashboard</Heading>
-          <Spinner size="xl" />
-          <Text>Loading stats...</Text>
+      <div className="container mx-auto py-10 px-4">
+        <div className="flex flex-col items-center space-y-6">
+          <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+          <p>Loading stats...</p>
           
           {/* Options for user if loading takes too long */}
-          <Box mt={8} p={4} borderWidth="1px" borderRadius="lg">
-            <VStack spacing={4}>
-              <Text fontWeight="bold">Taking longer than expected?</Text>
+          <div className="mt-8 p-4 border border-gray-200 rounded-lg">
+            <div className="flex flex-col space-y-4">
+              <p className="font-bold">Taking longer than expected?</p>
               
               {hasAdminCache() && (
-                <Button 
-                  leftIcon={<ArrowPathIcon width={20} />} 
-                  colorScheme="blue"
+                <button 
+                  className="flex items-center justify-center px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
                   onClick={() => {
                     setStats(getCachedAdminStats());
                     setLoading(false);
                   }}
                 >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
+                  </svg>
                   Load from cache
-                </Button>
+                </button>
               )}
               
-              <Button 
-                colorScheme="orange" 
+              <button 
+                className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600"
                 onClick={() => {
                   // Force reload the page with cache buster
                   window.location.href = '/admin?refresh=' + Date.now();
                 }}
               >
                 Force Reload Page
-              </Button>
+              </button>
               
-              <Button 
-                colorScheme="red"
+              <button 
+                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
                 onClick={() => {
                   clearAdminCache();
                   window.location.reload();
                 }}
               >
                 Clear Cache & Reload
-              </Button>
-            </VStack>
-          </Box>
-        </VStack>
-      </Container>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     );
   }
 
   if (error) {
     return (
-      <Container maxW="container.xl" py={10}>
-        <VStack spacing={6} align="center">
-          <Heading as="h1" size="xl">Admin Dashboard</Heading>
-          <Text color="red.500">Error: {error}</Text>
-          <Button 
-            colorScheme="blue" 
+      <div className="container mx-auto py-10 px-4">
+        <div className="flex flex-col items-center space-y-6">
+          <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+          <p className="text-red-500">Error: {error}</p>
+          <button 
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
             onClick={() => fetchStatsStable()}
           >
             Try Again
-          </Button>
-        </VStack>
-      </Container>
+          </button>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Container maxW="container.xl" py={10}>
+    <div className="container mx-auto py-10 px-4">
       {/* Wrap URL handler in Suspense to fix the Next.js warning */}
       <Suspense fallback={null}>
         <AdminURLHandler onRefresh={handleForceRefresh} />
       </Suspense>
       
-      <VStack spacing={8} align="stretch">
-        <HStack justify="space-between">
-          <Heading as="h1" size="xl">Admin Dashboard</Heading>
-          <Button 
-            leftIcon={<ArrowPathIcon width={20} />} 
-            colorScheme="blue"
-            isLoading={loading}
+      {/* Toast message */}
+      {toastMessage && (
+        <div 
+          className={`fixed top-4 right-4 p-4 rounded shadow-md z-50 ${
+            toastMessage.type === 'error' ? 'bg-red-500' : 
+            toastMessage.type === 'success' ? 'bg-green-500' : 'bg-blue-500'
+          } text-white`}
+        >
+          <div className="font-bold">{toastMessage.title}</div>
+          <div>{toastMessage.message}</div>
+        </div>
+      )}
+      
+      <div className="flex flex-col space-y-8">
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+          <button 
+            className="flex items-center px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            disabled={loading}
             onClick={() => fetchStatsStable()}
           >
+            {loading ? (
+              <div className="animate-spin h-5 w-5 mr-2 border-b-2 border-white rounded-full"></div>
+            ) : (
+              <ArrowPathIcon className="h-5 w-5 mr-2" />
+            )}
             Refresh
-          </Button>
-        </HStack>
+          </button>
+        </div>
 
         {stats && (
           <>
@@ -290,58 +320,64 @@ export default function AdminPage() {
               ]}
             />
 
-            <Box borderWidth="1px" borderRadius="lg" p={6} bg="white">
-              <Heading as="h2" size="md" mb={4}>New Members by Month</Heading>
-              <Box h="400px">
+            <div className="border border-gray-200 rounded-lg p-6 bg-white">
+              <h2 className="text-lg font-medium mb-4">New Members by Month</h2>
+              <div className="h-[400px]">
                 <LineGraph data={stats.membersByMonth} />
-              </Box>
-            </Box>
+              </div>
+            </div>
             
-            <SimpleGrid columns={{ base: 1, md: 2 }} spacing={8}>
-              <Box borderWidth="1px" borderRadius="lg" p={6} bg="white">
-                <Heading as="h2" size="md" mb={4}>Quick Links</Heading>
-                <VStack align="stretch" spacing={4}>
-                  <Button colorScheme="teal" as="a" href="/admin/players">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="border border-gray-200 rounded-lg p-6 bg-white">
+                <h2 className="text-lg font-medium mb-4">Quick Links</h2>
+                <div className="flex flex-col space-y-4">
+                  <a 
+                    href="/admin/players"
+                    className="px-4 py-2 bg-teal-500 text-white rounded text-center hover:bg-teal-600"
+                  >
                     Manage Players
-                  </Button>
-                  <Button colorScheme="teal" as="a" href="/admin/matches">
+                  </a>
+                  <a 
+                    href="/admin/matches"
+                    className="px-4 py-2 bg-teal-500 text-white rounded text-center hover:bg-teal-600"
+                  >
                     Manage Matches
-                  </Button>
-                  <Button colorScheme="teal" as="a" href="/admin/gallery">
+                  </a>
+                  <a 
+                    href="/admin/gallery"
+                    className="px-4 py-2 bg-teal-500 text-white rounded text-center hover:bg-teal-600"
+                  >
                     Manage Gallery
-                  </Button>
-                </VStack>
-              </Box>
+                  </a>
+                </div>
+              </div>
               
-              <Box borderWidth="1px" borderRadius="lg" p={6} bg="white">
-                <Heading as="h2" size="md" mb={4}>System Status</Heading>
-                <VStack align="stretch" spacing={2}>
-                  <Text><strong>Database:</strong> Connected</Text>
-                  <Text><strong>Last Updated:</strong> {new Date().toLocaleTimeString()}</Text>
-                  <Text><strong>Session Status:</strong> Active</Text>
-                  <Button 
-                    mt={4}
-                    size="sm"
-                    colorScheme="red"
+              <div className="border border-gray-200 rounded-lg p-6 bg-white">
+                <h2 className="text-lg font-medium mb-4">System Status</h2>
+                <div className="flex flex-col space-y-2">
+                  <p><strong>Database:</strong> Connected</p>
+                  <p><strong>Last Updated:</strong> {new Date().toLocaleTimeString()}</p>
+                  <p><strong>Session Status:</strong> Active</p>
+                  <button 
+                    className="mt-4 px-4 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600"
                     onClick={() => {
                       clearAdminCache();
-                      toast({
-                        title: 'Cache cleared',
-                        description: 'Admin cache has been cleared successfully',
-                        status: 'success',
-                        duration: 3000,
-                      });
+                      showToast(
+                        'Cache cleared',
+                        'Admin cache has been cleared successfully',
+                        'success'
+                      );
                     }}
                   >
                     Clear Admin Cache
-                  </Button>
-                </VStack>
-              </Box>
-            </SimpleGrid>
+                  </button>
+                </div>
+              </div>
+            </div>
           </>
         )}
-      </VStack>
-    </Container>
+      </div>
+    </div>
   );
 }
 
