@@ -9,6 +9,7 @@ import { LanguageProvider } from "@/context/LanguageContext";
 import { AuthProvider } from "@/context/AuthContext";
 import VercelFixes from "@/components/shared/VercelFixes";
 import StatePersistence from "@/components/shared/StatePersistence";
+import AdminRecovery from "@/components/shared/AdminRecovery";
 
 const jockeyOne = Jockey_One({ 
   weight: '400',
@@ -44,6 +45,8 @@ export default function RootLayout({
         <VercelFixes />
         
         <StatePersistence />
+        
+        <AdminRecovery />
         
         <ThemeProvider>
           <AuthProvider>

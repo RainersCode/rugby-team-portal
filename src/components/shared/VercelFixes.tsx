@@ -76,6 +76,68 @@ export default function VercelFixes() {
       }
     };
     
+    // Fix for admin 404 error and performance optimization
+    const optimizeForAdmin = () => {
+      // Only apply to admin pages
+      if (window.location.pathname.startsWith('/admin')) {
+        console.log('Applying admin performance optimizations');
+        
+        // 1. Preconnect to Supabase
+        const preconnectLink = document.createElement('link');
+        preconnectLink.rel = 'preconnect';
+        preconnectLink.href = 'https://wlfcjbqqfdrnfhzzpjeg.supabase.co';
+        document.head.appendChild(preconnectLink);
+        
+        // 2. Limit concurrent requests
+        let activeRequests = 0;
+        const MAX_CONCURRENT = 5;
+        const requestQueue: Array<() => void> = [];
+        
+        const originalFetch = window.fetch;
+        window.fetch = function(...args) {
+          const url = args[0]?.toString() || '';
+          
+          // For Supabase requests, enforce limits
+          if (url.includes('supabase') || url.includes('wlfcjbqqfdrnfhzzpjeg')) {
+            return new Promise((resolve, reject) => {
+              const executeRequest = () => {
+                activeRequests++;
+                
+                const requestPromise = originalFetch.apply(this, args)
+                  .then(response => {
+                    activeRequests--;
+                    if (requestQueue.length > 0) {
+                      const nextRequest = requestQueue.shift();
+                      if (nextRequest) nextRequest();
+                    }
+                    return response;
+                  })
+                  .catch(error => {
+                    activeRequests--;
+                    if (requestQueue.length > 0) {
+                      const nextRequest = requestQueue.shift();
+                      if (nextRequest) nextRequest();
+                    }
+                    throw error;
+                  });
+                
+                resolve(requestPromise);
+              };
+              
+              if (activeRequests < MAX_CONCURRENT) {
+                executeRequest();
+              } else {
+                requestQueue.push(executeRequest);
+              }
+            });
+          }
+          
+          // For other requests, proceed normally
+          return originalFetch.apply(this, args);
+        };
+      }
+    };
+    
     // Apply message channel fix
     fixMessageChannelIssues();
     
@@ -84,6 +146,13 @@ export default function VercelFixes() {
       fixReactMessagePortError();
     } catch (e) {
       console.warn('Could not apply MessagePort fix:', e);
+    }
+    
+    // Apply performance optimizations for admin
+    try {
+      optimizeForAdmin();
+    } catch (e) {
+      console.warn('Could not apply admin optimizations:', e);
     }
     
     // Fix for Next.js RSC loading issues
