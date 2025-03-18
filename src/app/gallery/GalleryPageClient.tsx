@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -60,15 +60,33 @@ export default function GalleryPageClient() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
+  
+  // Track component mounted state to prevent memory leaks
+  const isMounted = useRef(true);
+  const abortController = useRef(new AbortController());
+  
   const supabase = createClientComponentClient();
   const { language } = useLanguage();
   const t = galleryTranslations[language];
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+      abortController.current.abort();
+      
+      // Force cleanup of any stuck UI states on unmount
+      document.body.style.overflow = 'auto';
+      document.body.style.pointerEvents = 'auto';
+    };
+  }, []);
 
   useEffect(() => {
     fetchGalleries();
     
     // Check if the device is mobile
     const checkIfMobile = () => {
+      if (!isMounted.current) return;
       setIsMobile(window.innerWidth < 768);
     };
     
@@ -88,19 +106,29 @@ export default function GalleryPageClient() {
   useEffect(() => {
     if (loadError && retryCount < 3) {
       const timer = setTimeout(() => {
+        if (!isMounted.current) return;
+        
         console.log(`Gallery: Retrying gallery fetch (${retryCount + 1}/3)...`);
         setRetryCount(prev => prev + 1);
         fetchGalleries();
       }, 3000);
       
-      return () => clearTimeout(timer);
+      return () => {
+        clearTimeout(timer);
+      };
     }
   }, [loadError, retryCount]);
 
   const fetchGalleries = async () => {
     try {
+      if (!isMounted.current) return;
+      
       setLoading(true);
       setLoadError(null);
+      
+      // Create a fresh abort controller for this operation
+      abortController.current = new AbortController();
+      const signal = abortController.current.signal;
       
       // Set a timeout for the fetch operation
       const fetchPromise = supabase
@@ -109,7 +137,8 @@ export default function GalleryPageClient() {
           *,
           photos:gallery_photos(*)
         `)
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .abortSignal(signal);
         
       const timeoutPromise = new Promise((_, reject) => {
         setTimeout(() => reject(new Error('Gallery fetch timeout')), 8000);
@@ -119,6 +148,9 @@ export default function GalleryPageClient() {
         fetchPromise, 
         timeoutPromise
       ]) as any;
+
+      // Stop if component unmounted during fetch
+      if (!isMounted.current || signal.aborted) return;
 
       if (error) throw error;
       
@@ -130,15 +162,24 @@ export default function GalleryPageClient() {
       // Process galleries to ensure photos are properly loaded
       const processedGalleries = galleries.map(gallery => ({
         ...gallery,
-        photos: Array.isArray(gallery.photos) ? gallery.photos : []
+        photos: Array.isArray(gallery.photos) ? gallery.photos.map(photo => ({
+          ...photo,
+          // Add a cache buster to each image URL for Vercel deployments
+          image_url: window.location.hostname.includes('vercel.app') 
+            ? `${photo.image_url}?v=${Date.now()}`
+            : photo.image_url
+        })) : []
       }));
       
+      if (!isMounted.current) return;
       setGalleries(processedGalleries);
       setLoadError(null);
     } catch (error: any) {
+      if (!isMounted.current) return;
       console.error("Error fetching galleries:", error);
       setLoadError(error.message || 'Failed to load galleries');
     } finally {
+      if (!isMounted.current) return;
       setLoading(false);
     }
   };
@@ -230,20 +271,6 @@ export default function GalleryPageClient() {
       document.body.style.overflow = 'auto';
     }
   }, [selectedGallery]);
-
-  // Component unmount cleanup
-  useEffect(() => {
-    return () => {
-      // Force reset any potential stuck UI state
-      document.body.style.overflow = 'auto';
-      document.body.style.pointerEvents = 'auto';
-      document.documentElement.style.pointerEvents = 'auto';
-      
-      // Reset state
-      setSelectedGallery(null);
-      setSelectedPhotoIndex(0);
-    };
-  }, []);
 
   if (loading) {
     return (

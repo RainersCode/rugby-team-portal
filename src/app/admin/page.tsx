@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { Users, FileText, Calendar, Settings, BarChart, CalendarDays, Dumbbell, Image as ImageIcon, Play, Trophy, Loader2 } from "lucide-react";
@@ -33,7 +33,18 @@ export default function AdminDashboard() {
     cup_teams: 0,
   });
 
+  // Use refs to track component mounting state
+  const isMounted = useRef(true);
+  const abortController = useRef(new AbortController());
   const supabase = createClientComponentClient();
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+      abortController.current.abort();
+    };
+  }, []);
 
   // Only fetch stats when we know the user is an admin
   useEffect(() => {
@@ -43,11 +54,15 @@ export default function AdminDashboard() {
     } else if (!isReady && retryCount < 3) {
       // Add a retry mechanism after 3 seconds (shorter time)
       const timer = setTimeout(() => {
-        console.log(`AdminDashboard: Not ready yet, retrying (${retryCount + 1}/3)...`);
-        setRetryCount(prev => prev + 1);
+        if (isMounted.current) {
+          console.log(`AdminDashboard: Not ready yet, retrying (${retryCount + 1}/3)...`);
+          setRetryCount(prev => prev + 1);
+        }
       }, 3000); // Reduced from 5000 to 3000
       
-      return () => clearTimeout(timer);
+      return () => {
+        clearTimeout(timer);
+      };
     }
   }, [isReady, isAdmin, retryCount]);
 
@@ -59,6 +74,9 @@ export default function AdminDashboard() {
         !isReady && retryCount === 0) {
       const refreshAuth = async () => {
         try {
+          // Don't run if component is unmounted
+          if (!isMounted.current) return;
+          
           // Force a session refresh
           await supabase.auth.refreshSession();
           console.log("AdminDashboard: Forced session refresh for Vercel deployment");
@@ -71,14 +89,59 @@ export default function AdminDashboard() {
     }
   }, [retryCount, isReady, supabase.auth]);
 
+  // Add a function to fix message channel issues with Supabase
+  useEffect(() => {
+    if (!isReady || !isAdmin) return;
+
+    // Function to ping the server to keep message channels alive
+    const keepMessageChannelsAlive = async () => {
+      try {
+        if (!isMounted.current) return;
+        
+        // Call a simple endpoint that keeps the message channel open
+        await fetch('/api/auth/message-fix', {
+          method: 'GET',
+          headers: {
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache'
+          },
+          signal: abortController.current.signal
+        });
+      } catch (err) {
+        // Ignore aborted requests
+        if (err.name === 'AbortError') return;
+        console.warn('Error keeping message channels alive:', err);
+      }
+    };
+
+    // Call once immediately
+    keepMessageChannelsAlive();
+    
+    // Set up interval to call regularly
+    const interval = setInterval(keepMessageChannelsAlive, 30000);
+    
+    return () => {
+      clearInterval(interval);
+    };
+  }, [isReady, isAdmin]);
+
   const fetchStats = async () => {
     try {
+      if (!isMounted.current) return;
+      
       setLoadingError(null);
       console.log("AdminDashboard: Fetching stats");
+      
+      // Create a new abort controller for this operation
+      abortController.current = new AbortController();
+      const signal = abortController.current.signal;
       
       // Use try-catch for each count to prevent one failure from stopping all stats
       const fetchCount = async (table: string) => {
         try {
+          // Check if component is still mounted
+          if (!isMounted.current || signal.aborted) return 0;
+          
           const { count, error } = await supabase
             .from(table)
             .select('*', { count: 'exact', head: true });
@@ -95,6 +158,29 @@ export default function AdminDashboard() {
         }
       };
       
+      // Use Promise.all with a timeout
+      const fetchWithTimeout = async () => {
+        const timeoutPromise = new Promise<never>((_, reject) => {
+          setTimeout(() => reject(new Error('Stats fetch timeout')), 10000);
+        });
+        
+        const statsPromise = Promise.all([
+          fetchCount("players"),
+          fetchCount("articles"),
+          fetchCount("matches"),
+          fetchCount("profiles"),
+          fetchCount("activities"),
+          fetchCount("exercises"),
+          fetchCount("training_programs"),
+          fetchCount("live_streams"),
+          fetchCount("championship_teams"),
+          fetchCount("sevens_teams"),
+          fetchCount("cup_teams"),
+        ]);
+        
+        return Promise.race([statsPromise, timeoutPromise]);
+      };
+      
       const [
         playersCount,
         articlesCount,
@@ -107,20 +193,11 @@ export default function AdminDashboard() {
         championshipTeamsCount,
         sevensTeamsCount,
         cupTeamsCount,
-      ] = await Promise.all([
-        fetchCount("players"),
-        fetchCount("articles"),
-        fetchCount("matches"),
-        fetchCount("profiles"),
-        fetchCount("activities"),
-        fetchCount("exercises"),
-        fetchCount("training_programs"),
-        fetchCount("live_streams"),
-        fetchCount("championship_teams"),
-        fetchCount("sevens_teams"),
-        fetchCount("cup_teams"),
-      ]);
-
+      ] = await fetchWithTimeout();
+      
+      // Check if component is still mounted before updating state
+      if (!isMounted.current) return;
+      
       setStats({
         players: playersCount,
         articles: articlesCount,
@@ -138,9 +215,15 @@ export default function AdminDashboard() {
       
       console.log("AdminDashboard: Stats fetched successfully");
     } catch (error) {
+      // Only update state if still mounted
+      if (!isMounted.current) return;
+      
       console.error("AdminDashboard: Error fetching stats:", error);
       setLoadingError("Failed to load dashboard statistics. Please try refreshing the page.");
     } finally {
+      // Only update state if still mounted
+      if (!isMounted.current) return;
+      
       setLoading(false);
     }
   };
