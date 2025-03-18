@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/components/shared/ThemeProvider";
 import { Toaster } from "sonner";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { AuthProvider } from "@/context/AuthContext";
+import VercelFixes from "@/components/shared/VercelFixes";
 
 const jockeyOne = Jockey_One({ 
   weight: '400',
@@ -39,6 +40,8 @@ export default function RootLayout({
       <body
         className={`${jockeyOne.variable} ${roboto.variable} font-roboto bg-bg-light dark:bg-bg-dark text-content-light dark:text-content-dark`}
       >
+        <VercelFixes />
+        
         <ThemeProvider>
           <AuthProvider>
             <LanguageProvider>

@@ -34,9 +34,23 @@ export async function middleware(request: NextRequest) {
   }
   
   try {
+    // Create Supabase client without extra options
     const supabase = createMiddlewareClient({ req: request, res });
     
-    // Get session with increased timeout
+    // Explicitly set cookie with appropriate settings
+    if (request.cookies.has('rugby-portal-auth-storage')) {
+      const cookieValue = request.cookies.get('rugby-portal-auth-storage')?.value;
+      if (cookieValue) {
+        res.cookies.set('rugby-portal-auth-storage', cookieValue, {
+          secure: process.env.NODE_ENV === 'production',
+          path: '/',
+          sameSite: 'lax',
+          maxAge: 7 * 24 * 60 * 60 // 7 days
+        });
+      }
+    }
+    
+    // Get session with increased timeout and error handling
     const sessionPromise = supabase.auth.getSession();
     const timeoutPromise = new Promise((_, reject) => {
       setTimeout(() => reject(new Error('Session fetch timeout')), 5000);
@@ -64,6 +78,7 @@ export async function middleware(request: NextRequest) {
       session = data.session;
     } catch (error) {
       console.error('Middleware: Session fetch error:', error);
+      
       // For specific routes, redirect to login
       if (['/members', '/profile', '/settings'].some(path => 
         request.nextUrl.pathname.startsWith(path))) {

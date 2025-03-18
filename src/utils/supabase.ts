@@ -18,7 +18,7 @@ export const supabase = createClientComponentClient({
       detectSessionInUrl: true,
       storageKey: AUTH_STORAGE_KEY, // Use consistent storage key
       flowType: 'pkce', // Use PKCE flow for better security and compatibility
-      // Disable localStorage to force cookie-only auth for better cross-browser consistency
+      // Update cookie settings for better cross-domain compatibility
       storage: {
         getItem: (key) => {
           if (typeof document === 'undefined') return null;
@@ -33,11 +33,13 @@ export const supabase = createClientComponentClient({
           if (typeof document === 'undefined') return;
           const maxAge = 7 * 24 * 60 * 60; // 7 days
           const encodedValue = encodeURIComponent(JSON.stringify(value));
-          document.cookie = `${key}=${encodedValue}; max-age=${maxAge}; path=/; samesite=lax`;
+          const domain = window.location.hostname.includes('vercel.app') ? '.vercel.app' : undefined;
+          document.cookie = `${key}=${encodedValue}; max-age=${maxAge}; path=/; samesite=lax${domain ? `; domain=${domain}` : ''}`;
         },
         removeItem: (key) => {
           if (typeof document === 'undefined') return;
-          document.cookie = `${key}=; max-age=0; path=/; samesite=lax`;
+          const domain = window.location.hostname.includes('vercel.app') ? '.vercel.app' : undefined;
+          document.cookie = `${key}=; max-age=0; path=/; samesite=lax${domain ? `; domain=${domain}` : ''}`;
         },
       },
     },
@@ -82,8 +84,15 @@ export const supabaseAdmin = createClient(supabaseUrl, supabaseAnonKey, {
         credentials: 'include',
         // Add shorter timeout for fetch operations to prevent hanging in production
         signal: args[1]?.signal || new AbortController().signal,
+        // Use a more reliable timeout approach
         // @ts-ignore - custom option for shorter timeout
-        timeout: 10000 // 10 seconds timeout
+        timeout: 10000, // 10 seconds timeout
+        // Add headers to ensure proper cache control
+        headers: {
+          ...args[1]?.headers,
+          'Cache-Control': 'no-cache, no-store',
+          'Pragma': 'no-cache',
+        }
       });
     }
   }

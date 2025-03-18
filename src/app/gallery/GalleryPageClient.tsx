@@ -57,6 +57,8 @@ export default function GalleryPageClient() {
   const [selectedGallery, setSelectedGallery] = useState<Gallery | null>(null);
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number>(0);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
   const supabase = createClientComponentClient();
   const { language } = useLanguage();
@@ -81,22 +83,61 @@ export default function GalleryPageClient() {
       window.removeEventListener('resize', checkIfMobile);
     };
   }, []);
+  
+  // Add retry mechanism for gallery loading
+  useEffect(() => {
+    if (loadError && retryCount < 3) {
+      const timer = setTimeout(() => {
+        console.log(`Gallery: Retrying gallery fetch (${retryCount + 1}/3)...`);
+        setRetryCount(prev => prev + 1);
+        fetchGalleries();
+      }, 3000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [loadError, retryCount]);
 
   const fetchGalleries = async () => {
     try {
       setLoading(true);
-      const { data: galleries, error } = await supabase
+      setLoadError(null);
+      
+      // Set a timeout for the fetch operation
+      const fetchPromise = supabase
         .from("galleries")
         .select(`
           *,
           photos:gallery_photos(*)
         `)
         .order("created_at", { ascending: false });
+        
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Gallery fetch timeout')), 8000);
+      });
+      
+      const { data: galleries, error } = await Promise.race([
+        fetchPromise, 
+        timeoutPromise
+      ]) as any;
 
       if (error) throw error;
-      setGalleries(galleries || []);
-    } catch (error) {
+      
+      // Check if we have valid data
+      if (!galleries || !Array.isArray(galleries)) {
+        throw new Error('Invalid gallery data received');
+      }
+      
+      // Process galleries to ensure photos are properly loaded
+      const processedGalleries = galleries.map(gallery => ({
+        ...gallery,
+        photos: Array.isArray(gallery.photos) ? gallery.photos : []
+      }));
+      
+      setGalleries(processedGalleries);
+      setLoadError(null);
+    } catch (error: any) {
       console.error("Error fetching galleries:", error);
+      setLoadError(error.message || 'Failed to load galleries');
     } finally {
       setLoading(false);
     }

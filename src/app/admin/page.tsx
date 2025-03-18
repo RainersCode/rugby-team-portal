@@ -41,15 +41,35 @@ export default function AdminDashboard() {
       console.log("AdminDashboard: User is admin, fetching stats");
       fetchStats();
     } else if (!isReady && retryCount < 3) {
-      // Add a retry mechanism after 5 seconds
+      // Add a retry mechanism after 3 seconds (shorter time)
       const timer = setTimeout(() => {
         console.log(`AdminDashboard: Not ready yet, retrying (${retryCount + 1}/3)...`);
         setRetryCount(prev => prev + 1);
-      }, 5000);
+      }, 3000); // Reduced from 5000 to 3000
       
       return () => clearTimeout(timer);
     }
   }, [isReady, isAdmin, retryCount]);
+
+  // Add another effect to handle session refresh on Vercel
+  useEffect(() => {
+    // For Vercel deployment, check if we're in production and refresh auth
+    if (typeof window !== 'undefined' && 
+        window.location.hostname.includes('vercel.app') && 
+        !isReady && retryCount === 0) {
+      const refreshAuth = async () => {
+        try {
+          // Force a session refresh
+          await supabase.auth.refreshSession();
+          console.log("AdminDashboard: Forced session refresh for Vercel deployment");
+        } catch (e) {
+          console.error("AdminDashboard: Error refreshing session:", e);
+        }
+      };
+      
+      refreshAuth();
+    }
+  }, [retryCount, isReady, supabase.auth]);
 
   const fetchStats = async () => {
     try {
