@@ -4,16 +4,25 @@ import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    console.log('API: Auth refresh - Request received');
+    
+    const requestUrl = new URL(request.url);
+    console.log('API: Auth refresh - Request URL:', requestUrl.toString());
+    
     const cookieStore = cookies();
     const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
     
     // Get current session
     const { data: { session }, error: sessionError } = await supabase.auth.getSession();
     
-    if (sessionError || !session) {
-      console.error('API: Auth refresh - No session', sessionError);
+    if (sessionError) {
+      console.error('API: Auth refresh - Session error:', sessionError);
+    }
+    
+    if (!session) {
+      console.error('API: Auth refresh - No session');
       return NextResponse.json(
         { error: 'Not authenticated' },
         { 
@@ -27,6 +36,8 @@ export async function GET() {
       );
     }
     
+    console.log('API: Auth refresh - Session found for user:', session.user.id);
+    
     // Get profile data
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
@@ -35,11 +46,14 @@ export async function GET() {
       .single();
       
     if (profileError) {
-      console.error('API: Auth refresh - Profile error', profileError);
+      console.error('API: Auth refresh - Profile error:', profileError);
+    } else {
+      console.log('API: Auth refresh - Profile found with role:', profile?.role);
     }
     
     // Check admin status
     const isAdmin = profile?.role === 'admin';
+    console.log('API: Auth refresh - Admin status:', isAdmin);
     
     // Return with no-cache headers
     return NextResponse.json(
@@ -61,7 +75,7 @@ export async function GET() {
       }
     );
   } catch (error) {
-    console.error('API: Auth refresh - Unexpected error', error);
+    console.error('API: Auth refresh - Unexpected error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { 

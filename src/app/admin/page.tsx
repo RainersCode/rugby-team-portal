@@ -16,6 +16,8 @@ import { useRequireAdmin } from "@/hooks/useRequireAdmin";
 export default function AdminDashboard() {
   const { isReady, isAdmin, user } = useRequireAdmin();
   const [loading, setLoading] = useState(true);
+  const [loadingError, setLoadingError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
   const [stats, setStats] = useState({
     players: 0,
     articles: 0,
@@ -38,11 +40,20 @@ export default function AdminDashboard() {
     if (isReady && isAdmin) {
       console.log("AdminDashboard: User is admin, fetching stats");
       fetchStats();
+    } else if (!isReady && retryCount < 3) {
+      // Add a retry mechanism after 5 seconds
+      const timer = setTimeout(() => {
+        console.log(`AdminDashboard: Not ready yet, retrying (${retryCount + 1}/3)...`);
+        setRetryCount(prev => prev + 1);
+      }, 5000);
+      
+      return () => clearTimeout(timer);
     }
-  }, [isReady, isAdmin]);
+  }, [isReady, isAdmin, retryCount]);
 
   const fetchStats = async () => {
     try {
+      setLoadingError(null);
       console.log("AdminDashboard: Fetching stats");
       
       // Use try-catch for each count to prevent one failure from stopping all stats
@@ -108,6 +119,7 @@ export default function AdminDashboard() {
       console.log("AdminDashboard: Stats fetched successfully");
     } catch (error) {
       console.error("AdminDashboard: Error fetching stats:", error);
+      setLoadingError("Failed to load dashboard statistics. Please try refreshing the page.");
     } finally {
       setLoading(false);
     }
@@ -193,7 +205,34 @@ export default function AdminDashboard() {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen">
         <Loader2 className="animate-spin h-8 w-8 text-rugby-teal mb-4" />
-        <p className="text-muted-foreground">Loading dashboard...</p>
+        <p className="text-muted-foreground mb-2">Loading dashboard{retryCount > 0 ? ` (Attempt ${retryCount}/3)` : ''}...</p>
+        {retryCount >= 3 && (
+          <div className="text-center mt-4 max-w-md">
+            <p className="text-red-500 mb-2">Dashboard is taking longer than expected to load.</p>
+            <p className="mb-4">Try accessing the dashboard directly at:</p>
+            <a 
+              href="/admin" 
+              className="px-4 py-2 bg-rugby-teal text-white hover:bg-rugby-teal/90 transition-colors"
+              onClick={() => window.location.href = '/admin'}
+            >
+              Reload Admin Dashboard
+            </a>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  if (loadingError) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <div className="text-red-500 mb-4">{loadingError}</div>
+        <button 
+          onClick={fetchStats}
+          className="px-4 py-2 bg-rugby-teal text-white hover:bg-rugby-teal/90 transition-colors"
+        >
+          Retry
+        </button>
       </div>
     );
   }

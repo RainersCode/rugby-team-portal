@@ -67,10 +67,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('AuthContext: Refreshing auth state...');
       
       // Use the API endpoint for refreshing instead of direct Supabase call
-      const response = await fetch('/api/auth/refresh', {
+      // Add a timestamp to prevent caching
+      const response = await fetch(`/api/auth/refresh?_t=${Date.now()}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
         },
         credentials: 'include', // Important for cookies
       });
