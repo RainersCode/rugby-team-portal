@@ -12,9 +12,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useRequireAdmin } from "@/hooks/useRequireAdmin";
+import { toast } from "sonner";
 
 export default function AdminDashboard() {
-  const { isReady, isAdmin, user } = useRequireAdmin();
+  const { isReady, isAdmin, user, isLoading } = useRequireAdmin();
   const [loading, setLoading] = useState(true);
   const [loadingError, setLoadingError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
@@ -37,6 +38,25 @@ export default function AdminDashboard() {
   const isMounted = useRef(true);
   const abortController = useRef(new AbortController());
   const supabase = createClientComponentClient();
+  const sessionCheckedRef = useRef(false);
+  const statsLoadedRef = useRef(false);
+
+  // Track page visibility for better reliability
+  useEffect(() => {
+    // Handle page visibility changes
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && !statsLoadedRef.current && isAdmin) {
+        console.log("Page became visible, refreshing stats");
+        fetchStats();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [isAdmin]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -48,23 +68,43 @@ export default function AdminDashboard() {
 
   // Only fetch stats when we know the user is an admin
   useEffect(() => {
-    if (isReady && isAdmin) {
+    if (isReady && isAdmin && user) {
       console.log("AdminDashboard: User is admin, fetching stats");
+      sessionCheckedRef.current = true;
       fetchStats();
-    } else if (!isReady && retryCount < 3) {
-      // Add a retry mechanism after 3 seconds (shorter time)
+    } else if (!isReady && !isLoading && retryCount < 3) {
+      // Add a retry mechanism after 2 seconds (shorter time)
       const timer = setTimeout(() => {
         if (isMounted.current) {
           console.log(`AdminDashboard: Not ready yet, retrying (${retryCount + 1}/3)...`);
           setRetryCount(prev => prev + 1);
         }
-      }, 3000); // Reduced from 5000 to 3000
+      }, 2000); // Reduced from 3000 to 2000
       
       return () => {
         clearTimeout(timer);
       };
     }
-  }, [isReady, isAdmin, retryCount]);
+  }, [isReady, isAdmin, user, retryCount, isLoading]);
+
+  // Special useEffect for persistence across navigation
+  useEffect(() => {
+    // Try to restore stats from sessionStorage on initial render
+    if (typeof window !== 'undefined' && !statsLoadedRef.current) {
+      try {
+        const savedStats = sessionStorage.getItem('admin-dashboard-stats');
+        if (savedStats) {
+          const parsedStats = JSON.parse(savedStats);
+          setStats(parsedStats);
+          setLoading(false);
+          statsLoadedRef.current = true;
+          console.log("Restored stats from session storage");
+        }
+      } catch (e) {
+        console.warn('Failed to restore stats from sessionStorage:', e);
+      }
+    }
+  }, []);
 
   // Add another effect to handle session refresh on Vercel
   useEffect(() => {
@@ -78,7 +118,18 @@ export default function AdminDashboard() {
           if (!isMounted.current) return;
           
           // Force a session refresh
-          await supabase.auth.refreshSession();
+          const { error } = await supabase.auth.refreshSession();
+          
+          if (error) {
+            console.error("Error refreshing session:", error);
+            // If refresh failed, try to get a new session
+            if (!sessionCheckedRef.current) {
+              toast.error("Session expired. Please sign in again.");
+              window.location.href = '/auth/signin?redirect=/admin';
+            }
+            return;
+          }
+          
           console.log("AdminDashboard: Forced session refresh for Vercel deployment");
         } catch (e) {
           console.error("AdminDashboard: Error refreshing session:", e);
@@ -124,6 +175,62 @@ export default function AdminDashboard() {
       clearInterval(interval);
     };
   }, [isReady, isAdmin]);
+
+  // Listen for admin navigation events to restore state
+  useEffect(() => {
+    // Memoized version of fetchStats to avoid dependency issues
+    const fetchStatsStable = () => {
+      fetchStats();
+    };
+
+    // Function to handle returning to admin page
+    const handleAdminReturn = (event: Event) => {
+      console.log("Detected return to admin page");
+      
+      // If we have stats in session storage, restore them
+      if (typeof window !== 'undefined' && !loading) {
+        try {
+          const savedStats = sessionStorage.getItem('admin-dashboard-stats');
+          if (savedStats) {
+            setStats(JSON.parse(savedStats));
+            statsLoadedRef.current = true;
+            setLoading(false);
+            console.log("Restored stats on admin page return");
+          } else {
+            // If no saved stats but we're admin, fetch them
+            if (isAdmin && !statsLoadedRef.current) {
+              console.log("No saved stats found, fetching fresh data");
+              fetchStatsStable();
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to handle admin return:', e);
+        }
+      }
+    };
+    
+    // Function to handle back button to admin page
+    const handleBackButton = () => {
+      console.log("Back button used to return to admin");
+      
+      // Similar to admin return, but ensure we're forcing a refresh
+      setTimeout(() => {
+        if (isAdmin && !statsLoadedRef.current) {
+          console.log("Refreshing stats after back button navigation");
+          fetchStatsStable();
+        }
+      }, 500);
+    };
+    
+    // Add event listeners
+    window.addEventListener('adminPageReturn', handleAdminReturn);
+    window.addEventListener('adminBackButtonUsed', handleBackButton);
+    
+    return () => {
+      window.removeEventListener('adminPageReturn', handleAdminReturn);
+      window.removeEventListener('adminBackButtonUsed', handleBackButton);
+    };
+  }, [isAdmin, loading]);
 
   const fetchStats = async () => {
     try {
@@ -221,8 +328,18 @@ export default function AdminDashboard() {
         statsData.sevens_teams + 
         statsData.cup_teams;
       
+      // Save to sessionStorage for persistence across navigation
+      if (typeof window !== 'undefined') {
+        try {
+          sessionStorage.setItem('admin-dashboard-stats', JSON.stringify(statsData));
+        } catch (e) {
+          console.warn('Failed to save stats to sessionStorage:', e);
+        }
+      }
+      
       // Update the state with the new stats
       setStats(statsData);
+      statsLoadedRef.current = true;
       
       console.log("AdminDashboard: Stats fetched successfully");
     } catch (error) {
@@ -231,6 +348,18 @@ export default function AdminDashboard() {
       
       console.error("AdminDashboard: Error fetching stats:", error);
       setLoadingError("Failed to load dashboard statistics. Please try refreshing the page.");
+      
+      // Try to recover by loading from sessionStorage
+      try {
+        const savedStats = sessionStorage.getItem('admin-dashboard-stats');
+        if (savedStats) {
+          setStats(JSON.parse(savedStats));
+          statsLoadedRef.current = true;
+          setLoadingError(null);
+        }
+      } catch (e) {
+        console.warn('Failed to restore stats after error:', e);
+      }
     } finally {
       // Only update state if still mounted
       if (!isMounted.current) return;
