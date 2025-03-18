@@ -12,6 +12,7 @@
     "build:clean": "npm run clean && next build"
   },
   "dependencies": {
+    "@chakra-ui/hooks": "^2.4.2",
     "@chakra-ui/react": "^3.13.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",

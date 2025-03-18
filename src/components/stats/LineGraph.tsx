@@ -1,6 +1,7 @@
 'use client';
 
-import { Box, useColorModeValue } from '@chakra-ui/react';
+import { Box } from '@chakra-ui/react';
+import { useColorModeValue } from '@chakra-ui/hooks';
 import { useEffect, useRef } from 'react';
 
 interface DataPoint {

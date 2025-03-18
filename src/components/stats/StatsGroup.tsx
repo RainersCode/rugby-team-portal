@@ -1,6 +1,7 @@
 'use client';
 
-import { Box, Flex, SimpleGrid, Stat, StatLabel, StatNumber, useColorModeValue } from '@chakra-ui/react';
+import { Box, Flex, SimpleGrid, Stat, StatLabel, StatNumber } from '@chakra-ui/react';
+import { useColorModeValue } from '@chakra-ui/hooks';
 
 interface StatProps {
   name: string;

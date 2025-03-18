@@ -1,7 +1,8 @@
 "use client";
 
-import { Container, Heading, Spinner, Text, VStack, Button, HStack, Box, useToast, SimpleGrid } from '@chakra-ui/react';
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { Container, Heading, Spinner, Text, VStack, Button, HStack, Box, SimpleGrid } from '@chakra-ui/react';
+import { useToast } from '@chakra-ui/hooks';
+import { useEffect, useState, useCallback, useRef, Suspense } from 'react';
 import LineGraph from '@/components/stats/LineGraph';
 import StatsGroup from '@/components/stats/StatsGroup';
 import { useRequireAdmin } from '@/hooks/useRequireAdmin';
@@ -20,6 +21,20 @@ interface Stats {
   activePlayers: number;
   totalMatches: number;
   membersByMonth: { name: string; value: number }[];
+}
+
+// Component to handle URL search params - wrapped in Suspense
+function AdminURLHandler({ onRefresh }: { onRefresh: () => void }) {
+  // Using Next.js hooks inside a client component wrapped in Suspense
+  useEffect(() => {
+    // Check URL params for refresh command
+    const url = new URL(window.location.href);
+    if (url.searchParams.has('refresh')) {
+      onRefresh();
+    }
+  }, [onRefresh]);
+  
+  return null; // This component doesn't render anything
 }
 
 export default function AdminPage() {
@@ -157,12 +172,6 @@ export default function AdminPage() {
         fetchStatsStable();
       }
       
-      // Check URL params for refresh command
-      const url = new URL(window.location.href);
-      if (url.searchParams.has('refresh')) {
-        handleForceRefresh();
-      }
-      
       return () => {
         window.removeEventListener('adminPageReturn', handleAdminReturn);
         window.removeEventListener('adminBackButtonUsed', handleBackButton);
@@ -253,6 +262,11 @@ export default function AdminPage() {
 
   return (
     <Container maxW="container.xl" py={10}>
+      {/* Wrap URL handler in Suspense to fix the Next.js warning */}
+      <Suspense fallback={null}>
+        <AdminURLHandler onRefresh={handleForceRefresh} />
+      </Suspense>
+      
       <VStack spacing={8} align="stretch">
         <HStack justify="space-between">
           <Heading as="h1" size="xl">Admin Dashboard</Heading>
