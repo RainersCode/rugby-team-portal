@@ -43,6 +43,11 @@ export function hardReload() {
  * Initialize Vercel-specific fixes for fetch and connections
  */
 export function initializeVercelFixes() {
+  // Only run on Vercel production
+  if (!isVercelProduction()) return;
+  
+  console.log('Initializing Vercel fixes');
+  
   // Apply service worker unregistration if needed
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.getRegistrations().then(registrations => {
@@ -82,6 +87,12 @@ export function initializeVercelFixes() {
     
     return originalFetch.apply(this, args);
   };
+  
+  // For Vercel deployments, add cache control headers to all fetch requests
+  configureVercelFetchPatching();
+  
+  // If running on Vercel and there seems to be cookie issues
+  checkAndFixSupabaseCookies();
 }
 
 /**
@@ -249,23 +260,52 @@ export const forceCleanReload = () => {
   window.location.reload();
 };
 
-// Use this at app initialization if needed
-export const initializeVercelFixes = () => {
-  if (!isVercelProduction()) return;
+// Helper function to check and fix Supabase cookies
+const checkAndFixSupabaseCookies = () => {
+  if (typeof document === 'undefined') return;
   
-  // For Vercel deployments, add cache control headers to all fetch requests
+  // Check if we're in a Vercel environment but cookies aren't working
+  const hasBrokenCookies = !document.cookie.includes('supabase');
+  
+  if (hasBrokenCookies && isVercelProduction()) {
+    console.log('Attempting to fix Supabase cookies for Vercel deployment');
+    
+    // Add a hidden iframe to force cookie sync on Vercel
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    iframe.src = `${window.location.origin}/api/auth/cookie-fix`;
+    document.body.appendChild(iframe);
+    
+    // Clean up after 5 seconds
+    setTimeout(() => {
+      if (document.body.contains(iframe)) {
+        document.body.removeChild(iframe);
+      }
+    }, 5000);
+  }
+};
+
+// Configure fetch patching for Vercel
+const configureVercelFetchPatching = () => {
+  if (typeof window === 'undefined') return;
+  
   const originalFetch = window.fetch;
   window.fetch = function(...args) {
-    // Add cache control headers to all requests
-    if (args[1] && typeof args[1] === 'object') {
-      args[1] = {
-        ...args[1],
-        headers: {
+    // Add cache control headers to admin API requests
+    if (typeof args[0] === 'string') {
+      const url = args[0];
+      
+      // Don't cache admin API calls
+      if (url.includes('/api/') && url.includes('/admin')) {
+        if (!args[1]) args[1] = {};
+        if (!args[1].headers) args[1].headers = {};
+        
+        args[1].headers = {
           ...args[1].headers,
           'Cache-Control': 'no-cache, no-store, must-revalidate',
           'Pragma': 'no-cache'
-        }
-      };
+        };
+      }
     }
     
     return originalFetch.apply(this, args);
