@@ -90,7 +90,7 @@ export default async function AboutPage() {
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white">
                 More Than Just
                 <span className="block mt-3">
-                  A Rugby Club
+                  Regbija klubs
                 </span>
               </h1>
               <p className="mt-8 text-lg md:text-xl text-white/90 leading-relaxed max-w-2xl">
