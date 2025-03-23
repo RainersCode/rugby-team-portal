@@ -6,23 +6,24 @@ export const dynamic = 'force-dynamic';
 export const fetchCache = 'force-no-store';
 export const revalidate = 0;
 
+// This is an alternate API for checking admin status that can be used 
+// if the main verify-admin route has caching issues
 export async function GET(request: Request) {
   try {
-    const url = new URL(request.url);
-    const timestamp = url.searchParams.get('t') || Date.now().toString();
-    console.log(`API: Verifying admin status (t=${timestamp})`);
+    const timestamp = Date.now();
+    console.log(`AdminCheck API: Starting verification (t=${timestamp})`);
     
     // Get cookies for the Supabase client
     const cookieStore = cookies();
     const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
     
-    // First get the current session
+    // Get the current session
     const { data: { session }, error: sessionError } = await supabase.auth.getSession();
     
-    if (sessionError) {
-      console.error('API: Error getting session:', sessionError);
+    if (sessionError || !session || !session.user) {
+      console.log('AdminCheck API: No valid session');
       return NextResponse.json(
-        { error: 'Authentication error', isAdmin: false, timestamp },
+        { isAdmin: false, timestamp, error: sessionError?.message || 'No session' },
         { 
           status: 401,
           headers: {
@@ -30,33 +31,13 @@ export async function GET(request: Request) {
             'Pragma': 'no-cache',
             'Expires': '0',
             'Surrogate-Control': 'no-store',
-            'X-Timestamp': timestamp
+            'X-Timestamp': timestamp.toString()
           }
         }
       );
     }
     
-    if (!session || !session.user) {
-      console.log('API: No authenticated user');
-      return NextResponse.json(
-        { error: 'Not authenticated', isAdmin: false, timestamp },
-        { 
-          status: 401,
-          headers: {
-            'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
-            'Pragma': 'no-cache',
-            'Expires': '0',
-            'Surrogate-Control': 'no-store',
-            'X-Timestamp': timestamp
-          }
-        }
-      );
-    }
-    
-    // Log the user details we found
-    console.log(`API: Found user session for ${session.user.email || session.user.id}`);
-    
-    // Get the user's profile to check admin status - force a direct DB query each time
+    // Directly query the database for admin status
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('role, first_name, last_name')
@@ -64,9 +45,9 @@ export async function GET(request: Request) {
       .single();
     
     if (profileError) {
-      console.error('API: Error fetching profile:', profileError);
+      console.error('AdminCheck API: Profile query error:', profileError);
       return NextResponse.json(
-        { error: 'Profile fetch error', isAdmin: false, timestamp },
+        { isAdmin: false, timestamp, error: profileError.message },
         { 
           status: 500,
           headers: {
@@ -74,22 +55,26 @@ export async function GET(request: Request) {
             'Pragma': 'no-cache',
             'Expires': '0',
             'Surrogate-Control': 'no-store',
-            'X-Timestamp': timestamp
+            'X-Timestamp': timestamp.toString()
           }
         }
       );
     }
     
     const isAdmin = profile?.role === 'admin';
-    console.log(`API: User ${session.user.id} (${profile?.first_name || 'Unknown'} ${profile?.last_name || 'User'}) admin status:`, isAdmin);
+    console.log(`AdminCheck API: User ${session.user.id} is admin: ${isAdmin}`);
     
-    // Cache control to prevent stale admin status
     return NextResponse.json(
       { 
-        isAdmin, 
+        success: true,
+        isAdmin,
+        timestamp,
         userId: session.user.id,
-        name: `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim() || 'Unknown',
-        timestamp
+        user: {
+          email: session.user.email,
+          firstName: profile?.first_name,
+          lastName: profile?.last_name
+        }
       },
       { 
         status: 200,
@@ -98,15 +83,15 @@ export async function GET(request: Request) {
           'Pragma': 'no-cache',
           'Expires': '0',
           'Surrogate-Control': 'no-store',
-          'X-Timestamp': timestamp
+          'X-Timestamp': timestamp.toString()
         }
       }
     );
   } catch (error) {
-    console.error('API: Unexpected error in admin verification:', error);
-    const timestamp = Date.now().toString();
+    console.error('AdminCheck API: Unexpected error:', error);
+    const timestamp = Date.now();
     return NextResponse.json(
-      { error: 'Server error', isAdmin: false, timestamp },
+      { isAdmin: false, timestamp, error: 'Server error' },
       { 
         status: 500,
         headers: {
@@ -114,7 +99,7 @@ export async function GET(request: Request) {
           'Pragma': 'no-cache',
           'Expires': '0',
           'Surrogate-Control': 'no-store',
-          'X-Timestamp': timestamp
+          'X-Timestamp': timestamp.toString()
         }
       }
     );
