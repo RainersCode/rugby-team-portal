@@ -92,6 +92,18 @@ function PlayersContent() {
 
   const uploadImage = async (file: File) => {
     try {
+      // Log more information about the file being uploaded
+      console.log(`Uploading image file: ${file.name}, size: ${file.size}kb, type: ${file.type}`);
+      
+      // Check if file is valid
+      if (file.size > 5 * 1024 * 1024) {
+        throw new Error("File size exceeds 5MB limit");
+      }
+      
+      if (!file.type.startsWith('image/')) {
+        throw new Error("File is not an image");
+      }
+      
       // Generate a unique filename
       const timestamp = Date.now();
       const fileExt = file.name.split(".").pop();
@@ -100,8 +112,33 @@ function PlayersContent() {
         .substring(2, 15)}.${fileExt}`;
       const filePath = `players/${fileName}`;
 
+      console.log(`Generated file path: ${filePath}`);
+      
+      // First check if the bucket exists
+      try {
+        console.log("Checking storage buckets...");
+        const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
+        
+        if (bucketsError) {
+          console.error("Error listing buckets:", bucketsError);
+          throw new Error(`Cannot access storage: ${bucketsError.message}`);
+        }
+        
+        console.log("Available buckets:", buckets.map(b => b.name).join(', '));
+        
+        // Check if our bucket exists
+        const imagesBucket = buckets.find(b => b.name === "images");
+        if (!imagesBucket) {
+          throw new Error("The 'images' storage bucket doesn't exist");
+        }
+      } catch (bucketError) {
+        console.error("Bucket check error:", bucketError);
+        throw new Error("Failed to verify storage access");
+      }
+
       // Upload the file
-      const { error: uploadError } = await supabase.storage
+      console.log("Starting file upload to Supabase storage...");
+      const { data: uploadData, error: uploadError } = await supabase.storage
         .from("images")
         .upload(filePath, file, {
           cacheControl: "3600",
@@ -110,10 +147,13 @@ function PlayersContent() {
 
       if (uploadError) {
         console.error("Upload error details:", uploadError);
-        throw uploadError;
+        throw new Error(`Upload failed: ${uploadError.message}`);
       }
+      
+      console.log("File uploaded successfully:", uploadData);
 
       // Get the public URL
+      console.log("Getting public URL for uploaded file...");
       const {
         data: { publicUrl },
       } = supabase.storage.from("images").getPublicUrl(filePath);
@@ -121,6 +161,8 @@ function PlayersContent() {
       if (!publicUrl) {
         throw new Error("Failed to get public URL for uploaded image");
       }
+      
+      console.log("Generated public URL:", publicUrl);
 
       return { filePath, publicUrl };
     } catch (error) {
@@ -177,12 +219,6 @@ function PlayersContent() {
         return;
       }
 
-      // Validate that we have either an image file or an existing image URL
-      if (!selectedPlayer && !imageFile && !formData.image) {
-        setFormError("Please upload a player image");
-        return;
-      }
-
       // Validate position is selected
       if (!formData.position) {
         setFormError("Please select a position");
@@ -195,14 +231,31 @@ function PlayersContent() {
       if (imageFile) {
         try {
           setFormError("Uploading image...");
+          console.log("Starting image upload process");
+          
+          // Add a small timeout to ensure the UI updates before starting the upload
+          await new Promise(resolve => setTimeout(resolve, 100));
+          
           const { publicUrl } = await uploadImage(imageFile);
           imageUrl = publicUrl;
+          console.log("Image upload completed successfully");
           setFormError(null);
         } catch (uploadError) {
           console.error("Image upload error:", uploadError);
-          setFormError("Failed to upload image. Please try again.");
-          return;
+          setFormError(`Failed to upload image: ${uploadError instanceof Error ? uploadError.message : "Unknown error"}`);
+          
+          // Ask if user wants to continue with placeholder
+          if (confirm("Image upload failed. Continue with placeholder image?")) {
+            // Use placeholder image
+            imageUrl = "/images/training-hero.jpg";
+            setFormError(null);
+          } else {
+            return; // User chose not to continue
+          }
         }
+      } else if (!imageUrl && !selectedPlayer) {
+        // No image file and no existing image - use placeholder
+        imageUrl = "/images/training-hero.jpg";
       }
 
       // Process achievements - make sure they're in correct format
@@ -220,7 +273,7 @@ function PlayersContent() {
         name: formData.name.trim(),
         position: formData.position,
         number: parseInt(formData.number) || 0,
-        image: imageUrl || "",
+        image: imageUrl || "/images/training-hero.jpg", // Ensure we always have an image URL
         stats: {
           matches: parseInt(formData.matches) || 0,
           tries: parseInt(formData.tries) || 0,
@@ -617,6 +670,11 @@ function PlayersContent() {
                     accept="image/*"
                     onChange={handleImageChange}
                   />
+                  {!selectedPlayer && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      Image optional - placeholder will be used if none provided
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
