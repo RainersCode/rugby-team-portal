@@ -92,7 +92,7 @@ function PlayersContent() {
 
   const uploadImage = async (file: File) => {
     try {
-      // Log more information about the file being uploaded
+      // Log file information
       console.log(`Uploading image file: ${file.name}, size: ${file.size}kb, type: ${file.type}`);
       
       // Check if file is valid
@@ -103,87 +103,25 @@ function PlayersContent() {
       if (!file.type.startsWith('image/')) {
         throw new Error("File is not an image");
       }
-
-      // Create a timeout promise that rejects after 30 seconds (increased from 15)
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error("Upload timed out after 30 seconds")), 30000);
-      });
       
-      // Generate a unique filename
+      // Generate a unique filename with timestamp
       const timestamp = Date.now();
       const fileExt = file.name.split(".").pop();
-      const fileName = `${timestamp}-${Math.random()
-        .toString(36)
-        .substring(2, 15)}.${fileExt}`;
-      let filePath = `players/${fileName}`;
-      let bucketName = "images"; // Default bucket
+      const fileName = `${timestamp}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+      const filePath = `players/${fileName}`;
 
       console.log(`Generated file path: ${filePath}`);
-
-      // First check if the bucket exists
-      try {
-        console.log("Checking storage buckets...");
-        const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
-        
-        if (bucketsError) {
-          console.error("Error listing buckets:", bucketsError);
-          throw new Error(`Cannot access storage: ${bucketsError.message}`);
-        }
-        
-        console.log("Available buckets:", buckets.map(b => b.name).join(', '));
-        
-        // Check if our preferred bucket exists
-        const imagesBucket = buckets.find(b => b.name === "images");
-        if (!imagesBucket) {
-          console.log("'images' bucket not found, trying to use public bucket instead");
-          // Try to use the public bucket instead
-          const publicBucket = buckets.find(b => b.name === "public");
-          if (publicBucket) {
-            console.log("Using 'public' bucket instead");
-            bucketName = "public";
-          } else {
-            // If neither exists, try to use the first available bucket
-            if (buckets.length > 0) {
-              bucketName = buckets[0].name;
-              console.log(`Using first available bucket: ${bucketName}`);
-            } else {
-              throw new Error("No storage buckets available");
-            }
-          }
-        }
-      } catch (bucketError) {
-        console.error("Bucket check error:", bucketError);
-        console.log("Will try default bucket as fallback");
-      }
-
-      // Upload the file with progress tracking
-      console.log(`Starting file upload to Supabase storage bucket: ${bucketName}`);
       
-      // Compress image before uploading if it's large (over 1MB)
-      let fileToUpload = file;
-      if (file.size > 1024 * 1024) {
-        try {
-          console.log("File is large, will attempt to compress it first");
-          // We'll just proceed with the original file since we can't do compression in this environment
-          // But in a real app, you'd compress the image here
-        } catch (compressionError) {
-          console.error("Error compressing image, will use original:", compressionError);
-        }
-      }
+      // Simple direct upload to the images bucket without checking bucket existence
+      console.log("Starting file upload to images bucket...");
       
-      // Use a promise with timeout for the upload
-      const uploadPromise = supabase.storage
-        .from(bucketName)
-        .upload(filePath, fileToUpload, {
+      // Upload the file directly with no timeout
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from("images")
+        .upload(filePath, file, {
           cacheControl: "3600",
-          upsert: true,
+          upsert: true
         });
-      
-      // Race the upload against the timeout
-      const { data: uploadData, error: uploadError } = await Promise.race([
-        uploadPromise,
-        timeoutPromise
-      ]) as any;
 
       if (uploadError) {
         console.error("Upload error details:", uploadError);
@@ -192,11 +130,10 @@ function PlayersContent() {
       
       console.log("File uploaded successfully:", uploadData);
 
-      // Get the public URL
-      console.log(`Getting public URL for uploaded file from bucket: ${bucketName}`);
-      const {
-        data: { publicUrl },
-      } = supabase.storage.from(bucketName).getPublicUrl(filePath);
+      // Get the public URL from the same bucket
+      const { data: { publicUrl } } = supabase.storage
+        .from("images")
+        .getPublicUrl(filePath);
 
       if (!publicUrl) {
         throw new Error("Failed to get public URL for uploaded image");
@@ -206,28 +143,28 @@ function PlayersContent() {
 
       return { filePath, publicUrl };
     } catch (error) {
-      console.error("Detailed upload error:", error);
-      // Just use the placeholder image instead of throwing an error
-      console.log("Using placeholder image due to upload failure");
-      return { 
-        filePath: "none", 
-        publicUrl: "/images/training-hero.jpg" 
-      };
+      console.error("Upload error:", error);
+      throw error; // Re-throw so we can handle it in the calling function
     }
   };
 
   const deleteImage = async (imagePath: string) => {
     try {
-      if (!imagePath) return;
+      if (!imagePath || imagePath.includes("training-hero.jpg")) return;
 
       // Extract the file path from the URL
-      const urlParts = imagePath.split("/");
-      const filePath = urlParts.slice(urlParts.indexOf("images") + 1).join("/");
-
-      if (!filePath) {
-        console.error("Invalid image path:", imagePath);
+      // URLs look like: https://xxx.supabase.co/storage/v1/object/public/images/players/filename.jpg
+      const pathParts = imagePath.split("/");
+      const playersIndex = pathParts.findIndex(part => part === "players");
+      
+      if (playersIndex === -1) {
+        console.error("Cannot parse image path:", imagePath);
         return;
       }
+      
+      // Get everything from "players/" onwards
+      const filePath = pathParts.slice(playersIndex).join("/");
+      console.log("Deleting image at path:", filePath);
 
       const { error } = await supabase.storage
         .from("images")
@@ -237,6 +174,8 @@ function PlayersContent() {
         console.error("Error deleting image:", error);
         throw error;
       }
+      
+      console.log("Image deleted successfully");
     } catch (error) {
       console.error("Delete image error:", error);
     }
@@ -274,7 +213,6 @@ function PlayersContent() {
       if (imageFile) {
         try {
           setFormError("Uploading image...");
-          console.log("Starting image upload process");
           
           // Add a small timeout to ensure the UI updates before starting the upload
           await new Promise(resolve => setTimeout(resolve, 100));
@@ -285,14 +223,13 @@ function PlayersContent() {
           setFormError(null);
         } catch (uploadError) {
           console.error("Image upload error:", uploadError);
-          // We now handle this by returning the placeholder image in uploadImage
-          // so this catch block should rarely execute
-          imageUrl = "/images/training-hero.jpg";
-          setFormError("Failed to upload image - using placeholder");
+          setFormError(`Failed to upload image: ${uploadError instanceof Error ? uploadError.message : "Unknown error"}`);
+          return; // Stop form submission if image upload fails
         }
       } else if (!imageUrl && !selectedPlayer) {
-        // No image file and no existing image - use placeholder
-        imageUrl = "/images/training-hero.jpg";
+        // No image file and no existing image
+        setFormError("Please upload a player image");
+        return;
       }
 
       // Process achievements - make sure they're in correct format
