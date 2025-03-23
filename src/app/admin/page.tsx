@@ -16,6 +16,7 @@ import { useRequireAdmin } from "@/hooks/useRequireAdmin";
 export default function AdminDashboard() {
   const { isReady, isAdmin, user } = useRequireAdmin();
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [stats, setStats] = useState({
     players: 0,
     articles: 0,
@@ -35,13 +36,14 @@ export default function AdminDashboard() {
 
   // Only fetch stats when we know the user is an admin
   useEffect(() => {
-    if (isReady && isAdmin) {
+    if (isReady && isAdmin && user) {
       console.log("AdminDashboard: User is admin, fetching stats");
       fetchStats();
     }
-  }, [isReady, isAdmin]);
+  }, [isReady, isAdmin, user]);
 
   const fetchStats = async () => {
+    setFetchError(null);
     try {
       console.log("AdminDashboard: Fetching stats");
       
@@ -64,6 +66,10 @@ export default function AdminDashboard() {
         }
       };
       
+      // Add a small timeout to ensure DB connections are established
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Then fetch all counts in parallel
       const [
         playersCount,
         articlesCount,
@@ -108,6 +114,7 @@ export default function AdminDashboard() {
       console.log("AdminDashboard: Stats fetched successfully");
     } catch (error) {
       console.error("AdminDashboard: Error fetching stats:", error);
+      setFetchError("Failed to load dashboard data. Please try refreshing the page.");
     } finally {
       setLoading(false);
     }
@@ -193,7 +200,29 @@ export default function AdminDashboard() {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen">
         <Loader2 className="animate-spin h-8 w-8 text-rugby-teal mb-4" />
-        <p className="text-muted-foreground">Loading dashboard...</p>
+        <p className="text-muted-foreground">Loading admin dashboard...</p>
+        {!isReady && <p className="text-sm text-muted-foreground mt-2">Verifying admin privileges...</p>}
+      </div>
+    );
+  }
+  
+  // Show error state if there was a problem fetching stats
+  if (fetchError) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold mb-2">Admin Dashboard</h1>
+          <p className="text-red-500 mt-4">{fetchError}</p>
+          <button 
+            onClick={() => {
+              setLoading(true);
+              fetchStats();
+            }}
+            className="mt-4 px-4 py-2 bg-rugby-teal text-white rounded-md hover:bg-rugby-teal/90 transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
       </div>
     );
   }

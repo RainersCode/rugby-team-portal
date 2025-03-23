@@ -23,6 +23,7 @@ type AuthContextType = {
   user: ExtendedUser | null;
   isAdmin: boolean;
   isLoading: boolean;
+  isAdminVerifying: boolean;
   isAuthenticated: boolean;
   checkingSession: boolean;
   session: Session | null;
@@ -34,6 +35,7 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   isAdmin: false,
   isLoading: true,
+  isAdminVerifying: false,
   isAuthenticated: false,
   checkingSession: true,
   session: null,
@@ -48,6 +50,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAdminVerifying, setIsAdminVerifying] = useState(false);
   const [checkingSession, setCheckingSession] = useState(true);
   const [lastRefresh, setLastRefresh] = useState<number>(0);
   const [explicitlyLoggedOut, setExplicitlyLoggedOut] = useState(false);
@@ -187,6 +190,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
     
+    // Set admin verification in progress
+    setIsAdminVerifying(true);
+    
     try {
       console.log('AuthContext: Checking admin status for user:', userId);
       const { data: profile, error: profileError } = await supabase
@@ -215,6 +221,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       console.error('AuthContext: Error checking admin status:', error);
       setIsAdmin(false);
+    } finally {
+      // Always mark verification as complete
+      setIsAdminVerifying(false);
     }
   };
 
@@ -384,6 +393,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         user,
         isAdmin,
         isLoading,
+        isAdminVerifying,
         isAuthenticated: !!user,
         checkingSession,
         session,

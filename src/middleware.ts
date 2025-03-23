@@ -9,10 +9,11 @@ export const config = {
     '/members/:path*', 
     '/profile/:path*', 
     '/settings/:path*', 
+    '/admin/:path*', // Explicitly add admin routes
     // Authentication pages
     '/auth/:path*',
-    // Exclude admin, api, and static resources
-    '/((?!admin|api|_next/static|_next/image|favicon.ico).*)',
+    // Exclude api, and static resources
+    '/((?!api|_next/static|_next/image|favicon.ico).*)',
   ],
 };
 
@@ -39,7 +40,7 @@ export async function middleware(request: NextRequest) {
     // Get session with increased timeout
     const sessionPromise = supabase.auth.getSession();
     const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('Session fetch timeout')), 5000);
+      setTimeout(() => reject(new Error('Session fetch timeout')), 8000);
     });
     
     let session;
@@ -51,6 +52,9 @@ export async function middleware(request: NextRequest) {
             user: {
               id: string;
               email?: string;
+              user_metadata?: {
+                [key: string]: any;
+              };
             };
           } | null;
         };
@@ -62,10 +66,43 @@ export async function middleware(request: NextRequest) {
       ]) as SessionResponse;
       
       session = data.session;
+      
+      // Check if we're accessing admin routes
+      if (request.nextUrl.pathname.startsWith('/admin')) {
+        // If no session, redirect to login
+        if (!session) {
+          console.log('Middleware: No session for admin route, redirecting to login');
+          const redirectUrl = request.nextUrl.pathname;
+          const encodedRedirectUrl = encodeURIComponent(redirectUrl);
+          return NextResponse.redirect(new URL(`/auth/signin?redirect=${encodedRedirectUrl}`, request.url));
+        }
+        
+        // Check admin status by querying database directly
+        if (session.user) {
+          try {
+            const { data: profile, error } = await supabase
+              .from('profiles')
+              .select('role')
+              .eq('id', session.user.id)
+              .single();
+            
+            // Only allow if the user is an admin
+            if (error || profile?.role !== 'admin') {
+              console.log('Middleware: User is not admin, redirecting to home');
+              return NextResponse.redirect(new URL('/', request.url));
+            }
+            
+            console.log('Middleware: Admin status verified, proceeding');
+          } catch (adminError) {
+            console.error('Middleware: Error checking admin status:', adminError);
+            return NextResponse.redirect(new URL('/', request.url));
+          }
+        }
+      }
     } catch (error) {
       console.error('Middleware: Session fetch error:', error);
       // For specific routes, redirect to login
-      if (['/members', '/profile', '/settings'].some(path => 
+      if (['/members', '/profile', '/settings', '/admin'].some(path => 
         request.nextUrl.pathname.startsWith(path))) {
         return NextResponse.redirect(new URL('/auth/signin', request.url));
       }
@@ -95,7 +132,7 @@ export async function middleware(request: NextRequest) {
     console.error('Middleware: Unexpected error:', error);
     
     // For protected routes, redirect to login on error
-    if (['/members', '/profile', '/settings'].some(path => 
+    if (['/members', '/profile', '/settings', '/admin'].some(path => 
       request.nextUrl.pathname.startsWith(path))) {
       return NextResponse.redirect(new URL('/auth/signin', request.url));
     }
