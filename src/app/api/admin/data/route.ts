@@ -114,19 +114,25 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  logApiCall('POST', new URL(request.url).searchParams.get('table') || 'unknown');
-  
   try {
     const url = new URL(request.url);
     const table = url.searchParams.get('table');
     const isUpdate = url.searchParams.get('update') === 'true';
+    
+    logApiCall('POST', table || 'unknown');
     
     if (!table) {
       return NextResponse.json({ error: 'Missing table parameter' }, { status: 400 });
     }
     
     // Get the data from the request body
-    const requestData = await request.json();
+    let requestData;
+    try {
+      requestData = await request.json();
+    } catch (e) {
+      console.error('Failed to parse request body:', e);
+      return NextResponse.json({ error: 'Invalid JSON in request body' }, { status: 400 });
+    }
     
     if (!requestData) {
       return NextResponse.json({ error: 'Missing request data' }, { status: 400 });
@@ -159,37 +165,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Not authorized' }, { status: 403 });
     }
     
-    // Special handling for players table to ensure proper JSON structure
-    let dataToUpsert = requestData;
-    if (table === 'players' && typeof requestData === 'object') {
-      // Make sure stats and social are proper JSON objects
-      if (requestData.stats && typeof requestData.stats !== 'object') {
-        try {
-          dataToUpsert.stats = JSON.parse(requestData.stats);
-        } catch (e) {
-          console.error('Failed to parse stats JSON:', e);
-          return NextResponse.json({ error: 'Invalid stats data format' }, { status: 400 });
-        }
-      }
-      
-      if (requestData.social && typeof requestData.social !== 'object') {
-        try {
-          dataToUpsert.social = JSON.parse(requestData.social);
-        } catch (e) {
-          console.error('Failed to parse social JSON:', e);
-          return NextResponse.json({ error: 'Invalid social data format' }, { status: 400 });
-        }
-      }
-      
-      if (requestData.achievements && !Array.isArray(requestData.achievements)) {
-        try {
-          dataToUpsert.achievements = JSON.parse(requestData.achievements);
-        } catch (e) {
-          console.error('Failed to parse achievements JSON:', e);
-          return NextResponse.json({ error: 'Invalid achievements data format' }, { status: 400 });
-        }
-      }
-    }
+    // Don't modify the requestData - assume it's already in the correct format
+    // This avoids issues with parsing JSON strings that are already objects
+    const dataToUpsert = { ...requestData };
     
     // Perform the operation based on whether it's an update or create
     let result;
@@ -199,10 +177,15 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Missing ID for update operation' }, { status: 400 });
       }
       
+      console.log(`Updating ${table} with ID: ${dataToUpsert.id}`);
+      
+      // Clone the data and make a copy without the ID to avoid Supabase errors
+      const { id, ...updateData } = dataToUpsert;
+      
       const { data, error } = await supabase
         .from(table)
-        .update(dataToUpsert)
-        .eq('id', dataToUpsert.id)
+        .update(updateData)
+        .eq('id', id)
         .select();
       
       if (error) {
@@ -226,6 +209,8 @@ export async function POST(request: Request) {
       result = data;
     }
     
+    console.log(`Successfully ${isUpdate ? 'updated' : 'created'} data in ${table}:`, result);
+    
     return NextResponse.json(result || [], {
       headers: {
         'Cache-Control': 'no-store, no-cache, must-revalidate',
@@ -234,7 +219,10 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error('Admin Data API: Unexpected error in POST:', error);
-    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+    return NextResponse.json({ 
+      error: 'Server error', 
+      details: error instanceof Error ? error.message : String(error)
+    }, { status: 500 });
   }
 }
 

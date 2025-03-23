@@ -172,7 +172,7 @@ function PlayersContent() {
 
     try {
       // Validate that we have either an image file or an existing image URL
-      if (!imageFile && !formData.image) {
+      if (!selectedPlayer && !imageFile && !formData.image) {
         setFormError("Please upload a player image");
         return;
       }
@@ -196,16 +196,21 @@ function PlayersContent() {
         }
       }
 
-      // Parse achievements from text to array
-      const achievementsArray = formData.achievements
-        ? formData.achievements.split('\n').filter(a => a.trim() !== '')
-        : [];
+      // Process achievements - make sure they're in correct format
+      let achievementsArray: string[] = [];
+      if (formData.achievements) {
+        // Split by newlines and filter out empty strings
+        achievementsArray = formData.achievements
+          .split('\n')
+          .map(line => line.trim())
+          .filter(line => line !== '');
+      }
 
       // Create the player data object
       const playerData = {
         name: formData.name.trim(),
         position: formData.position,
-        number: Number(formData.number),
+        number: Number(formData.number) || 0,
         image: imageUrl,
         stats: {
           matches: Number(formData.matches) || 0,
@@ -219,7 +224,7 @@ function PlayersContent() {
         achievements: achievementsArray,
       };
 
-      console.log("Player data to submit:", playerData);
+      console.log("Player data to submit:", JSON.stringify(playerData, null, 2));
 
       let success = false;
       if (selectedPlayer) {
