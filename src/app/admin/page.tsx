@@ -17,6 +17,8 @@ export default function AdminDashboard() {
   const { isReady, isAdmin, user } = useRequireAdmin();
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
+  const [directVerified, setDirectVerified] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
   const [stats, setStats] = useState({
     players: 0,
     articles: 0,
@@ -34,13 +36,68 @@ export default function AdminDashboard() {
 
   const supabase = createClientComponentClient();
 
+  // Direct API verification as a fallback
+  useEffect(() => {
+    // If we've been waiting too long without isReady becoming true
+    // and we have a user, try direct API verification
+    const timeout = setTimeout(async () => {
+      if (!isReady && user && !directVerified && retryCount < 3) {
+        console.log("AdminDashboard: Performing direct admin verification via API");
+        try {
+          // Try using our dedicated API first (more reliable)
+          const response = await fetch('/api/auth/verify-admin', {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Cache-Control': 'no-cache, no-store',
+            },
+            credentials: 'include', // Important for cookies
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok && data.isAdmin) {
+            console.log("AdminDashboard: API verification confirmed admin status");
+            setDirectVerified(true);
+            fetchStats(); // Start fetching stats once verified
+            return;
+          }
+          
+          console.log("AdminDashboard: API verification failed, trying database directly");
+          
+          // Fall back to direct database query if API fails
+          const { data: profile, error } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single();
+          
+          if (!error && profile?.role === 'admin') {
+            console.log("AdminDashboard: Database verification confirmed admin status");
+            setDirectVerified(true);
+            fetchStats(); // Start fetching stats once verified
+          } else {
+            console.log("AdminDashboard: Database verification failed", error);
+            // Try a few times before giving up
+            setRetryCount(prev => prev + 1);
+          }
+        } catch (verifyError) {
+          console.error("AdminDashboard: Error in direct verification", verifyError);
+          setRetryCount(prev => prev + 1);
+        }
+      }
+    }, 3000);
+    
+    return () => clearTimeout(timeout);
+  }, [isReady, user, directVerified, retryCount]);
+
   // Only fetch stats when we know the user is an admin
   useEffect(() => {
-    if (isReady && isAdmin && user) {
+    if ((isReady && isAdmin && user) || directVerified) {
       console.log("AdminDashboard: User is admin, fetching stats");
       fetchStats();
     }
-  }, [isReady, isAdmin, user]);
+  }, [isReady, isAdmin, user, directVerified]);
 
   const fetchStats = async () => {
     setFetchError(null);
@@ -66,8 +123,8 @@ export default function AdminDashboard() {
         }
       };
       
-      // Add a small timeout to ensure DB connections are established
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Add a small delay before fetching to give DB connections time to establish
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
       // Then fetch all counts in parallel
       const [
@@ -118,6 +175,11 @@ export default function AdminDashboard() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Force a refresh button 
+  const handleForceRefresh = () => {
+    window.location.reload();
   };
 
   const adminSections = [
@@ -196,12 +258,22 @@ export default function AdminDashboard() {
   ];
 
   // Show loading state while checking admin status OR while fetching stats
-  if (!isReady || loading) {
+  if ((!isReady && !directVerified) || loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen">
         <Loader2 className="animate-spin h-8 w-8 text-rugby-teal mb-4" />
         <p className="text-muted-foreground">Loading admin dashboard...</p>
-        {!isReady && <p className="text-sm text-muted-foreground mt-2">Verifying admin privileges...</p>}
+        {(!isReady && !directVerified) && <p className="text-sm text-muted-foreground mt-2">Verifying admin privileges...</p>}
+        
+        {/* Add a manual refresh button if it takes too long */}
+        {retryCount >= 2 && (
+          <button 
+            onClick={handleForceRefresh}
+            className="mt-6 px-4 py-2 bg-rugby-teal text-white rounded-md hover:bg-rugby-teal/90 transition-colors"
+          >
+            Force Refresh
+          </button>
+        )}
       </div>
     );
   }
