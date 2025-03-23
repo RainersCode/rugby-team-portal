@@ -36,7 +36,7 @@ export default function UserNav({ user: propUser }: UserNavProps) {
   const router = useRouter();
   const [initials, setInitials] = useState("");
   const [displayName, setDisplayName] = useState("");
-  const { user: contextUser, isAdmin, isLoading } = useAuth();
+  const { user: contextUser, isAdmin, isLoading, clearAuth } = useAuth();
   const supabase = createClientComponentClient();
   const fetchingRef = useRef(false);
   const [isChromeSetup, setIsChromeSetup] = useState(false);
@@ -242,12 +242,32 @@ export default function UserNav({ user: propUser }: UserNavProps) {
     try {
       console.log("UserNav: Signing out");
       
-      // Clear local cache first
+      // Directly clear auth context first
+      clearAuth();
+      
+      // Dispatch custom event for any other components listening
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('auth:logout'));
+      }
+      
+      // Clear all possible caches
       if (typeof window !== 'undefined') {
         try {
+          // Clear all local storage
           localStorage.removeItem(USER_CACHE_KEY);
+          
+          // Try to clear any supabase auth items
+          for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && (key.includes('supabase') || key.includes('auth'))) {
+              localStorage.removeItem(key);
+            }
+          }
+          
+          // Clear session storage too
+          sessionStorage.clear();
         } catch (error) {
-          console.error("UserNav: Error clearing cache:", error);
+          console.error("UserNav: Error clearing storage:", error);
         }
       }
       
@@ -259,30 +279,41 @@ export default function UserNav({ user: propUser }: UserNavProps) {
       }
       
       // Call our API endpoint with cache-busting parameter
-      const response = await fetch(`/api/auth/signout?_=${Date.now()}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Pragma': 'no-cache',
-        },
-        credentials: 'include'
-      });
-
-      if (!response.ok) {
-        throw new Error('Sign out failed');
+      try {
+        const response = await fetch(`/api/auth/signout?_=${Date.now()}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+          },
+          credentials: 'include'
+        });
+        
+        if (!response.ok) {
+          console.error("UserNav: Sign out API request failed", response.status);
+        }
+      } catch (apiError) {
+        console.error("UserNav: API call error:", apiError);
       }
 
       // Clear client-side state
       setInitials("");
       setDisplayName("");
       
-      // Redirect to home page and force a full page reload with cache busting
-      window.location.href = '/?nocache=' + Date.now();
+      // Force full page reload with aggressive cache busting
+      const timestamp = Date.now();
+      console.log("UserNav: Redirecting to home with cache busting:", timestamp);
+      
+      // Try to clear cookies by setting an expiry date in the past
+      document.cookie = "supabase-auth-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      
+      // Redirect using hard refresh
+      window.location.href = `/?forcereload=${timestamp}`;
     } catch (error) {
       console.error('Error during sign out:', error);
       // If there's an error, still try to refresh the page
-      window.location.href = '/?nocache=' + Date.now();
+      window.location.href = `/?forcereload=${Date.now()}`;
     }
   };
 

@@ -27,6 +27,7 @@ type AuthContextType = {
   checkingSession: boolean;
   session: Session | null;
   refreshAuth: () => Promise<void>;
+  clearAuth: () => void;
 };
 
 const AuthContext = createContext<AuthContextType>({
@@ -37,6 +38,7 @@ const AuthContext = createContext<AuthContextType>({
   checkingSession: true,
   session: null,
   refreshAuth: async () => {},
+  clearAuth: () => {},
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -226,6 +228,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     initialCheck();
   }, []);
 
+  // Add explicit method to clear auth state
+  const clearAuth = () => {
+    console.log('AuthContext: Explicitly clearing auth state');
+    setUser(null);
+    setSession(null);
+    setIsAdmin(false);
+  };
+
+  // Handle logout events more explicitly
+  useEffect(() => {
+    // Listen for custom logout event
+    const handleLogout = () => {
+      console.log('AuthContext: Logout event received');
+      clearAuth();
+    };
+
+    window.addEventListener('auth:logout', handleLogout);
+    
+    return () => {
+      window.removeEventListener('auth:logout', handleLogout);
+    };
+  }, []);
+
   // Handle auth state changes
   useEffect(() => {
     try {
@@ -236,9 +261,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           
           if (event === 'SIGNED_OUT') {
             console.log('AuthContext: User signed out');
-            setUser(null);
-            setSession(null);
-            setIsAdmin(false);
+            clearAuth();
             
             // If on an admin page, redirect to home
             if (pathname.startsWith('/admin')) {
@@ -340,6 +363,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         checkingSession,
         session,
         refreshAuth,
+        clearAuth,
       }}
     >
       {children}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { MobileNav } from "@/components/mobile-nav";
@@ -30,8 +30,31 @@ type MainNavItem = NavItem | DropdownNavItem;
 
 export function Header() {
   const pathname = usePathname();
-  const { user, isAdmin, isLoading } = useAuth();
+  const { user, isAdmin, isLoading, refreshAuth } = useAuth();
   const { language, setLanguage, translations } = useLanguage();
+  const [authKey, setAuthKey] = useState(Date.now());
+
+  // Force refresh when forcereload parameter is present in URL
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      const forceReload = url.searchParams.get('forcereload');
+      
+      if (forceReload) {
+        console.log('Header: Force reload parameter detected, refreshing auth state');
+        
+        // Remove the parameter to prevent endless refreshes
+        url.searchParams.delete('forcereload');
+        window.history.replaceState({}, document.title, url.toString());
+        
+        // Refresh auth state and force UI update
+        refreshAuth().then(() => {
+          console.log('Header: Auth state refreshed after forced reload');
+          setAuthKey(Date.now());
+        });
+      }
+    }
+  }, [pathname, refreshAuth]);
 
   const isLinkActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
@@ -172,19 +195,24 @@ export function Header() {
   };
 
   const renderAuthSection = () => {
+    // Always update authKey when user state changes
+    useEffect(() => {
+      setAuthKey(Date.now());
+    }, [user?.id]);
+    
     if (isLoading) {
       return <div className="h-8 w-8 rounded-none bg-white/10 animate-pulse"></div>;
     }
     
     if (user) {
-      return <UserNav key={`user-${user.id}-${Date.now()}`} />;
+      return <UserNav key={`user-${user.id}-${authKey}`} />;
     }
     
     return (
       <Link 
         href="/auth/signin" 
         className="inline-flex items-center justify-center rounded-none text-sm font-medium text-white bg-rugby-teal hover:bg-rugby-teal-light h-9 px-4 py-2 transition-colors"
-        key="sign-in-button"
+        key={`sign-in-${authKey}`}
       >
         {translations.signIn || 'Sign In'}
       </Link>
