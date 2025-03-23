@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { Pencil, Trash2, Plus, Loader2, Upload, RefreshCw } from "lucide-react";
@@ -39,7 +39,7 @@ const positions = [
   "Full-back",
 ];
 
-export default function AdminPlayersPage() {
+function PlayersContent() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<PlayerType | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -653,5 +653,20 @@ export default function AdminPlayersPage() {
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+export default function AdminPlayersPage() {
+  return (
+    <Suspense fallback={
+      <div className="container py-6">
+        <div className="flex justify-center items-center py-20">
+          <Loader2 className="h-10 w-10 animate-spin text-rugby-teal" />
+          <span className="ml-2">Loading players management...</span>
+        </div>
+      </div>
+    }>
+      <PlayersContent />
+    </Suspense>
   );
 }
