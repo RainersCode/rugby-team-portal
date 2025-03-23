@@ -171,6 +171,12 @@ function PlayersContent() {
     setFormError(null);
 
     try {
+      // Validate required fields
+      if (!formData.name.trim()) {
+        setFormError("Player name is required");
+        return;
+      }
+
       // Validate that we have either an image file or an existing image URL
       if (!selectedPlayer && !imageFile && !formData.image) {
         setFormError("Please upload a player image");
@@ -185,10 +191,13 @@ function PlayersContent() {
 
       let imageUrl = formData.image;
 
+      // Upload image if we have a new file
       if (imageFile) {
         try {
+          setFormError("Uploading image...");
           const { publicUrl } = await uploadImage(imageFile);
           imageUrl = publicUrl;
+          setFormError(null);
         } catch (uploadError) {
           console.error("Image upload error:", uploadError);
           setFormError("Failed to upload image. Please try again.");
@@ -206,16 +215,16 @@ function PlayersContent() {
           .filter(line => line !== '');
       }
 
-      // Create the player data object
+      // Create the player data object with explicit type conversion
       const playerData = {
         name: formData.name.trim(),
         position: formData.position,
-        number: Number(formData.number) || 0,
-        image: imageUrl,
+        number: parseInt(formData.number) || 0,
+        image: imageUrl || "",
         stats: {
-          matches: Number(formData.matches) || 0,
-          tries: Number(formData.tries) || 0,
-          tackles: Number(formData.tackles) || 0,
+          matches: parseInt(formData.matches) || 0,
+          tries: parseInt(formData.tries) || 0,
+          tackles: parseInt(formData.tackles) || 0,
         },
         social: {
           instagram: formData.instagram || "",
@@ -225,7 +234,9 @@ function PlayersContent() {
       };
 
       console.log("Player data to submit:", JSON.stringify(playerData, null, 2));
-
+      
+      setFormError("Saving player data...");
+      
       let success = false;
       if (selectedPlayer) {
         // If we're editing an existing player
@@ -238,6 +249,7 @@ function PlayersContent() {
       }
 
       console.log("Operation result:", success ? "Success" : "Failed");
+      
       if (success) {
         // Reset form state
         resetForm();
@@ -280,24 +292,40 @@ function PlayersContent() {
       console.log(`Attempting to delete player with ID: ${confirmDelete}`);
       const playerToDelete = players.find(p => p.id === confirmDelete);
       
-      if (playerToDelete?.image) {
-        // Delete the image first
-        console.log(`Deleting image: ${playerToDelete.image}`);
-        await deleteImage(playerToDelete.image);
+      if (!playerToDelete) {
+        console.error(`Player with ID ${confirmDelete} not found in list`);
+        setFormError(`Player not found. Try refreshing the page.`);
+        return;
       }
       
-      // Delete the player record
+      // Show operation in progress
+      setFormError("Deleting player...");
+      
+      // Delete the player record first
+      console.log("Deleting player record from database");
       const success = await deletePlayer(confirmDelete);
-      console.log("Delete operation result:", success ? "Success" : "Failed");
       
       if (success) {
+        // If database record deletion was successful, try to delete the image
+        if (playerToDelete?.image) {
+          try {
+            // Delete the image
+            console.log(`Deleting image: ${playerToDelete.image}`);
+            await deleteImage(playerToDelete.image);
+          } catch (imageError) {
+            // Just log image deletion errors, don't fail the whole operation
+            console.error("Failed to delete image, but player was removed:", imageError);
+          }
+        }
+        
         setConfirmDelete(null);
+        setFormError(null);
       } else {
-        throw new Error("Failed to delete player. Check console for details.");
+        throw new Error("Failed to delete player. Please try again.");
       }
     } catch (error) {
       console.error("Error deleting player:", error);
-      alert(error instanceof Error ? error.message : "An error occurred while deleting the player");
+      setFormError(error instanceof Error ? error.message : "An error occurred while deleting the player");
     }
   };
 

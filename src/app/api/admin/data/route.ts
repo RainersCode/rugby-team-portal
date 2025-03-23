@@ -268,6 +268,36 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: 'Not authorized' }, { status: 403 });
     }
     
+    // First check if the record exists
+    const { data: existingData, error: getError } = await supabase
+      .from(table)
+      .select('id')
+      .eq('id', id)
+      .maybeSingle();
+      
+    if (getError) {
+      console.error(`Admin Data API: Error checking if record exists in ${table}:`, getError);
+      return NextResponse.json({ 
+        error: `Error checking if record exists: ${getError.message}`,
+        details: getError
+      }, { status: 500 });
+    }
+    
+    if (!existingData) {
+      console.warn(`Admin Data API: Record with id ${id} not found in ${table}`);
+      // Still return success even if record doesn't exist
+      return NextResponse.json({ 
+        success: true, 
+        id,
+        message: `Record with id ${id} not found in ${table}, no deletion needed`
+      }, {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate',
+          'Pragma': 'no-cache'
+        }
+      });
+    }
+    
     // For players table, we should handle image deletion in the component, not here
     // This just deletes the database record
     
@@ -279,10 +309,19 @@ export async function DELETE(request: Request) {
     
     if (error) {
       console.error(`Admin Data API: Error deleting from ${table}:`, error);
-      return NextResponse.json({ error: `Error deleting data: ${error.message}` }, { status: 500 });
+      return NextResponse.json({ 
+        error: `Error deleting data: ${error.message}`,
+        details: error
+      }, { status: 500 });
     }
     
-    return NextResponse.json({ success: true, id }, {
+    console.log(`Admin Data API: Successfully deleted record with id ${id} from ${table}`);
+    
+    return NextResponse.json({ 
+      success: true, 
+      id,
+      message: `Successfully deleted record with id ${id} from ${table}`
+    }, {
       headers: {
         'Cache-Control': 'no-store, no-cache, must-revalidate',
         'Pragma': 'no-cache'
@@ -290,6 +329,9 @@ export async function DELETE(request: Request) {
     });
   } catch (error) {
     console.error('Admin Data API: Unexpected error in DELETE:', error);
-    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+    return NextResponse.json({ 
+      error: 'Server error', 
+      details: error instanceof Error ? error.message : String(error)
+    }, { status: 500 });
   }
 } 
