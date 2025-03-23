@@ -119,15 +119,6 @@ function PlayersContent() {
 
       console.log(`Generated file path: ${filePath}`);
 
-      // For simplicity and reliability, we'll just return the placeholder
-      // This is a temporary fix until the storage issues are resolved
-      return { 
-        filePath, 
-        publicUrl: "/images/training-hero.jpg" 
-      };
-
-      // The code below is commented out until storage issues are resolved
-      /*
       // First check if the bucket exists
       try {
         console.log("Checking storage buckets...");
@@ -143,11 +134,19 @@ function PlayersContent() {
         // Check if our bucket exists
         const imagesBucket = buckets.find(b => b.name === "images");
         if (!imagesBucket) {
-          throw new Error("The 'images' storage bucket doesn't exist");
+          console.log("'images' bucket not found, trying to use public bucket instead");
+          // Try to use the public bucket instead
+          const publicBucket = buckets.find(b => b.name === "public");
+          if (!publicBucket) {
+            throw new Error("Neither 'images' nor 'public' storage buckets exist");
+          }
+          // Modify filePath to use public bucket
+          filePath = `public/${filePath}`;
         }
       } catch (bucketError) {
         console.error("Bucket check error:", bucketError);
-        throw new Error("Failed to verify storage access");
+        console.log("Continuing with upload attempt anyway...");
+        // Continue with the upload attempt
       }
 
       // Upload the file
@@ -156,7 +155,7 @@ function PlayersContent() {
         .from("images")
         .upload(filePath, file, {
           cacheControl: "3600",
-          upsert: false,
+          upsert: true, // Changed to true to overwrite if file exists
         });
       
       // Race the upload against the timeout
@@ -185,7 +184,6 @@ function PlayersContent() {
       console.log("Generated public URL:", publicUrl);
 
       return { filePath, publicUrl };
-      */
     } catch (error) {
       console.error("Detailed upload error:", error);
       throw new Error(
@@ -381,7 +379,7 @@ function PlayersContent() {
       
       if (success) {
         // If database record deletion was successful, try to delete the image
-        if (playerToDelete?.image) {
+        if (playerToDelete?.image && !playerToDelete.image.includes("training-hero.jpg")) {
           try {
             // Delete the image
             console.log(`Deleting image: ${playerToDelete.image}`);
@@ -392,6 +390,7 @@ function PlayersContent() {
           }
         }
         
+        // Always close the confirm dialog after successful deletion
         setConfirmDelete(null);
         setFormError(null);
       } else {
@@ -400,6 +399,8 @@ function PlayersContent() {
     } catch (error) {
       console.error("Error deleting player:", error);
       setFormError(error instanceof Error ? error.message : "An error occurred while deleting the player");
+      // Also close the dialog on error, to avoid getting stuck
+      setConfirmDelete(null);
     }
   };
 
