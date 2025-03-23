@@ -90,7 +90,7 @@ export default function ArticlesPage() {
     if (loading) {
       return (
         <tr>
-          <td colSpan={5} className="text-center py-4">Loading articles...</td>
+          <td colSpan={5} className="text-center py-4">Loading articles..</td>
         </tr>
       );
     }
