@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { useState } from "react";
+import { Plus, Pencil, Trash2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -21,7 +20,6 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/components/ui/use-toast";
 import {
   Select,
   SelectContent,
@@ -29,309 +27,133 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-type TeamType = {
-  id: number;
-  name: string;
-  status: "active" | "inactive";
-};
-
-type StandingType = {
-  id: number;
-  team_id: number;
-  position: number;
-  played: number;
-  won: number;
-  drawn: number;
-  lost: number;
-  points_for: number;
-  try_bonus_points: number;
-  losing_bonus_points: number;
-  total_points: number;
-  team_name?: string;
-};
-
-type SeasonType = {
-  id: number;
-  name: string;
-  start_date: string;
-  end_date: string;
-  is_current: boolean;
-};
+import { useTournamentData, TeamType, StandingType, SeasonType } from "@/hooks/useTournamentData";
+import { format } from "date-fns";
 
 export default function AdminChampionshipClient({
   activeTab = "standings",
 }: {
   activeTab?: "standings" | "teams" | "seasons";
 }) {
-  const [standings, setStandings] = useState<StandingType[]>([]);
-  const [teams, setTeams] = useState<TeamType[]>([]);
-  const [seasons, setSeasons] = useState<SeasonType[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
   const [formData, setFormData] = useState<any>({});
-  const [currentSeason, setCurrentSeason] = useState<SeasonType | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
-  const supabase = createClientComponentClient();
-  const { toast } = useToast();
+  const tournament = useTournamentData('championship', activeTab);
+  
+  const { 
+    currentSeason,
+    teams,
+    standings,
+    seasons,
+    isLoading,
+    error,
+    refreshData,
+    createItem,
+    updateItem,
+    deleteItem,
+    setAsCurrentSeason
+  } = tournament;
 
-  // Load current season first
-  useEffect(() => {
-    async function getCurrentSeason() {
-      try {
-        const { data: seasonData, error: seasonError } = await supabase
-          .from("championship_seasons")
-          .select("*")
-          .eq("is_current", true)
-          .single();
-
-        if (seasonError) throw seasonError;
-        setCurrentSeason(seasonData);
-        return seasonData;
-      } catch (error: any) {
-        console.error("Error loading current season:", error);
-        toast({
-          title: "Error",
-          description: "Failed to load current season",
-          variant: "destructive",
-        });
-        return null;
-      }
-    }
-    getCurrentSeason();
-  }, []);
-
-  // Load data based on active tab
-  useEffect(() => {
-    async function loadTabData() {
-      setIsLoading(true);
-      try {
-        if (activeTab === "standings" && currentSeason) {
-          // Load teams first
-          const { data: teamsData, error: teamsError } = await supabase
-            .from("championship_teams")
-            .select("*")
-            .eq("season_id", currentSeason.id)
-            .eq("status", "active");
-
-          if (teamsError) throw teamsError;
-          setTeams(teamsData || []);
-
-          // Then load standings with team names
-          const { data: standingsData, error: standingsError } = await supabase
-            .from("championship_standings")
-            .select(
-              `
-              *,
-              team:championship_teams(name)
-            `
-            )
-            .eq("season_id", currentSeason.id)
-            .order("position");
-
-          if (standingsError) throw standingsError;
-
-          const transformedStandings =
-            standingsData?.map((standing) => ({
-              ...standing,
-              team_name: standing.team?.name,
-            })) || [];
-
-          setStandings(transformedStandings);
-        } else if (activeTab === "teams") {
-          const { data, error } = await supabase
-            .from("championship_teams")
-            .select("*")
-            .order("name");
-          if (error) throw error;
-          setTeams(data || []);
-        } else if (activeTab === "seasons") {
-          const { data, error } = await supabase
-            .from("championship_seasons")
-            .select("*")
-            .order("start_date", { ascending: false });
-          if (error) throw error;
-          setSeasons(data || []);
-        }
-      } catch (error: any) {
-        console.error("Error loading data:", error);
-        toast({
-          title: "Error",
-          description: error.message,
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    loadTabData();
-  }, [activeTab, currentSeason]);
+  async function handleRefresh() {
+    setIsRefreshing(true);
+    await refreshData();
+    setIsRefreshing(false);
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setIsLoading(true);
+    
     try {
-      let table = "";
-      if (activeTab === "standings") {
-        table = "championship_standings";
-        // Make sure standings are associated with current season
-        if (!editingItem && currentSeason) {
-          formData.season_id = currentSeason.id;
-        }
-        console.log("Submitting standing with data:", formData);
-      } else if (activeTab === "teams") {
-        table = "championship_teams";
-        // Make sure teams are associated with current season
-        if (!editingItem && currentSeason) {
-          formData.season_id = currentSeason.id;
-          formData.status = formData.status || "active";
-        }
-        console.log("Submitting team with data:", formData);
-      } else if (activeTab === "seasons") table = "championship_seasons";
-
       if (editingItem) {
-        const { data, error } = await supabase
-          .from(table)
-          .update(formData)
-          .eq("id", editingItem.id);
-        if (error) throw error;
-        console.log("Updated data:", data);
+        // Update existing item
+        const itemType = activeTab === 'standings' 
+          ? 'standing' 
+          : activeTab === 'teams' 
+            ? 'team' 
+            : 'season';
+        
+        await updateItem(itemType, formData);
       } else {
-        const { data, error } = await supabase.from(table).insert(formData);
-        if (error) throw error;
-        console.log("Inserted data:", data);
+        // Create new item
+        const itemType = activeTab === 'standings' 
+          ? 'standing' 
+          : activeTab === 'teams' 
+            ? 'team' 
+            : 'season';
+        
+        await createItem(itemType, formData);
       }
-
-      toast({
-        title: "Success",
-        description: `${activeTab} ${
-          editingItem ? "updated" : "created"
-        } successfully`,
-      });
+      
       setIsDialogOpen(false);
-
-      // Reload data based on active tab
-      if (activeTab === "standings" && currentSeason) {
-        const { data: standingsData } = await supabase
-          .from("championship_standings")
-          .select(`*, team:championship_teams(name)`)
-          .eq("season_id", currentSeason.id)
-          .order("position");
-
-        const transformedStandings =
-          standingsData?.map((standing) => ({
-            ...standing,
-            team_name: standing.team?.name,
-          })) || [];
-
-        setStandings(transformedStandings);
-      } else if (activeTab === "teams") {
-        const { data: teamsData } = await supabase
-          .from("championship_teams")
-          .select("*")
-          .order("name");
-        setTeams(teamsData || []);
-      } else if (activeTab === "seasons") {
-        const { data: seasonsData } = await supabase
-          .from("championship_seasons")
-          .select("*")
-          .order("start_date", { ascending: false });
-        setSeasons(seasonsData || []);
-
-        // If we're updating seasons, check if we need to update current season
-        if (formData.is_current) {
-          const { data: currentSeasonData } = await supabase
-            .from("championship_seasons")
-            .select("*")
-            .eq("is_current", true)
-            .single();
-          setCurrentSeason(currentSeasonData);
-        }
-      }
-    } catch (error: any) {
-      console.error("Error saving data:", error);
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
+      setEditingItem(null);
+      setFormData({});
+    } catch (error) {
+      console.error("Error submitting form:", error);
     }
   }
 
-  async function handleDelete(id: number) {
-    if (!window.confirm("Are you sure you want to delete this item?")) return;
+  async function handleDelete(id: string) {
+    setConfirmDelete(id);
+  }
 
-    setIsLoading(true);
+  async function confirmDeleteAction() {
+    if (!confirmDelete) return;
+    
     try {
-      let table = "";
-      if (activeTab === "standings") table = "championship_standings";
-      else if (activeTab === "teams") table = "championship_teams";
-      else if (activeTab === "seasons") table = "championship_seasons";
-
-      const { error } = await supabase.from(table).delete().eq("id", id);
-
-      if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: `${activeTab} deleted successfully`,
-      });
-
-      // Reload data
-      if (activeTab === "standings" && currentSeason) {
-        const { data } = await supabase
-          .from("championship_standings")
-          .select(`*, team:championship_teams(name)`)
-          .eq("season_id", currentSeason.id)
-          .order("position");
-
-        const transformedStandings =
-          data?.map((standing) => ({
-            ...standing,
-            team_name: standing.team?.name,
-          })) || [];
-
-        setStandings(transformedStandings);
-      } else if (activeTab === "teams") {
-        const { data } = await supabase
-          .from("championship_teams")
-          .select("*")
-          .order("name");
-        setTeams(data || []);
-      } else if (activeTab === "seasons") {
-        const { data } = await supabase
-          .from("championship_seasons")
-          .select("*")
-          .order("start_date", { ascending: false });
-        setSeasons(data || []);
-      }
-    } catch (error: any) {
+      const itemType = activeTab === 'standings' 
+        ? 'standing' 
+        : activeTab === 'teams' 
+          ? 'team' 
+          : 'season';
+      
+      await deleteItem(itemType, confirmDelete);
+      setConfirmDelete(null);
+    } catch (error) {
       console.error("Error deleting item:", error);
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
     }
+  }
+
+  function handleEdit(item: any) {
+    setEditingItem(item);
+    setFormData(item);
+    setIsDialogOpen(true);
+  }
+
+  function handleNew() {
+    setEditingItem(null);
+    setFormData({});
+    setIsDialogOpen(true);
+  }
+
+  function handleSetCurrentSeason(id: string) {
+    setAsCurrentSeason(id);
   }
 
   function renderStandingsTable() {
     return (
       <div>
-        <div className="flex justify-end mb-4">
+        <div className="flex justify-between mb-4">
+          <div className="flex items-center">
+            <h2 className="text-lg font-semibold mr-2">
+              {currentSeason?.name || "Current Season"}
+            </h2>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRefresh}
+              disabled={isLoading || isRefreshing}
+            >
+              <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
+          </div>
           <Button
-            onClick={() => {
-              setEditingItem(null);
-              setFormData({});
-              setIsDialogOpen(true);
-            }}
+            onClick={handleNew}
             className="bg-rugby-teal hover:bg-rugby-teal/90"
+            disabled={isLoading}
           >
             <Plus className="h-4 w-4 mr-2" /> Add Standing
           </Button>
@@ -375,65 +197,60 @@ export default function AdminChampionshipClient({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {standings.map((standing, index) => (
-              <TableRow
-                key={standing.id}
-                className={`
-                  ${
-                    index % 2 === 0
-                      ? "bg-white dark:bg-gray-900"
-                      : "bg-rugby-teal/5 dark:bg-gray-800/50"
-                  } 
-                  hover:bg-rugby-teal/10 dark:hover:bg-rugby-teal/10 transition-colors
-                  border-b border-rugby-teal/10
-                `}
-              >
-                <TableCell className="font-medium">
-                  {standing.position}
-                </TableCell>
-                <TableCell className="font-medium">
-                  {standing.team_name}
-                </TableCell>
-                <TableCell className="text-center">{standing.played}</TableCell>
-                <TableCell className="text-center">{standing.won}</TableCell>
-                <TableCell className="text-center">{standing.drawn}</TableCell>
-                <TableCell className="text-center">{standing.lost}</TableCell>
-                <TableCell className="text-center">
-                  {standing.points_for}
-                </TableCell>
-                <TableCell className="text-center">
-                  {standing.try_bonus_points}
-                </TableCell>
-                <TableCell className="text-center">
-                  {standing.losing_bonus_points}
-                </TableCell>
-                <TableCell className="text-center font-semibold text-rugby-teal">
-                  {standing.total_points}
-                </TableCell>
-                <TableCell className="text-right">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      setEditingItem(standing);
-                      setFormData(standing);
-                      setIsDialogOpen(true);
-                    }}
-                    className="mr-2 hover:bg-rugby-teal/10 hover:text-rugby-teal"
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleDelete(standing.id)}
-                    className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+            {isLoading ? (
+              <TableRow>
+                <TableCell colSpan={11} className="text-center py-4">
+                  Loading standings...
                 </TableCell>
               </TableRow>
-            ))}
+            ) : error ? (
+              <TableRow>
+                <TableCell colSpan={11} className="text-center py-4 text-red-500">
+                  Error loading standings. Please refresh.
+                </TableCell>
+              </TableRow>
+            ) : standings.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={11} className="text-center py-4">
+                  No standings found. Add your first standing.
+                </TableCell>
+              </TableRow>
+            ) : (
+              standings.map((standing) => (
+                <TableRow key={standing.id}>
+                  <TableCell>{standing.position}</TableCell>
+                  <TableCell>
+                    {teams.find((t) => t.id === standing.team_id)?.name || "Unknown Team"}
+                  </TableCell>
+                  <TableCell className="text-center">{standing.played}</TableCell>
+                  <TableCell className="text-center">{standing.won}</TableCell>
+                  <TableCell className="text-center">{standing.drawn}</TableCell>
+                  <TableCell className="text-center">{standing.lost}</TableCell>
+                  <TableCell className="text-center">{standing.points_for}</TableCell>
+                  <TableCell className="text-center">{standing.try_bonus_points}</TableCell>
+                  <TableCell className="text-center">{standing.losing_bonus_points}</TableCell>
+                  <TableCell className="text-center">{standing.total_points}</TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end space-x-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleEdit(standing)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDelete(standing.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </div>
@@ -443,52 +260,98 @@ export default function AdminChampionshipClient({
   function renderTeamsTable() {
     return (
       <div>
-        <div className="flex justify-end mb-4">
+        <div className="flex justify-between mb-4">
+          <div className="flex items-center">
+            <h2 className="text-lg font-semibold mr-2">
+              {currentSeason?.name || "Current Season"}
+            </h2>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRefresh}
+              disabled={isLoading || isRefreshing}
+            >
+              <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
+          </div>
           <Button
-            onClick={() => {
-              setEditingItem(null);
-              setFormData({});
-              setIsDialogOpen(true);
-            }}
+            onClick={handleNew}
+            className="bg-rugby-teal hover:bg-rugby-teal/90"
+            disabled={isLoading}
           >
             <Plus className="h-4 w-4 mr-2" /> Add Team
           </Button>
         </div>
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Actions</TableHead>
+            <TableRow className="bg-rugby-teal/5 hover:bg-rugby-teal/5">
+              <TableHead className="text-rugby-teal font-semibold">
+                Team Name
+              </TableHead>
+              <TableHead className="text-rugby-teal font-semibold">
+                Status
+              </TableHead>
+              <TableHead className="text-right text-rugby-teal font-semibold">
+                Actions
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {teams.map((team) => (
-              <TableRow key={team.id}>
-                <TableCell>{team.name}</TableCell>
-                <TableCell>{team.status}</TableCell>
-                <TableCell>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      setEditingItem(team);
-                      setFormData(team);
-                      setIsDialogOpen(true);
-                    }}
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleDelete(team.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+            {isLoading ? (
+              <TableRow>
+                <TableCell colSpan={3} className="text-center py-4">
+                  Loading teams...
                 </TableCell>
               </TableRow>
-            ))}
+            ) : error ? (
+              <TableRow>
+                <TableCell colSpan={3} className="text-center py-4 text-red-500">
+                  Error loading teams. Please refresh.
+                </TableCell>
+              </TableRow>
+            ) : teams.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={3} className="text-center py-4">
+                  No teams found. Add your first team.
+                </TableCell>
+              </TableRow>
+            ) : (
+              teams.map((team) => (
+                <TableRow key={team.id}>
+                  <TableCell>{team.name}</TableCell>
+                  <TableCell>
+                    <span
+                      className={`px-2 py-1 rounded text-xs ${
+                        team.status === "active"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-red-100 text-red-800"
+                      }`}
+                    >
+                      {team.status}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end space-x-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleEdit(team)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDelete(team.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </div>
@@ -498,60 +361,114 @@ export default function AdminChampionshipClient({
   function renderSeasonsTable() {
     return (
       <div>
-        <div className="flex justify-end mb-4">
+        <div className="flex justify-between mb-4">
           <Button
-            onClick={() => {
-              setEditingItem(null);
-              setFormData({});
-              setIsDialogOpen(true);
-            }}
+            variant="outline"
+            size="sm"
+            onClick={handleRefresh}
+            disabled={isLoading || isRefreshing}
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+          <Button
+            onClick={handleNew}
+            className="bg-rugby-teal hover:bg-rugby-teal/90"
+            disabled={isLoading}
           >
             <Plus className="h-4 w-4 mr-2" /> Add Season
           </Button>
         </div>
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Start Date</TableHead>
-              <TableHead>End Date</TableHead>
-              <TableHead>Current</TableHead>
-              <TableHead>Actions</TableHead>
+            <TableRow className="bg-rugby-teal/5 hover:bg-rugby-teal/5">
+              <TableHead className="text-rugby-teal font-semibold">
+                Season Name
+              </TableHead>
+              <TableHead className="text-rugby-teal font-semibold">
+                Start Date
+              </TableHead>
+              <TableHead className="text-rugby-teal font-semibold">
+                End Date
+              </TableHead>
+              <TableHead className="text-rugby-teal font-semibold">
+                Status
+              </TableHead>
+              <TableHead className="text-right text-rugby-teal font-semibold">
+                Actions
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {seasons.map((season) => (
-              <TableRow key={season.id}>
-                <TableCell>{season.name}</TableCell>
-                <TableCell>
-                  {new Date(season.start_date).toLocaleDateString()}
-                </TableCell>
-                <TableCell>
-                  {new Date(season.end_date).toLocaleDateString()}
-                </TableCell>
-                <TableCell>{season.is_current ? "Yes" : "No"}</TableCell>
-                <TableCell>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      setEditingItem(season);
-                      setFormData(season);
-                      setIsDialogOpen(true);
-                    }}
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleDelete(season.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+            {isLoading ? (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center py-4">
+                  Loading seasons...
                 </TableCell>
               </TableRow>
-            ))}
+            ) : error ? (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center py-4 text-red-500">
+                  Error loading seasons. Please refresh.
+                </TableCell>
+              </TableRow>
+            ) : seasons.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center py-4">
+                  No seasons found. Add your first season.
+                </TableCell>
+              </TableRow>
+            ) : (
+              seasons.map((season) => (
+                <TableRow key={season.id}>
+                  <TableCell>{season.name}</TableCell>
+                  <TableCell>
+                    {format(new Date(season.start_date), "PP")}
+                  </TableCell>
+                  <TableCell>
+                    {format(new Date(season.end_date), "PP")}
+                  </TableCell>
+                  <TableCell>
+                    <span
+                      className={`px-2 py-1 rounded text-xs ${
+                        season.is_current
+                          ? "bg-green-100 text-green-800"
+                          : "bg-blue-100 text-blue-800"
+                      }`}
+                    >
+                      {season.is_current ? "Current" : "Past"}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end space-x-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleSetCurrentSeason(season.id)}
+                        disabled={season.is_current}
+                      >
+                        Set Current
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleEdit(season)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDelete(season.id)}
+                        disabled={season.is_current}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </div>
@@ -567,7 +484,7 @@ export default function AdminChampionshipClient({
             <Select
               value={formData.team_id?.toString()}
               onValueChange={(value) =>
-                setFormData({ ...formData, team_id: parseInt(value) })
+                setFormData({ ...formData, team_id: value })
               }
             >
               <SelectTrigger>
@@ -575,24 +492,24 @@ export default function AdminChampionshipClient({
               </SelectTrigger>
               <SelectContent>
                 {teams.map((team) => (
-                  <SelectItem key={team.id} value={team.id.toString()}>
+                  <SelectItem key={team.id} value={team.id}>
                     {team.name}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
-          <div>
-            <Label htmlFor="position">Position</Label>
-            <Input
-              type="number"
-              value={formData.position || ""}
-              onChange={(e) =>
-                setFormData({ ...formData, position: parseInt(e.target.value) })
-              }
-            />
-          </div>
           <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="position">Position</Label>
+              <Input
+                type="number"
+                value={formData.position || ""}
+                onChange={(e) =>
+                  setFormData({ ...formData, position: parseInt(e.target.value) })
+                }
+              />
+            </div>
             <div>
               <Label htmlFor="played">Played</Label>
               <Input
@@ -603,6 +520,8 @@ export default function AdminChampionshipClient({
                 }
               />
             </div>
+          </div>
+          <div className="grid grid-cols-3 gap-4">
             <div>
               <Label htmlFor="won">Won</Label>
               <Input
@@ -690,29 +609,25 @@ export default function AdminChampionshipClient({
           </div>
           <DialogFooter>
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Saving..." : editingItem ? "Update" : "Create"}
+              {editingItem ? "Update" : "Create"}
             </Button>
           </DialogFooter>
         </form>
       );
-    }
-
-    if (activeTab === "teams") {
+    } else if (activeTab === "teams") {
       return (
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <Label htmlFor="name">Team Name</Label>
             <Input
               value={formData.name || ""}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             />
           </div>
           <div>
             <Label htmlFor="status">Status</Label>
             <Select
-              value={formData.status}
+              value={formData.status || "active"}
               onValueChange={(value) =>
                 setFormData({ ...formData, status: value })
               }
@@ -728,88 +643,103 @@ export default function AdminChampionshipClient({
           </div>
           <DialogFooter>
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Saving..." : editingItem ? "Update" : "Create"}
+              {editingItem ? "Update" : "Create"}
             </Button>
           </DialogFooter>
         </form>
       );
-    }
-
-    if (activeTab === "seasons") {
+    } else if (activeTab === "seasons") {
       return (
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <Label htmlFor="name">Season Name</Label>
             <Input
               value={formData.name || ""}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             />
           </div>
-          <div>
-            <Label htmlFor="start_date">Start Date</Label>
-            <Input
-              type="date"
-              value={formData.start_date || ""}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="start_date">Start Date</Label>
+              <Input
+                type="date"
+                value={formData.start_date ? formData.start_date.substring(0, 10) : ""}
+                onChange={(e) =>
+                  setFormData({ ...formData, start_date: e.target.value })
+                }
+              />
+            </div>
+            <div>
+              <Label htmlFor="end_date">End Date</Label>
+              <Input
+                type="date"
+                value={formData.end_date ? formData.end_date.substring(0, 10) : ""}
+                onChange={(e) =>
+                  setFormData({ ...formData, end_date: e.target.value })
+                }
+              />
+            </div>
+          </div>
+          <div className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              id="is_current"
+              checked={formData.is_current || false}
               onChange={(e) =>
-                setFormData({ ...formData, start_date: e.target.value })
+                setFormData({ ...formData, is_current: e.target.checked })
               }
             />
-          </div>
-          <div>
-            <Label htmlFor="end_date">End Date</Label>
-            <Input
-              type="date"
-              value={formData.end_date || ""}
-              onChange={(e) =>
-                setFormData({ ...formData, end_date: e.target.value })
-              }
-            />
-          </div>
-          <div>
-            <Label htmlFor="is_current">Current Season</Label>
-            <Select
-              value={formData.is_current?.toString()}
-              onValueChange={(value) =>
-                setFormData({ ...formData, is_current: value === "true" })
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="true">Yes</SelectItem>
-                <SelectItem value="false">No</SelectItem>
-              </SelectContent>
-            </Select>
+            <Label htmlFor="is_current">Set as current season</Label>
           </div>
           <DialogFooter>
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Saving..." : editingItem ? "Update" : "Create"}
+              {editingItem ? "Update" : "Create"}
             </Button>
           </DialogFooter>
         </form>
       );
     }
+    return null;
   }
 
   return (
-    <div>
+    <>
       {activeTab === "standings" && renderStandingsTable()}
       {activeTab === "teams" && renderTeamsTable()}
       {activeTab === "seasons" && renderSeasonsTable()}
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="bg-gradient-to-b from-white to-gray-50/80 dark:from-gray-900 dark:to-gray-900/80 backdrop-blur-xl border-rugby-teal/20">
+        <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {editingItem ? `Edit ${activeTab}` : `Add ${activeTab}`}
+              {editingItem
+                ? `Edit ${activeTab === "standings" ? "Standing" : activeTab === "teams" ? "Team" : "Season"}`
+                : `Add ${activeTab === "standings" ? "Standing" : activeTab === "teams" ? "Team" : "Season"}`}
             </DialogTitle>
           </DialogHeader>
           {renderForm()}
         </DialogContent>
       </Dialog>
-    </div>
+
+      <Dialog open={!!confirmDelete} onOpenChange={() => setConfirmDelete(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Deletion</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            Are you sure you want to delete this {activeTab === "standings" ? "standing" : activeTab === "teams" ? "team" : "season"}?
+            This action cannot be undone.
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConfirmDelete(null)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={confirmDeleteAction}>
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

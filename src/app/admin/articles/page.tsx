@@ -1,250 +1,223 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { format } from 'date-fns';
+import { Trash2, Edit, Plus, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { Pencil, Trash2 } from 'lucide-react';
-import { supabase, withRetry } from '@/utils/supabase';
-import { Database } from '@/lib/database.types';
-import { formatDate } from '@/lib/utils';
-import { toast } from '@/components/ui/use-toast';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { useToast } from '@/components/ui/use-toast';
+import { useAdminData } from '@/hooks/useAdminData';
+import { createClient } from '@/utils/supabase/client';
 
 interface Article {
   id: string;
   title: string;
   slug: string;
+  content: string;
   created_at: string;
   updated_at: string;
-  image: string;
-  blocks?: any[];
+  image_path?: string;
+  published: boolean;
 }
 
 export default function ArticlesPage() {
-  const [loading, setLoading] = useState(true);
-  const [deleting, setDeleting] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [articles, setArticles] = useState<Article[]>([]);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [articleToDelete, setArticleToDelete] = useState<Article | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const router = useRouter();
+  const { toast } = useToast();
 
-  const fetchArticles = async () => {
-    setLoading(true);
-    setError(null);
+  const { 
+    data: articles, 
+    loading, 
+    error, 
+    deleteItem,
+    fetchData
+  } = useAdminData<Article>({
+    table: 'articles',
+    fetchOnMount: true,
+    onError: (error) => {
+      toast({
+        variant: 'destructive',
+        title: 'Failed to load articles',
+        description: error.message,
+      });
+    }
+  });
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await fetchData({ orderBy: 'created_at', orderDirection: 'desc' });
+    setIsRefreshing(false);
+  };
+
+  const handleDelete = async (article: Article) => {
+    setArticleToDelete(article);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!articleToDelete) return;
     
     try {
-      // Check authentication
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        router.push('/auth/signin');
-        return;
+      // If there's an image, delete it from storage
+      if (articleToDelete.image_path) {
+        const supabase = createClient();
+        await supabase.storage.from('articles').remove([articleToDelete.image_path.split('/').pop() || '']);
       }
-
-      // Use withRetry for better resilience
-      const { data, error } = await withRetry(() => 
-        supabase
-          .from('articles')
-          .select('*')
-          .order('created_at', { ascending: false })
-      );
-
-      if (error) throw error;
       
-      setArticles(data || []);
-    } catch (err: any) {
-      console.error('Error fetching articles:', err);
-      setError(err.message || 'Failed to load articles');
-      toast({
-        title: 'Error fetching articles',
-        description: err.message || 'Please try again later',
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchArticles();
-  }, []);
-
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this article?')) {
-      return;
-    }
-
-    setDeleting(id);
-    try {
-      // First get the article to access the image path
-      const { data: article, error: getError } = await withRetry(() => 
-        supabase
-          .from('articles')
-          .select('image')
-          .eq('id', id)
-          .single()
-      );
-
-      if (getError) throw getError;
-
       // Delete the article from the database
-      const { error: deleteError } = await withRetry(() => 
-        supabase
-          .from('articles')
-          .delete()
-          .eq('id', id)
-      );
-
-      if (deleteError) throw deleteError;
-
-      // Try to delete the associated image, but don't fail if it doesn't work
-      if (article?.image) {
-        try {
-          const imagePath = getImagePathFromUrl(article.image);
-          if (imagePath) {
-            await supabase
-              .storage
-              .from('articles')
-              .remove([imagePath]);
-          }
-        } catch (imageError) {
-          console.error('Error deleting image (non-critical):', imageError);
-        }
-      }
-
-      // Update the UI
-      setArticles(articles.filter(article => article.id !== id));
-      toast({
-        title: 'Article deleted',
-        description: 'The article has been successfully deleted',
-      });
-    } catch (err: any) {
-      console.error('Error deleting article:', err);
-      toast({
-        title: 'Error deleting article',
-        description: err.message || 'Please try again later',
-        variant: 'destructive',
-      });
-    } finally {
-      setDeleting(null);
-    }
-  };
-
-  const getImagePathFromUrl = (url: string): string | null => {
-    try {
-      const match = url.match(/\/article-images\/([^?]+)/);
-      if (match) {
-        return `article-images/${match[1]}`;
-      }
-      return null;
+      await deleteItem(articleToDelete.id);
+      
+      setDeleteDialogOpen(false);
+      setArticleToDelete(null);
+      
     } catch (error) {
-      console.error('Error extracting image path:', error);
-      return null;
+      console.error('Error deleting article:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Delete failed',
+        description: 'There was an error deleting the article.',
+      });
     }
   };
 
   const renderTableContent = () => {
     if (loading) {
-      return Array.from({ length: 5 }).map((_, index) => (
-        <TableRow key={`loading-${index}`}>
-          <TableCell><div className="h-6 w-48 bg-gray-200 dark:bg-gray-700 animate-pulse rounded"></div></TableCell>
-          <TableCell><div className="h-6 w-24 bg-gray-200 dark:bg-gray-700 animate-pulse rounded"></div></TableCell>
-          <TableCell><div className="h-6 w-24 bg-gray-200 dark:bg-gray-700 animate-pulse rounded"></div></TableCell>
-          <TableCell><div className="h-6 w-24 bg-gray-200 dark:bg-gray-700 animate-pulse rounded"></div></TableCell>
-          <TableCell><div className="h-6 w-20 bg-gray-200 dark:bg-gray-700 animate-pulse rounded"></div></TableCell>
-        </TableRow>
-      ));
+      return (
+        <tr>
+          <td colSpan={5} className="text-center py-4">Loading articles...</td>
+        </tr>
+      );
     }
 
     if (error) {
       return (
-        <TableRow>
-          <TableCell colSpan={5} className="text-center py-8">
-            <div className="flex flex-col items-center">
-              <p className="text-red-500 mb-4">{error}</p>
-              <Button onClick={fetchArticles} variant="outline">
-                Try Again
-              </Button>
-            </div>
-          </TableCell>
-        </TableRow>
+        <tr>
+          <td colSpan={5} className="text-center py-4 text-red-500">
+            Error loading articles: {error.message}
+          </td>
+        </tr>
       );
     }
 
     if (articles.length === 0) {
       return (
-        <TableRow>
-          <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-            No articles found. Create your first article.
-          </TableCell>
-        </TableRow>
+        <tr>
+          <td colSpan={5} className="text-center py-4">No articles found.</td>
+        </tr>
       );
     }
 
     return articles.map((article) => (
-      <TableRow key={article.id}>
-        <TableCell>{article.title}</TableCell>
-        <TableCell>{article.slug}</TableCell>
-        <TableCell>{formatDate(article.created_at)}</TableCell>
-        <TableCell>{formatDate(article.updated_at)}</TableCell>
-        <TableCell>
-          <div className="flex gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => router.push(`/admin/articles/${article.id}/edit`)}
-              disabled={deleting === article.id}
-            >
-              <Pencil className="h-4 w-4" />
+      <tr key={article.id} className="border-b hover:bg-muted/50">
+        <td className="py-3 px-4">
+          <div className="flex items-center space-x-3">
+            {article.image_path && (
+              <div className="relative h-10 w-16 rounded overflow-hidden">
+                <Image
+                  src={article.image_path}
+                  alt={article.title}
+                  fill
+                  sizes="64px"
+                  className="object-cover"
+                />
+              </div>
+            )}
+            <div>
+              <div className="font-medium">{article.title}</div>
+              <div className="text-xs text-muted-foreground">{article.slug}</div>
+            </div>
+          </div>
+        </td>
+        <td className="py-3 px-4">
+          <span className={`px-2 py-1 rounded text-xs ${article.published ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800'}`}>
+            {article.published ? 'Published' : 'Draft'}
+          </span>
+        </td>
+        <td className="py-3 px-4 text-sm">{format(new Date(article.created_at), 'PPP')}</td>
+        <td className="py-3 px-4 text-sm">{format(new Date(article.updated_at), 'PPP')}</td>
+        <td className="py-3 px-4">
+          <div className="flex justify-end space-x-2">
+            <Button size="icon" variant="ghost" asChild>
+              <Link href={`/admin/articles/${article.id}/edit`}>
+                <Edit className="h-4 w-4" />
+                <span className="sr-only">Edit</span>
+              </Link>
             </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => handleDelete(article.id)}
-              disabled={deleting === article.id}
-            >
-              {deleting === article.id ? (
-                <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-              ) : (
-                <Trash2 className="h-4 w-4" />
-              )}
+            <Button size="icon" variant="ghost" onClick={() => handleDelete(article)}>
+              <Trash2 className="h-4 w-4" />
+              <span className="sr-only">Delete</span>
             </Button>
           </div>
-        </TableCell>
-      </TableRow>
+        </td>
+      </tr>
     ));
   };
 
   return (
-    <Card className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Articles</h1>
-        <Button onClick={() => router.push('/admin/articles/new')}>
-          New Article
-        </Button>
+    <div className="h-full flex flex-col">
+      <div className="flex items-center justify-between p-4 border-b">
+        <h1 className="text-xl font-semibold">Articles</h1>
+        <div className="flex space-x-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleRefresh} 
+            disabled={loading || isRefreshing}
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+          <Button size="sm" asChild>
+            <Link href="/admin/articles/new">
+              <Plus className="h-4 w-4 mr-1" />
+              New Article
+            </Link>
+          </Button>
+        </div>
       </div>
+      
+      <ScrollArea className="flex-1">
+        <div className="p-4">
+          <div className="rounded-md border">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-muted/50">
+                <tr>
+                  <th className="py-3 px-4 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Title</th>
+                  <th className="py-3 px-4 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Status</th>
+                  <th className="py-3 px-4 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Created</th>
+                  <th className="py-3 px-4 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Updated</th>
+                  <th className="py-3 px-4 text-xs font-medium text-muted-foreground uppercase tracking-wider text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {renderTableContent()}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </ScrollArea>
 
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Title</TableHead>
-            <TableHead>Slug</TableHead>
-            <TableHead>Created</TableHead>
-            <TableHead>Updated</TableHead>
-            <TableHead>Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {renderTableContent()}
-        </TableBody>
-      </Table>
-    </Card>
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Deletion</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete &quot;{articleToDelete?.title}&quot;? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
+            <Button variant="destructive" onClick={confirmDelete}>Delete</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 } 
 
