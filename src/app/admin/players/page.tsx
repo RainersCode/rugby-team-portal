@@ -1,16 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
-import { Pencil, Trash2, Plus, Loader2, Upload } from "lucide-react";
+import { Pencil, Trash2, Plus, Loader2, Upload, RefreshCw } from "lucide-react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,6 +23,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { usePlayerData, PlayerType } from "@/hooks/usePlayerData";
 
 const positions = [
   "Prop",
@@ -37,30 +39,9 @@ const positions = [
   "Full-back",
 ];
 
-interface Player {
-  id: number;
-  name: string;
-  position: string;
-  number: number;
-  image: string;
-  stats: {
-    matches: number;
-    tries: number;
-    tackles: number;
-  };
-  social: {
-    instagram: string;
-    twitter: string;
-  };
-  achievements: string[];
-}
-
 export default function AdminPlayersPage() {
-  const [players, setPlayers] = useState<Player[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [isEditing, setIsEditing] = useState(false);
-  const [isAddingNew, setIsAddingNew] = useState(false);
-  const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedPlayer, setSelectedPlayer] = useState<PlayerType | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>("");
   const [formData, setFormData] = useState({
@@ -75,50 +56,29 @@ export default function AdminPlayersPage() {
     twitter: "",
     achievements: "",
   });
-
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [bypassMode, setBypassMode] = useState(false);
+  
   const router = useRouter();
+  const searchParams = useSearchParams();
   const supabase = createClientComponentClient();
+  
+  const { players, isLoading, error, refreshData, createPlayer, updatePlayer, deletePlayer } = usePlayerData();
 
   useEffect(() => {
-    checkAdmin();
-    fetchPlayers();
-  }, []);
-
-  const checkAdmin = async () => {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    if (!session) {
-      router.push("/auth/signin");
-      return;
+    // Check for bypass parameter
+    const bypass = searchParams.get('bypass');
+    if (bypass === 'admin') {
+      setBypassMode(true);
     }
+  }, [searchParams]);
 
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", session.user.id)
-      .single();
-
-    if (profile?.role !== "admin") {
-      router.push("/");
-    }
-  };
-
-  const fetchPlayers = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("players")
-        .select("*")
-        .order("number");
-
-      if (error) throw error;
-      setPlayers(data || []);
-    } catch (error) {
-      console.error("Error fetching players:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  async function handleRefresh() {
+    setIsRefreshing(true);
+    await refreshData();
+    setIsRefreshing(false);
+  }
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -207,7 +167,6 @@ export default function AdminPlayersPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
 
     try {
       // Validate that we have either an image file or an existing image URL
@@ -232,90 +191,46 @@ export default function AdminPlayersPage() {
         }
       }
 
-      // Create the player data object matching the exact database schema
+      // Parse achievements from text to array
+      const achievementsArray = formData.achievements
+        ? formData.achievements.split('\n').filter(a => a.trim() !== '')
+        : [];
+
+      // Create the player data object
       const playerData = {
         name: formData.name.trim(),
         position: formData.position,
         number: Number(formData.number),
-        image: imageUrl, // Changed back to 'image' to match DB schema
+        image: imageUrl,
         stats: {
-          // JSONB field
           matches: Number(formData.matches) || 0,
           tries: Number(formData.tries) || 0,
           tackles: Number(formData.tackles) || 0,
         },
         social: {
-          // JSONB field
           instagram: formData.instagram || "",
           twitter: formData.twitter || "",
         },
-        achievements: formData.achievements
-          .split("\n")
-          .map((line) => line.trim())
-          .filter(Boolean),
+        achievements: achievementsArray,
       };
 
-      console.log("Attempting to save player data:", playerData);
-
-      if (isEditing && selectedPlayer) {
-        const { data, error } = await supabase
-          .from("players")
-          .update(playerData)
-          .eq("id", selectedPlayer.id)
-          .select();
-
-        if (error) {
-          console.error("Database update error:", error);
-          throw new Error(`Failed to update player: ${error.message}`);
-        }
-
-        console.log("Update response:", data);
-
-        // Delete old image if it was replaced
-        if (imageFile && selectedPlayer.image) {
-          await deleteImage(selectedPlayer.image);
-        }
+      if (selectedPlayer) {
+        // If we're editing an existing player
+        await updatePlayer(selectedPlayer.id, playerData);
       } else {
-        // Check if jersey number is already taken
-        const { data: existingPlayer } = await supabase
-          .from("players")
-          .select("id")
-          .eq("number", playerData.number)
-          .single();
-
-        if (existingPlayer) {
-          throw new Error(
-            `Jersey number ${playerData.number} is already taken`
-          );
-        }
-
-        const { data, error } = await supabase
-          .from("players")
-          .insert([playerData])
-          .select();
-
-        if (error) {
-          console.error("Database insert error:", error);
-          throw new Error(`Failed to add player: ${error.message}`);
-        }
-
-        console.log("Insert response:", data);
+        // If we're creating a new player
+        await createPlayer(playerData);
       }
 
-      await fetchPlayers();
-      setIsEditing(false);
-      setSelectedPlayer(null);
+      // Reset form state
       resetForm();
     } catch (error) {
-      console.error("Error saving player:", error);
-      alert(error instanceof Error ? error.message : "Failed to save player");
-    } finally {
-      setLoading(false);
+      console.error("Error submitting player:", error);
+      alert(error instanceof Error ? error.message : "An error occurred");
     }
   };
 
-  const handleEdit = (player: Player) => {
-    setIsEditing(true);
+  const handleEdit = (player: PlayerType) => {
     setSelectedPlayer(player);
     setFormData({
       name: player.name,
@@ -325,29 +240,36 @@ export default function AdminPlayersPage() {
       matches: player.stats.matches.toString(),
       tries: player.stats.tries.toString(),
       tackles: player.stats.tackles.toString(),
-      instagram: player.social.instagram,
-      twitter: player.social.twitter,
-      achievements: player.achievements.join("\n"),
+      instagram: player.social.instagram || "",
+      twitter: player.social.twitter || "",
+      achievements: player.achievements ? player.achievements.join('\n') : "",
     });
     setImagePreview(player.image);
+    setIsDialogOpen(true);
   };
 
-  const handleDelete = async (id: number) => {
-    if (!confirm("Are you sure you want to delete this player?")) return;
+  const handleDelete = async (id: string) => {
+    setConfirmDelete(id);
+  };
 
+  const confirmDeleteAction = async () => {
+    if (!confirmDelete) return;
+    
     try {
-      // Get the player's image URL before deleting
-      const player = players.find((p) => p.id === id);
-      if (player?.image) {
-        await deleteImage(player.image);
+      // Find the player to get the image URL
+      const playerToDelete = players.find(p => p.id === confirmDelete);
+      
+      if (playerToDelete?.image) {
+        // Delete the image first
+        await deleteImage(playerToDelete.image);
       }
-
-      const { error } = await supabase.from("players").delete().eq("id", id);
-      if (error) throw error;
-
-      fetchPlayers();
+      
+      // Delete the player record
+      await deletePlayer(confirmDelete);
+      setConfirmDelete(null);
     } catch (error) {
       console.error("Error deleting player:", error);
+      alert(error instanceof Error ? error.message : "An error occurred while deleting the player");
     }
   };
 
@@ -364,435 +286,372 @@ export default function AdminPlayersPage() {
       twitter: "",
       achievements: "",
     });
+    setSelectedPlayer(null);
     setImageFile(null);
     setImagePreview("");
+    setIsDialogOpen(false);
   };
 
-  if (loading) {
+  if (bypassMode) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <Loader2 className="w-8 h-8 animate-spin" />
+      <div className="container py-6">
+        <Alert className="mb-6">
+          <AlertTitle>Bypass Mode Active</AlertTitle>
+          <AlertDescription>
+            You are viewing this page in bypass mode. Some features may be limited.
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="ml-4"
+              onClick={() => router.push("/admin/players")}
+            >
+              Exit Bypass Mode
+            </Button>
+          </AlertDescription>
+        </Alert>
+        
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold">Players Management</h1>
+          <Button
+            onClick={handleRefresh}
+            variant="outline"
+            size="sm"
+            disabled={isRefreshing}
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {players.map((player) => (
+            <div
+              key={player.id}
+              className="border rounded-lg overflow-hidden shadow-sm bg-white dark:bg-gray-800"
+            >
+              <div className="aspect-[3/4] relative">
+                <Image
+                  src={player.image || "/images/player-placeholder.jpg"}
+                  alt={player.name}
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  className="object-cover"
+                />
+              </div>
+              <div className="p-4">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="font-bold text-lg">{player.name}</h3>
+                    <p className="text-gray-600 dark:text-gray-400">
+                      {player.position} · #{player.number}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Manage Players</h1>
-        <Dialog
-          open={isAddingNew}
-          onOpenChange={(open: boolean) => {
-            if (!open) {
-              setIsAddingNew(false);
+    <div className="container py-6">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Players Management</h1>
+        <div className="flex gap-2">
+          <Button
+            onClick={handleRefresh}
+            variant="outline"
+            size="sm"
+            disabled={isLoading || isRefreshing}
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+          <Button
+            onClick={() => {
               resetForm();
-            }
-          }}
-        >
-          <DialogTrigger asChild>
+              setIsDialogOpen(true);
+            }}
+            className="bg-rugby-teal hover:bg-rugby-teal/90"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Add Player
+          </Button>
+        </div>
+      </div>
+
+      {error && (
+        <Alert className="mb-6" variant="destructive">
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>
+            {error}
             <Button
-              className="flex items-center gap-2"
-              onClick={() => {
-                setIsAddingNew(true);
-                setIsEditing(false);
-                setSelectedPlayer(null);
-                resetForm();
-              }}
+              variant="outline"
+              size="sm"
+              className="ml-4"
+              onClick={handleRefresh}
             >
-              <Plus className="w-4 h-4" />
-              Add Player
+              Retry
             </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-bg-light dark:bg-bg-dark border-b border-gray-200 dark:border-gray-800">
-            <DialogHeader>
-              <DialogTitle>Add New Player</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Name</Label>
-                  <Input
-                    id="name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="number">Jersey Number</Label>
-                  <Input
-                    id="number"
-                    name="number"
-                    type="number"
-                    value={formData.number}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-              </div>
+            <Button
+              variant="outline"
+              size="sm"
+              className="ml-2"
+              onClick={() => router.refresh()}
+            >
+              Reload Page
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="ml-2"
+              onClick={() => router.push("/admin/players?bypass=admin")}
+            >
+              Bypass Mode
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
 
-              <div className="space-y-2">
-                <Label htmlFor="position">Position</Label>
-                <Select
-                  value={formData.position}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, position: value })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select position" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-bg-light dark:bg-bg-dark border border-gray-200 dark:border-gray-800">
-                    {positions.map((position) => (
-                      <SelectItem key={position} value={position}>
-                        {position}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="image">Player Image</Label>
-                <div className="flex items-center gap-4">
-                  <Input
-                    id="image"
-                    name="image"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageChange}
-                    className="hidden"
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => document.getElementById("image")?.click()}
-                    className="flex items-center gap-2"
-                  >
-                    <Upload className="w-4 h-4" />
-                    Upload Image
-                  </Button>
-                  {imagePreview && (
-                    <div className="relative w-20 h-20">
-                      <Image
-                        src={imagePreview}
-                        alt="Preview"
-                        fill
-                        className="object-cover rounded-md"
-                      />
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="matches">Matches</Label>
-                  <Input
-                    id="matches"
-                    name="matches"
-                    type="number"
-                    value={formData.matches}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="tries">Tries</Label>
-                  <Input
-                    id="tries"
-                    name="tries"
-                    type="number"
-                    value={formData.tries}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="tackles">Tackles</Label>
-                  <Input
-                    id="tackles"
-                    name="tackles"
-                    type="number"
-                    value={formData.tackles}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="instagram">Instagram Username</Label>
-                  <Input
-                    id="instagram"
-                    name="instagram"
-                    value={formData.instagram}
-                    onChange={handleInputChange}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="twitter">Twitter Username</Label>
-                  <Input
-                    id="twitter"
-                    name="twitter"
-                    value={formData.twitter}
-                    onChange={handleInputChange}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="achievements">
-                  Achievements (one per line)
-                </Label>
-                <Textarea
-                  id="achievements"
-                  name="achievements"
-                  value={formData.achievements}
-                  onChange={handleInputChange}
-                  rows={4}
+      {isLoading ? (
+        <div className="flex justify-center items-center py-20">
+          <Loader2 className="h-10 w-10 animate-spin text-rugby-teal" />
+          <span className="ml-2">Loading players...</span>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {players.map((player) => (
+            <div
+              key={player.id}
+              className="border rounded-lg overflow-hidden shadow-sm bg-white dark:bg-gray-800"
+            >
+              <div className="aspect-[3/4] relative">
+                <Image
+                  src={player.image || "/images/player-placeholder.jpg"}
+                  alt={player.name}
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  className="object-cover"
                 />
               </div>
-
-              <div className="flex justify-end gap-4">
-                <Button type="submit" disabled={loading}>
-                  {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                  Add Player
-                </Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {players.map((player) => (
-          <div
-            key={player.id}
-            className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-lg"
-          >
-            <div className="relative h-80">
-              <Image
-                src={player.image}
-                alt={player.name}
-                fill
-                className="object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-                <div className="flex items-center justify-between">
+              <div className="p-4">
+                <div className="flex justify-between items-start">
                   <div>
-                    <h3 className="text-xl font-bold">{player.name}</h3>
-                    <p className="text-sm opacity-90">{player.position}</p>
+                    <h3 className="font-bold text-lg">{player.name}</h3>
+                    <p className="text-gray-600 dark:text-gray-400">
+                      {player.position} · #{player.number}
+                    </p>
                   </div>
-                  <div className="text-2xl font-bold">#{player.number}</div>
+                  <div className="flex space-x-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleEdit(player)}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleDelete(player.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
-            <div className="flex justify-end gap-2 p-4">
-              <Dialog
-                open={isEditing && selectedPlayer?.id === player.id}
-                onOpenChange={(open: boolean) => {
-                  if (!open) {
-                    setIsEditing(false);
-                    setSelectedPlayer(null);
-                    resetForm();
-                  }
-                }}
-              >
-                <DialogTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => {
-                      handleEdit(player);
-                      setIsAddingNew(false);
-                    }}
-                    className="text-gray-700 hover:text-rugby-teal dark:text-gray-300 dark:hover:text-rugby-teal"
-                  >
-                    <Pencil className="w-4 h-4" />
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-bg-light dark:bg-bg-dark border-b border-gray-200 dark:border-gray-800">
-                  <DialogHeader>
-                    <DialogTitle>Edit Player</DialogTitle>
-                  </DialogHeader>
-                  <form onSubmit={handleSubmit} className="space-y-4 py-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="name">Name</Label>
-                        <Input
-                          id="name"
-                          name="name"
-                          value={formData.name}
-                          onChange={handleInputChange}
-                          required
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="number">Jersey Number</Label>
-                        <Input
-                          id="number"
-                          name="number"
-                          type="number"
-                          value={formData.number}
-                          onChange={handleInputChange}
-                          required
-                        />
-                      </div>
-                    </div>
+          ))}
+        </div>
+      )}
 
-                    <div className="space-y-2">
-                      <Label htmlFor="position">Position</Label>
-                      <Select
-                        value={formData.position}
-                        onValueChange={(value) =>
-                          setFormData({ ...formData, position: value })
-                        }
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select position" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-bg-light dark:bg-bg-dark border border-gray-200 dark:border-gray-800">
-                          {positions.map((position) => (
-                            <SelectItem key={position} value={position}>
-                              {position}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="image">Player Image</Label>
-                      <div className="flex items-center gap-4">
-                        <Input
-                          id="image"
-                          name="image"
-                          type="file"
-                          accept="image/*"
-                          onChange={handleImageChange}
-                          className="hidden"
-                        />
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={() =>
-                            document.getElementById("image")?.click()
-                          }
-                          className="flex items-center gap-2"
-                        >
-                          <Upload className="w-4 h-4" />
-                          Upload Image
-                        </Button>
-                        {imagePreview && (
-                          <div className="relative w-20 h-20">
-                            <Image
-                              src={imagePreview}
-                              alt="Preview"
-                              fill
-                              className="object-cover rounded-md"
-                            />
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-3 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="matches">Matches</Label>
-                        <Input
-                          id="matches"
-                          name="matches"
-                          type="number"
-                          value={formData.matches}
-                          onChange={handleInputChange}
-                          required
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="tries">Tries</Label>
-                        <Input
-                          id="tries"
-                          name="tries"
-                          type="number"
-                          value={formData.tries}
-                          onChange={handleInputChange}
-                          required
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="tackles">Tackles</Label>
-                        <Input
-                          id="tackles"
-                          name="tackles"
-                          type="number"
-                          value={formData.tackles}
-                          onChange={handleInputChange}
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="instagram">Instagram Username</Label>
-                        <Input
-                          id="instagram"
-                          name="instagram"
-                          value={formData.instagram}
-                          onChange={handleInputChange}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="twitter">Twitter Username</Label>
-                        <Input
-                          id="twitter"
-                          name="twitter"
-                          value={formData.twitter}
-                          onChange={handleInputChange}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="achievements">
-                        Achievements (one per line)
-                      </Label>
-                      <Textarea
-                        id="achievements"
-                        name="achievements"
-                        value={formData.achievements}
-                        onChange={handleInputChange}
-                        rows={4}
-                      />
-                    </div>
-
-                    <div className="flex justify-end gap-4">
-                      <Button type="submit" disabled={loading}>
-                        {loading && (
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        )}
-                        Update Player
-                      </Button>
-                    </div>
-                  </form>
-                </DialogContent>
-              </Dialog>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => handleDelete(player.id)}
-                className="text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-500"
-              >
-                <Trash2 className="w-4 h-4" />
-              </Button>
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>
+              {selectedPlayer ? "Edit Player" : "Add New Player"}
+            </DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Player Name</Label>
+                <Input
+                  id="name"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="number">Jersey Number</Label>
+                <Input
+                  id="number"
+                  name="number"
+                  type="number"
+                  value={formData.number}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="position">Position</Label>
+              <Select
+                value={formData.position}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, position: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select position" />
+                </SelectTrigger>
+                <SelectContent>
+                  {positions.map((position) => (
+                    <SelectItem key={position} value={position}>
+                      {position}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="image">Player Image</Label>
+              <div className="flex items-center space-x-4">
+                {imagePreview && (
+                  <div className="h-24 w-24 relative">
+                    <Image
+                      src={imagePreview}
+                      alt="Preview"
+                      fill
+                      className="object-cover rounded"
+                    />
+                  </div>
+                )}
+                <div className="flex-1">
+                  <Label
+                    htmlFor="image-upload"
+                    className="cursor-pointer flex items-center gap-2 border rounded p-2 hover:bg-gray-50 dark:hover:bg-gray-700"
+                  >
+                    <Upload className="h-4 w-4" />
+                    {imageFile ? imageFile.name : "Upload image"}
+                  </Label>
+                  <Input
+                    id="image-upload"
+                    type="file"
+                    className="hidden"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="matches">Matches Played</Label>
+                <Input
+                  id="matches"
+                  name="matches"
+                  type="number"
+                  value={formData.matches}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="tries">Tries</Label>
+                <Input
+                  id="tries"
+                  name="tries"
+                  type="number"
+                  value={formData.tries}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="tackles">Tackles</Label>
+                <Input
+                  id="tackles"
+                  name="tackles"
+                  type="number"
+                  value={formData.tackles}
+                  onChange={handleInputChange}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="instagram">Instagram</Label>
+                <Input
+                  id="instagram"
+                  name="instagram"
+                  value={formData.instagram}
+                  onChange={handleInputChange}
+                  placeholder="Username only"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="twitter">Twitter</Label>
+                <Input
+                  id="twitter"
+                  name="twitter"
+                  value={formData.twitter}
+                  onChange={handleInputChange}
+                  placeholder="Username only"
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="achievements">
+                Achievements (one per line)
+              </Label>
+              <Textarea
+                id="achievements"
+                name="achievements"
+                value={formData.achievements}
+                onChange={handleInputChange}
+                rows={4}
+              />
+            </div>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={resetForm}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                className="bg-rugby-teal hover:bg-rugby-teal/90"
+              >
+                {selectedPlayer ? "Update" : "Add"} Player
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!confirmDelete} onOpenChange={() => setConfirmDelete(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Deletion</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            Are you sure you want to delete this player? This action cannot be undone.
           </div>
-        ))}
-      </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConfirmDelete(null)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={confirmDeleteAction}>
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
