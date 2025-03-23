@@ -11,6 +11,9 @@ const AUTH_COOKIE_NAMES = [
   'sb-auth-token',
   '__session',
   'supabase-auth',
+  'sb:token',
+  '.AuthToken',
+  'sb-auth-event',
 ];
 
 export async function POST() {
@@ -22,6 +25,18 @@ export async function POST() {
     
     // Create a Supabase client with the awaited cookie store
     const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
+    
+    // Get the current session to invalidate
+    let userId = 'unknown';
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        userId = session.user.id;
+        console.log('API: Found user session to invalidate:', userId);
+      }
+    } catch (sessionError) {
+      console.error('API: Error fetching session:', sessionError);
+    }
     
     // Force signout with additional options
     const { error } = await supabase.auth.signOut({ 
@@ -38,7 +53,8 @@ export async function POST() {
             'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
             'Pragma': 'no-cache',
             'Expires': '0',
-            'Surrogate-Control': 'no-store'
+            'Surrogate-Control': 'no-store',
+            'Clear-Site-Data': '"cookies", "storage", "cache"'
           }
         }
       );
@@ -54,7 +70,7 @@ export async function POST() {
           'Pragma': 'no-cache',
           'Expires': '0',
           'Surrogate-Control': 'no-store',
-          'Clear-Site-Data': '"cookies", "storage"'
+          'Clear-Site-Data': '"cookies", "storage", "cache"'
         }
       }
     );
@@ -74,6 +90,15 @@ export async function POST() {
         name: name.toLowerCase(),
         path: '/',
       });
+      // Try with domain
+      if (typeof window !== 'undefined') {
+        const domain = window.location.hostname;
+        response.cookies.delete({
+          name,
+          path: '/',
+          domain,
+        });
+      }
     });
     
     // Then clear all cookies that might be related to auth
@@ -86,13 +111,20 @@ export async function POST() {
           name.includes('token') || 
           name.includes('session')) {
         console.log('API: Clearing cookie:', name);
-        response.cookies.delete({
-          name,
-          path: '/',
+        
+        // Clear with all possible variations
+        [
+          { name, path: '/' },
+          { name, path: '/api' },
+          { name, path: '/auth' },
+          { name, path: '' },
+        ].forEach(config => {
+          response.cookies.delete(config);
         });
       }
     });
     
+    console.log('API: Signout complete for user:', userId);
     return response;
   } catch (error) {
     console.error('API: Unexpected error during sign out:', error);
@@ -105,7 +137,7 @@ export async function POST() {
           'Pragma': 'no-cache',
           'Expires': '0',
           'Surrogate-Control': 'no-store',
-          'Clear-Site-Data': '"cookies", "storage"'
+          'Clear-Site-Data': '"cookies", "storage", "cache"'
         }
       }
     );

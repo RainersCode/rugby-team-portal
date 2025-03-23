@@ -255,6 +255,7 @@ export default function UserNav({ user: propUser }: UserNavProps) {
         try {
           // Clear all local storage
           localStorage.removeItem(USER_CACHE_KEY);
+          localStorage.removeItem('supabase.auth.token');
           
           // Try to clear any supabase auth items
           for (let i = 0; i < localStorage.length; i++) {
@@ -266,6 +267,11 @@ export default function UserNav({ user: propUser }: UserNavProps) {
           
           // Clear session storage too
           sessionStorage.clear();
+          
+          // Attempt to clear cookies
+          document.cookie.split(";").forEach(function(c) {
+            document.cookie = c.trim().split("=")[0] + "=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;";
+          });
         } catch (error) {
           console.error("UserNav: Error clearing storage:", error);
         }
@@ -273,7 +279,7 @@ export default function UserNav({ user: propUser }: UserNavProps) {
       
       // First do a client-side sign out
       try {
-        await supabase.auth.signOut();
+        await supabase.auth.signOut({ scope: 'global' });
       } catch (localError) {
         console.error("UserNav: Error during client-side signout:", localError);
       }
@@ -305,15 +311,13 @@ export default function UserNav({ user: propUser }: UserNavProps) {
       const timestamp = Date.now();
       console.log("UserNav: Redirecting to home with cache busting:", timestamp);
       
-      // Try to clear cookies by setting an expiry date in the past
-      document.cookie = "supabase-auth-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-      
-      // Redirect using hard refresh
-      window.location.href = `/?forcereload=${timestamp}`;
+      // Completely reset browser state with a hard reload by navigating to a new URL
+      // This is more aggressive than just changing window.location.href
+      window.location.replace(`/?forcereload=${timestamp}`);
     } catch (error) {
       console.error('Error during sign out:', error);
       // If there's an error, still try to refresh the page
-      window.location.href = `/?forcereload=${Date.now()}`;
+      window.location.replace(`/?forcereload=${Date.now()}`);
     }
   };
 

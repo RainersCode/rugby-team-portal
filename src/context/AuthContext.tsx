@@ -50,12 +50,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [checkingSession, setCheckingSession] = useState(true);
   const [lastRefresh, setLastRefresh] = useState<number>(0);
+  const [explicitlyLoggedOut, setExplicitlyLoggedOut] = useState(false);
   const supabase = createClientComponentClient();
   const router = useRouter();
   const pathname = usePathname();
 
   // Add debounce to prevent multiple auth checks in quick succession
   const refreshAuth = async () => {
+    // Skip refresh if user explicitly logged out in this session
+    if (explicitlyLoggedOut) {
+      console.log('AuthContext: Skipping auth refresh - user explicitly logged out');
+      return;
+    }
+  
     const now = Date.now();
     // Only refresh if it's been at least 5 seconds since the last refresh
     if (now - lastRefresh < 5000) {
@@ -234,7 +241,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
     setSession(null);
     setIsAdmin(false);
+    setExplicitlyLoggedOut(true);
+    
+    // Also try to clear supabase auth directly
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.removeItem('supabase.auth.token');
+      } catch (e) {
+        console.error('AuthContext: Error clearing storage:', e);
+      }
+    }
   };
+
+  // Reset logout flag when user navigates to sign in page
+  useEffect(() => {
+    if (pathname === '/auth/signin') {
+      console.log('AuthContext: User navigated to signin, resetting logout flag');
+      setExplicitlyLoggedOut(false);
+    }
+  }, [pathname]);
 
   // Handle logout events more explicitly
   useEffect(() => {

@@ -209,13 +209,13 @@ export function Header() {
     }
     
     return (
-      <Link 
-        href="/auth/signin" 
+      <button 
+        onClick={() => window.location.href = '/auth/signin'}
         className="inline-flex items-center justify-center rounded-none text-sm font-medium text-white bg-rugby-teal hover:bg-rugby-teal-light h-9 px-4 py-2 transition-colors"
         key={`sign-in-${authKey}`}
       >
         {translations.signIn || 'Sign In'}
-      </Link>
+      </button>
     );
   };
 
