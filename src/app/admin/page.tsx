@@ -12,13 +12,16 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useRequireAdmin } from "@/hooks/useRequireAdmin";
+import { useRouter } from "next/navigation";
 
 export default function AdminDashboard() {
-  const { isReady, isAdmin, user } = useRequireAdmin();
+  const router = useRouter();
+  const { isReady, user, isAdmin } = useRequireAdmin();
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [directVerified, setDirectVerified] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
+  const [delayedCheckActive, setDelayedCheckActive] = useState(false);
   const [bypassMode, setBypassMode] = useState(false);
   const [stats, setStats] = useState({
     players: 0,
@@ -53,225 +56,241 @@ export default function AdminDashboard() {
         window.history.replaceState({}, document.title, url.toString());
         
         // Start loading data
-        fetchStats();
+        setLoading(true); // Trigger stats fetch
       }
     }
   }, [user]);
 
-  // Direct API verification as a fallback
+  // Delayed verification mechanism
   useEffect(() => {
-    // Clear any browser cache immediately
-    if (typeof window !== 'undefined') {
-      // Clear localStorage and sessionStorage
-      try {
-        // Clear localStorage
-        localStorage.removeItem('supabase.auth.token');
+    // Only activate delayed check if normal verification is taking too long
+    if (!isReady && !directVerified && !bypassMode && user && !delayedCheckActive) {
+      console.log("AdminDashboard: Starting delayed verification sequence");
+      setDelayedCheckActive(true);
+      
+      // Schedule a series of delayed verification attempts
+      const attemptDelayedVerification = (attempt = 1) => {
+        // Exponential backoff for retry timing
+        const delay = Math.min(1000 * Math.pow(1.5, attempt), 10000); // max 10 seconds
         
-        // Find and clear any admin-related cache items
-        for (let i = 0; i < localStorage.length; i++) {
-          const key = localStorage.key(i);
-          if (key && (key.includes('admin') || key.includes('profile'))) {
-            localStorage.removeItem(key);
-          }
-        }
+        console.log(`AdminDashboard: Delayed verification attempt ${attempt} scheduled in ${delay}ms`);
         
-        // Clear session storage too
-        for (let i = 0; i < sessionStorage.length; i++) {
-          const key = sessionStorage.key(i);
-          if (key && (key.includes('admin') || key.includes('profile'))) {
-            sessionStorage.removeItem(key);
+        setTimeout(async () => {
+          // If already verified by another method, don't continue
+          if (isReady || directVerified || bypassMode) {
+            console.log("AdminDashboard: Delayed verification - another method succeeded");
+            return;
           }
-        }
-      } catch (e) {
-        console.error('Error clearing cache:', e);
-      }
-    }
-    
-    // If we've been waiting too long without isReady becoming true
-    // and we have a user, try direct API verification
-    const timeout = setTimeout(async () => {
-      if (!isReady && user && !directVerified && retryCount < 3) {
-        console.log("AdminDashboard: Performing direct admin verification via API");
-        try {
-          // Add a timestamp to bust cache
-          const timestamp = Date.now();
           
-          // Try both API endpoints, starting with the alternate one
-          let verified = false;
+          console.log(`AdminDashboard: Executing delayed verification attempt ${attempt}`);
           
-          // First try the alternate endpoint which has a different route
           try {
-            const altResponse = await fetch(`/api/admin/check?t=${timestamp}`, {
-              method: 'GET',
-              headers: {
-                'Content-Type': 'application/json',
-                'Cache-Control': 'no-cache, no-store, must-revalidate',
-                'Pragma': 'no-cache',
-                'X-No-Cache': timestamp.toString(),
-              },
-              credentials: 'include',
-              cache: 'no-store',
-              next: { revalidate: 0 }
-            });
+            // Direct database query with fresh client
+            const freshSupabase = createClientComponentClient();
+            const { data: profile, error } = await freshSupabase
+              .from('profiles')
+              .select('role')
+              .eq('id', user.id)
+              .single();
             
-            if (altResponse.ok) {
-              const altData = await altResponse.json();
-              if (altData.isAdmin) {
-                console.log("AdminDashboard: Alternate API verification succeeded");
-                setDirectVerified(true);
-                fetchStats();
-                verified = true;
-                return;
+            if (!error && profile?.role === 'admin') {
+              console.log("AdminDashboard: Delayed verification succeeded");
+              setDirectVerified(true);
+              setLoading(true); // Trigger stats fetch
+              return;
+            } else {
+              console.log("AdminDashboard: Delayed verification attempt failed", error);
+              
+              // Continue with more attempts, up to 5 total
+              if (attempt < 5) {
+                attemptDelayedVerification(attempt + 1);
               }
             }
-          } catch (altError) {
-            console.error("AdminDashboard: Alternate API error:", altError);
-          }
-          
-          // If alternate endpoint failed, try the original one
-          if (!verified) {
-            console.log("AdminDashboard: Trying original API endpoint");
+          } catch (err) {
+            console.error("AdminDashboard: Error in delayed verification:", err);
             
-            // Try using our dedicated API
-            const response = await fetch(`/api/auth/verify-admin?t=${timestamp}`, {
-              method: 'GET',
-              headers: {
-                'Content-Type': 'application/json',
-                'Cache-Control': 'no-cache, no-store, must-revalidate',
-                'Pragma': 'no-cache',
-                'X-No-Cache': timestamp.toString(),
-              },
-              credentials: 'include',
-              cache: 'no-store',
-              next: { revalidate: 0 }
-            });
-            
-            const data = await response.json();
-            
-            if (response.ok && data.isAdmin) {
-              console.log("AdminDashboard: API verification confirmed admin status");
-              setDirectVerified(true);
-              fetchStats();
-              return;
+            // Continue with more attempts, up to 5 total
+            if (attempt < 5) {
+              attemptDelayedVerification(attempt + 1);
             }
           }
+        }, delay);
+      };
+      
+      // Start the delayed verification series
+      attemptDelayedVerification();
+    }
+  }, [isReady, directVerified, bypassMode, user, delayedCheckActive]);
+
+  // Direct API verification if conditions are right
+  useEffect(() => {
+    let isMounted = true;
+    
+    const verifyAdmin = async () => {
+      // If we're already verified or in bypass mode, skip
+      if (directVerified || bypassMode) return;
+      
+      // If we're already verified by the hook, skip
+      if (isReady && isAdmin) {
+        setDirectVerified(true);
+        return;
+      }
+      
+      // Only try direct verification if the hook isn't ready yet but we have a user
+      if (!isReady && user) {
+        console.log("AdminDashboard: Starting direct API verification");
+        setDelayedCheckActive(true);
+        
+        try {
+          // Try the alternate endpoint first
+          const timestamp = Date.now();
+          const altRes = await fetch(`/api/admin/check?t=${timestamp}`);
           
-          console.log("AdminDashboard: Both API verifications failed, trying database directly");
+          if (altRes.ok) {
+            const altData = await altRes.json();
+            console.log("AdminDashboard: Alternate endpoint verification result", altData);
+            
+            if (altData.isAdmin) {
+              if (isMounted) {
+                setDirectVerified(true);
+                setRetryCount(0); // Reset retry count on success
+              }
+              return;
+            }
+          } else {
+            console.log("AdminDashboard: Alternate endpoint verification failed");
+          }
           
-          // Both API methods failed, try direct database query as last resort
-          const { data: profile, error } = await supabase
+          // If alternate fails, try the original endpoint
+          const res = await fetch(`/api/auth/verify-admin?t=${timestamp}`);
+          
+          if (res.ok) {
+            const data = await res.json();
+            console.log("AdminDashboard: Original endpoint verification result", data);
+            
+            if (data.isAdmin) {
+              if (isMounted) {
+                setDirectVerified(true);
+                setRetryCount(0); // Reset retry count on success
+              }
+              return;
+            }
+          } else {
+            console.log("AdminDashboard: Original endpoint verification failed");
+          }
+          
+          // Both API endpoints failed, try direct database check
+          console.log("AdminDashboard: API checks failed, trying direct database check");
+          
+          const supabase = createClientComponentClient();
+          const { data: profile } = await supabase
             .from('profiles')
             .select('role')
             .eq('id', user.id)
             .single();
+            
+          if (profile?.role === 'admin') {
+            console.log("AdminDashboard: Direct database check success");
+            if (isMounted) {
+              setDirectVerified(true);
+              setRetryCount(0); // Reset retry count on success
+            }
+            return;
+          }
           
-          if (!error && profile?.role === 'admin') {
-            console.log("AdminDashboard: Database verification confirmed admin status");
-            setDirectVerified(true);
-            fetchStats();
-          } else {
-            console.log("AdminDashboard: Database verification failed", error);
-            // Try a few times before giving up
+          // All verification methods failed, increment retry count
+          if (isMounted) {
+            setRetryCount(prev => prev + 1);
+            console.log(`AdminDashboard: All verification attempts failed, retry count: ${retryCount + 1}`);
+          }
+        } catch (error) {
+          console.error("AdminDashboard: Verification error:", error);
+          if (isMounted) {
             setRetryCount(prev => prev + 1);
           }
-        } catch (verifyError) {
-          console.error("AdminDashboard: Error in direct verification", verifyError);
-          setRetryCount(prev => prev + 1);
         }
       }
-    }, 2000);
+    };
     
-    return () => clearTimeout(timeout);
-  }, [isReady, user, directVerified, retryCount]);
+    // Initial verification
+    verifyAdmin();
+    
+    // Schedule retries with increasing delays if needed
+    if (!directVerified && !bypassMode && !isReady && user && retryCount > 0) {
+      const delay = Math.min(1000 * Math.pow(1.5, retryCount - 1), 10000); // max 10 seconds
+      console.log(`AdminDashboard: Scheduling retry #${retryCount} after ${delay}ms`);
+      
+      const timeoutId = setTimeout(() => {
+        if (isMounted && !directVerified && !bypassMode && !isReady && user) {
+          verifyAdmin();
+        }
+      }, delay);
+      
+      return () => clearTimeout(timeoutId);
+    }
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [isReady, isAdmin, user, directVerified, bypassMode, retryCount]);
 
   // Only fetch stats when we know the user is an admin
   useEffect(() => {
     if ((isReady && isAdmin && user) || directVerified || bypassMode) {
-      console.log("AdminDashboard: User is admin, fetching stats");
-      fetchStats();
+      console.log("AdminDashboard: User is admin, triggering stats fetch");
+      setLoading(true); // Set loading to true to trigger the fetch in the next effect
     }
   }, [isReady, isAdmin, user, directVerified, bypassMode]);
-
-  const fetchStats = async () => {
-    setFetchError(null);
-    try {
-      console.log("AdminDashboard: Fetching stats");
-      
-      // Use try-catch for each count to prevent one failure from stopping all stats
-      const fetchCount = async (table: string) => {
+  
+  // Handle the actual stats fetching based on loading state
+  useEffect(() => {
+    const fetchStats = async () => {
+      if (loading && ((isReady && isAdmin) || directVerified || bypassMode)) {
+        setFetchError(null);
+        console.log("AdminDashboard: Fetching dashboard stats");
+        
         try {
-          const { count, error } = await supabase
-            .from(table)
-            .select('*', { count: 'exact', head: true });
+          // Add timestamp to avoid caching
+          const timestamp = Date.now();
+          const response = await fetch(`/api/admin/dashboard-stats?t=${timestamp}`, {
+            method: 'GET',
+            headers: {
+              'Cache-Control': 'no-cache, no-store, must-revalidate',
+              'Pragma': 'no-cache',
+            }
+          });
           
-          if (error) {
-            console.error(`Error fetching ${table} count:`, error);
-            return 0;
+          if (!response.ok) {
+            throw new Error(`API error: ${response.status}`);
           }
           
-          return count || 0;
-        } catch (e) {
-          console.error(`Error in fetchCount for ${table}:`, e);
-          return 0;
+          const data = await response.json();
+          console.log("AdminDashboard: Stats fetched successfully", data);
+          setStats(data);
+        } catch (error) {
+          console.error("AdminDashboard: Error fetching stats:", error);
+          setFetchError("Failed to load dashboard data. Please try refreshing the page.");
+        } finally {
+          setLoading(false);
         }
-      };
-      
-      // Add a small delay before fetching to give DB connections time to establish
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Then fetch all counts in parallel
-      const [
-        playersCount,
-        articlesCount,
-        matchesCount,
-        usersCount,
-        activitiesCount,
-        exercisesCount,
-        trainingProgramsCount,
-        liveStreamsCount,
-        championshipTeamsCount,
-        sevensTeamsCount,
-        cupTeamsCount,
-      ] = await Promise.all([
-        fetchCount("players"),
-        fetchCount("articles"),
-        fetchCount("matches"),
-        fetchCount("profiles"),
-        fetchCount("activities"),
-        fetchCount("exercises"),
-        fetchCount("training_programs"),
-        fetchCount("live_streams"),
-        fetchCount("championship_teams"),
-        fetchCount("sevens_teams"),
-        fetchCount("cup_teams"),
-      ]);
+      } else if (!loading && !fetchError && Object.values(stats).every(val => val === 0)) {
+        // If we're not loading but stats are all zeros, try fetching again
+        console.log("AdminDashboard: Stats appear empty, trying to fetch again");
+        setLoading(true); // Set loading back to true to trigger a re-fetch
+      }
+    };
+    
+    fetchStats();
+  }, [isReady, isAdmin, directVerified, bypassMode, loading, stats, fetchError]);
 
-      setStats({
-        players: playersCount,
-        articles: articlesCount,
-        matches: matchesCount,
-        users: usersCount,
-        activities: activitiesCount,
-        exercises: exercisesCount,
-        training_programs: trainingProgramsCount,
-        live_streams: liveStreamsCount,
-        tournaments: championshipTeamsCount + sevensTeamsCount + cupTeamsCount,
-        championship_teams: championshipTeamsCount,
-        sevens_teams: sevensTeamsCount,
-        cup_teams: cupTeamsCount,
-      });
-      
-      console.log("AdminDashboard: Stats fetched successfully");
-    } catch (error) {
-      console.error("AdminDashboard: Error fetching stats:", error);
-      setFetchError("Failed to load dashboard data. Please try refreshing the page.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Force a refresh button 
+  // Function to force page refresh
   const handleForceRefresh = () => {
+    // Clear any potentially cached data
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('adminData');
+      sessionStorage.removeItem('adminVerified');
+    }
+    // Force full page reload
     window.location.reload();
   };
 
@@ -356,7 +375,30 @@ export default function AdminDashboard() {
       <div className="flex flex-col items-center justify-center min-h-screen">
         <Loader2 className="animate-spin h-8 w-8 text-rugby-teal mb-4" />
         <p className="text-muted-foreground">Loading admin dashboard...</p>
-        {(!isReady && !directVerified && !bypassMode) && <p className="text-sm text-muted-foreground mt-2">Verifying admin privileges...</p>}
+        {(!isReady && !directVerified && !bypassMode) && (
+          <div className="text-center max-w-md mx-auto">
+            <p className="text-sm text-muted-foreground mt-2">Verifying admin privileges...</p>
+            
+            {/* Show detailed status based on retry count */}
+            {retryCount === 0 && delayedCheckActive && (
+              <p className="text-xs text-muted-foreground mt-2">Initial verification in progress...</p>
+            )}
+            
+            {retryCount === 1 && (
+              <p className="text-xs text-muted-foreground mt-2">Retrying verification...</p>
+            )}
+            
+            {retryCount === 2 && (
+              <p className="text-xs text-muted-foreground mt-2">Verification taking longer than expected. Please be patient...</p>
+            )}
+            
+            {retryCount >= 3 && (
+              <p className="text-xs text-amber-500 mt-2">
+                Verification is taking unusually long. This might be due to database connection issues.
+              </p>
+            )}
+          </div>
+        )}
         
         {/* Add a manual refresh button if it takes too long */}
         {retryCount >= 1 && (
@@ -374,27 +416,40 @@ export default function AdminDashboard() {
             >
               Try Bypass Mode
             </a>
+            
+            {retryCount >= 3 && (
+              <div className="mt-6 border border-amber-200 bg-amber-50 p-4 rounded-md max-w-md">
+                <h3 className="text-amber-800 font-medium mb-2">Troubleshooting Tips:</h3>
+                <ul className="text-xs text-amber-700 list-disc pl-4 space-y-2">
+                  <li>Your session might have expired. Try logging out and back in.</li>
+                  <li>Network issues might be affecting database connections.</li>
+                  <li>Click "Force Refresh" to reload the entire page.</li>
+                  <li>Try "Bypass Mode" which uses an alternative verification method.</li>
+                  <li>If problems persist, please contact the administrator.</li>
+                </ul>
+              </div>
+            )}
           </div>
         )}
       </div>
     );
   }
   
-  // Show error state if there was a problem fetching stats
+  // Show error state if we failed to fetch stats
   if (fetchError) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Admin Dashboard</h1>
-          <p className="text-red-500 mt-4">{fetchError}</p>
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <div className="text-center max-w-md p-6 bg-red-50 rounded-lg border border-red-100">
+          <h2 className="text-xl font-semibold text-red-800 mb-2">Error Loading Dashboard</h2>
+          <p className="text-red-600 mb-4">{fetchError}</p>
           <button 
             onClick={() => {
-              setLoading(true);
-              fetchStats();
+              setFetchError(null);
+              setLoading(true); // This will trigger the stats fetch in the useEffect
             }}
-            className="mt-4 px-4 py-2 bg-rugby-teal text-white rounded-md hover:bg-rugby-teal/90 transition-colors"
+            className="px-4 py-2 bg-rugby-teal text-white rounded-md hover:bg-rugby-teal/90 transition-colors"
           >
-            Try Again
+            Retry
           </button>
         </div>
       </div>

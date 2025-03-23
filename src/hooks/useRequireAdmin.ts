@@ -1,19 +1,31 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 
 export function useRequireAdmin() {
   const { user, isAdmin, isLoading, isAdminVerifying, refreshAuth } = useAuth();
   const [isReady, setIsReady] = useState(false);
   const [adminChecked, setAdminChecked] = useState(false);
   const [verificationAttempted, setVerificationAttempted] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
+  const delayedCheckRef = useRef<NodeJS.Timeout | null>(null);
   const router = useRouter();
+
+  // Cleanup function to clear any active timeout
+  useEffect(() => {
+    return () => {
+      if (delayedCheckRef.current) {
+        clearTimeout(delayedCheckRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const checkAdmin = async () => {
-      console.log("useRequireAdmin: Checking admin status");
+      console.log("useRequireAdmin: Checking admin status", { retryCount });
       
       // If we're still loading auth state, wait
       if (isLoading) {
@@ -59,15 +71,56 @@ export function useRequireAdmin() {
       if (isAdmin) {
         console.log("useRequireAdmin: User is admin, allowing access");
         setIsReady(true);
+      } else if (retryCount < 5) {
+        // Not yet admin, but we still have retries left
+        console.log(`useRequireAdmin: Not yet admin, scheduling retry #${retryCount + 1}`);
+        
+        // Schedule a delayed retry with increasing delay
+        const delay = Math.min(1000 * Math.pow(1.5, retryCount), 8000); // max 8 seconds
+        
+        // Clear any existing timeout
+        if (delayedCheckRef.current) {
+          clearTimeout(delayedCheckRef.current);
+        }
+        
+        delayedCheckRef.current = setTimeout(async () => {
+          console.log(`useRequireAdmin: Executing delayed admin check #${retryCount + 1}`);
+          
+          try {
+            // Try direct database query as a more reliable check
+            const supabase = createClientComponentClient();
+            const { data: profile, error } = await supabase
+              .from('profiles')
+              .select('role')
+              .eq('id', user.id)
+              .single();
+              
+            if (!error && profile?.role === 'admin') {
+              console.log("useRequireAdmin: Delayed check found admin status");
+              setIsReady(true);
+              return;
+            }
+            
+            // Admin check failed, increment retry counter
+            console.log("useRequireAdmin: Delayed check failed, will retry");
+            setRetryCount(prev => prev + 1);
+            
+            // Also try refreshing auth again
+            await refreshAuth();
+          } catch (error) {
+            console.error("useRequireAdmin: Error in delayed check", error);
+            setRetryCount(prev => prev + 1);
+          }
+        }, delay);
       } else {
-        // User is not admin, redirect to home
-        console.log("useRequireAdmin: User is not admin, redirecting to home");
+        // We've exhausted our retries, redirect to home
+        console.log("useRequireAdmin: Exhausted retries, user is not admin");
         router.push('/');
       }
     };
     
     checkAdmin();
-  }, [user, isAdmin, isLoading, isAdminVerifying, router, adminChecked, refreshAuth, verificationAttempted]);
+  }, [user, isAdmin, isLoading, isAdminVerifying, router, adminChecked, refreshAuth, verificationAttempted, retryCount]);
   
   return { isReady, isAdmin, user };
 } 
