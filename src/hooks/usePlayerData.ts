@@ -27,12 +27,13 @@ export function usePlayerData() {
     setIsLoading(true);
     setError(null);
     try {
-      // Fetch players from our API
-      const response = await fetch('/api/admin/data?table=players');
+      // Fetch players from our API - include a timestamp to avoid caching
+      const timestamp = new Date().getTime();
+      const response = await fetch(`/api/admin/data?table=players&_t=${timestamp}`);
       
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to fetch players');
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        throw new Error(errorData.error || `Failed to fetch players: ${response.status}`);
       }
       
       const data = await response.json();
@@ -51,7 +52,9 @@ export function usePlayerData() {
 
   const createPlayer = async (player: Omit<PlayerType, 'id'>) => {
     setIsLoading(true);
+    setError(null);
     try {
+      console.log('Creating player with data:', player);
       const response = await fetch('/api/admin/data?table=players', {
         method: 'POST',
         headers: {
@@ -60,15 +63,26 @@ export function usePlayerData() {
         body: JSON.stringify(player),
       });
 
+      // Log full response for debugging
+      const responseText = await response.text();
+      console.log(`API Response (${response.status}):`, responseText);
+      
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to create player');
+        let errorMessage = 'Failed to create player';
+        try {
+          const errorData = JSON.parse(responseText);
+          errorMessage = errorData.error || errorMessage;
+        } catch (e) {
+          console.error('Failed to parse error response:', e);
+        }
+        throw new Error(errorMessage);
       }
 
       await fetchData();
       return true;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create player');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to create player';
+      setError(errorMessage);
       console.error('Error creating player:', err);
       return false;
     } finally {
@@ -78,7 +92,9 @@ export function usePlayerData() {
 
   const updatePlayer = async (id: string, player: Partial<PlayerType>) => {
     setIsLoading(true);
+    setError(null);
     try {
+      console.log('Updating player with ID and data:', id, player);
       const response = await fetch(`/api/admin/data?table=players&update=true`, {
         method: 'POST',
         headers: {
@@ -87,15 +103,26 @@ export function usePlayerData() {
         body: JSON.stringify({ id, ...player }),
       });
 
+      // Log full response for debugging
+      const responseText = await response.text();
+      console.log(`API Response (${response.status}):`, responseText);
+      
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to update player');
+        let errorMessage = 'Failed to update player';
+        try {
+          const errorData = JSON.parse(responseText);
+          errorMessage = errorData.error || errorMessage;
+        } catch (e) {
+          console.error('Failed to parse error response:', e);
+        }
+        throw new Error(errorMessage);
       }
 
       await fetchData();
       return true;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to update player');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update player';
+      setError(errorMessage);
       console.error('Error updating player:', err);
       return false;
     } finally {
@@ -105,20 +132,33 @@ export function usePlayerData() {
 
   const deletePlayer = async (id: string) => {
     setIsLoading(true);
+    setError(null);
     try {
+      console.log('Deleting player with ID:', id);
       const response = await fetch(`/api/admin/data?table=players&id=${id}`, {
         method: 'DELETE',
       });
 
+      // Log full response for debugging
+      const responseText = await response.text();
+      console.log(`API Response (${response.status}):`, responseText);
+      
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to delete player');
+        let errorMessage = 'Failed to delete player';
+        try {
+          const errorData = JSON.parse(responseText);
+          errorMessage = errorData.error || errorMessage;
+        } catch (e) {
+          console.error('Failed to parse error response:', e);
+        }
+        throw new Error(errorMessage);
       }
 
       await fetchData();
       return true;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete player');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to delete player';
+      setError(errorMessage);
       console.error('Error deleting player:', err);
       return false;
     } finally {

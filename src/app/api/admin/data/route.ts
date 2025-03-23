@@ -6,7 +6,14 @@ export const dynamic = 'force-dynamic';
 export const fetchCache = 'force-no-store';
 export const revalidate = 0;
 
+// Add extra logging for API calls
+const logApiCall = (method: string, table: string, id?: string) => {
+  console.log(`[${new Date().toISOString()}] ${method} request for ${table}${id ? ` (ID: ${id})` : ''}`);
+};
+
 export async function GET(request: Request) {
+  logApiCall('GET', new URL(request.url).searchParams.get('table') || 'unknown');
+  
   try {
     const url = new URL(request.url);
     const table = url.searchParams.get('table');
@@ -107,6 +114,8 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  logApiCall('POST', new URL(request.url).searchParams.get('table') || 'unknown');
+  
   try {
     const url = new URL(request.url);
     const table = url.searchParams.get('table');
@@ -124,6 +133,7 @@ export async function POST(request: Request) {
     }
     
     console.log(`Admin Data API: ${isUpdate ? 'Updating' : 'Creating'} data in table ${table}`);
+    console.log('Request data:', JSON.stringify(requestData, null, 2));
     
     // Get cookies for the Supabase client
     const cookieStore = cookies();
@@ -149,18 +159,50 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Not authorized' }, { status: 403 });
     }
     
+    // Special handling for players table to ensure proper JSON structure
+    let dataToUpsert = requestData;
+    if (table === 'players' && typeof requestData === 'object') {
+      // Make sure stats and social are proper JSON objects
+      if (requestData.stats && typeof requestData.stats !== 'object') {
+        try {
+          dataToUpsert.stats = JSON.parse(requestData.stats);
+        } catch (e) {
+          console.error('Failed to parse stats JSON:', e);
+          return NextResponse.json({ error: 'Invalid stats data format' }, { status: 400 });
+        }
+      }
+      
+      if (requestData.social && typeof requestData.social !== 'object') {
+        try {
+          dataToUpsert.social = JSON.parse(requestData.social);
+        } catch (e) {
+          console.error('Failed to parse social JSON:', e);
+          return NextResponse.json({ error: 'Invalid social data format' }, { status: 400 });
+        }
+      }
+      
+      if (requestData.achievements && !Array.isArray(requestData.achievements)) {
+        try {
+          dataToUpsert.achievements = JSON.parse(requestData.achievements);
+        } catch (e) {
+          console.error('Failed to parse achievements JSON:', e);
+          return NextResponse.json({ error: 'Invalid achievements data format' }, { status: 400 });
+        }
+      }
+    }
+    
     // Perform the operation based on whether it's an update or create
     let result;
     if (isUpdate) {
       // For updates, need an ID in the data
-      if (!requestData.id) {
+      if (!dataToUpsert.id) {
         return NextResponse.json({ error: 'Missing ID for update operation' }, { status: 400 });
       }
       
       const { data, error } = await supabase
         .from(table)
-        .update(requestData)
-        .eq('id', requestData.id)
+        .update(dataToUpsert)
+        .eq('id', dataToUpsert.id)
         .select();
       
       if (error) {
@@ -173,7 +215,7 @@ export async function POST(request: Request) {
       // For create operations
       const { data, error } = await supabase
         .from(table)
-        .insert(requestData)
+        .insert(dataToUpsert)
         .select();
       
       if (error) {
@@ -201,6 +243,8 @@ export async function DELETE(request: Request) {
     const url = new URL(request.url);
     const table = url.searchParams.get('table');
     const id = url.searchParams.get('id');
+    
+    logApiCall('DELETE', table || 'unknown', id || undefined);
     
     if (!table) {
       return NextResponse.json({ error: 'Missing table parameter' }, { status: 400 });
@@ -235,6 +279,9 @@ export async function DELETE(request: Request) {
       console.error('Admin Data API: Not authorized');
       return NextResponse.json({ error: 'Not authorized' }, { status: 403 });
     }
+    
+    // For players table, we should handle image deletion in the component, not here
+    // This just deletes the database record
     
     // Delete the record
     const { error } = await supabase

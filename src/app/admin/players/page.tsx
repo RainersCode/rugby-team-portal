@@ -59,6 +59,7 @@ function PlayersContent() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [bypassMode, setBypassMode] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
   
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -167,16 +168,19 @@ function PlayersContent() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError(null);
 
     try {
       // Validate that we have either an image file or an existing image URL
       if (!imageFile && !formData.image) {
-        throw new Error("Please upload a player image");
+        setFormError("Please upload a player image");
+        return;
       }
 
       // Validate position is selected
       if (!formData.position) {
-        throw new Error("Please select a position");
+        setFormError("Please select a position");
+        return;
       }
 
       let imageUrl = formData.image;
@@ -187,7 +191,8 @@ function PlayersContent() {
           imageUrl = publicUrl;
         } catch (uploadError) {
           console.error("Image upload error:", uploadError);
-          throw new Error("Failed to upload image. Please try again.");
+          setFormError("Failed to upload image. Please try again.");
+          return;
         }
       }
 
@@ -214,19 +219,29 @@ function PlayersContent() {
         achievements: achievementsArray,
       };
 
+      console.log("Player data to submit:", playerData);
+
+      let success = false;
       if (selectedPlayer) {
         // If we're editing an existing player
-        await updatePlayer(selectedPlayer.id, playerData);
+        console.log(`Updating player with ID: ${selectedPlayer.id}`);
+        success = await updatePlayer(selectedPlayer.id, playerData);
       } else {
         // If we're creating a new player
-        await createPlayer(playerData);
+        console.log("Creating new player");
+        success = await createPlayer(playerData);
       }
 
-      // Reset form state
-      resetForm();
+      console.log("Operation result:", success ? "Success" : "Failed");
+      if (success) {
+        // Reset form state
+        resetForm();
+      } else {
+        setFormError("Operation failed. Check console for details.");
+      }
     } catch (error) {
       console.error("Error submitting player:", error);
-      alert(error instanceof Error ? error.message : "An error occurred");
+      setFormError(error instanceof Error ? error.message : "An error occurred");
     }
   };
 
@@ -257,16 +272,24 @@ function PlayersContent() {
     
     try {
       // Find the player to get the image URL
+      console.log(`Attempting to delete player with ID: ${confirmDelete}`);
       const playerToDelete = players.find(p => p.id === confirmDelete);
       
       if (playerToDelete?.image) {
         // Delete the image first
+        console.log(`Deleting image: ${playerToDelete.image}`);
         await deleteImage(playerToDelete.image);
       }
       
       // Delete the player record
-      await deletePlayer(confirmDelete);
-      setConfirmDelete(null);
+      const success = await deletePlayer(confirmDelete);
+      console.log("Delete operation result:", success ? "Success" : "Failed");
+      
+      if (success) {
+        setConfirmDelete(null);
+      } else {
+        throw new Error("Failed to delete player. Check console for details.");
+      }
     } catch (error) {
       console.error("Error deleting player:", error);
       alert(error instanceof Error ? error.message : "An error occurred while deleting the player");
@@ -331,11 +354,16 @@ function PlayersContent() {
             >
               <div className="aspect-[3/4] relative">
                 <Image
-                  src={player.image || "/images/player-placeholder.jpg"}
+                  src={player.image || "/images/training-hero.jpg"}
                   alt={player.name}
                   fill
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   className="object-cover"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.onerror = null;
+                    target.src = "/images/training-hero.jpg";
+                  }}
                 />
               </div>
               <div className="p-4">
@@ -429,11 +457,16 @@ function PlayersContent() {
             >
               <div className="aspect-[3/4] relative">
                 <Image
-                  src={player.image || "/images/player-placeholder.jpg"}
+                  src={player.image || "/images/training-hero.jpg"}
                   alt={player.name}
                   fill
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   className="object-cover"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.onerror = null;
+                    target.src = "/images/training-hero.jpg";
+                  }}
                 />
               </div>
               <div className="p-4">
@@ -474,6 +507,11 @@ function PlayersContent() {
               {selectedPlayer ? "Edit Player" : "Add New Player"}
             </DialogTitle>
           </DialogHeader>
+          {formError && (
+            <div className="mt-2 p-3 bg-red-50 text-red-700 rounded-md text-sm">
+              {formError}
+            </div>
+          )}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
