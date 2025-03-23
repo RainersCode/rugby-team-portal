@@ -177,13 +177,14 @@ export function Header() {
     }
     
     if (user) {
-      return <UserNav />;
+      return <UserNav key={`user-${user.id}-${Date.now()}`} />;
     }
     
     return (
       <Link 
         href="/auth/signin" 
         className="inline-flex items-center justify-center rounded-none text-sm font-medium text-white bg-rugby-teal hover:bg-rugby-teal-light h-9 px-4 py-2 transition-colors"
+        key="sign-in-button"
       >
         {translations.signIn || 'Sign In'}
       </Link>

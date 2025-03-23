@@ -251,6 +251,13 @@ export default function UserNav({ user: propUser }: UserNavProps) {
         }
       }
       
+      // First do a client-side sign out
+      try {
+        await supabase.auth.signOut();
+      } catch (localError) {
+        console.error("UserNav: Error during client-side signout:", localError);
+      }
+      
       // Call our API endpoint with cache-busting parameter
       const response = await fetch(`/api/auth/signout?_=${Date.now()}`, {
         method: 'POST',
@@ -270,12 +277,12 @@ export default function UserNav({ user: propUser }: UserNavProps) {
       setInitials("");
       setDisplayName("");
       
-      // Redirect to home page and force a full page reload
-      window.location.href = '/?_=' + Date.now();
+      // Redirect to home page and force a full page reload with cache busting
+      window.location.href = '/?nocache=' + Date.now();
     } catch (error) {
       console.error('Error during sign out:', error);
       // If there's an error, still try to refresh the page
-      window.location.href = '/?_=' + Date.now();
+      window.location.href = '/?nocache=' + Date.now();
     }
   };
 

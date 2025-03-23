@@ -273,6 +273,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [supabase, router, pathname]);
 
+  // Add window focus event to check auth status when tab regains focus
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      console.log('AuthContext: Setting up window focus handler');
+      
+      const handleFocus = () => {
+        console.log('AuthContext: Window focused, checking auth status');
+        // Check if session is present in local storage to avoid unnecessary checks
+        const hasSessionInStorage = localStorage.getItem('supabase.auth.token') !== null;
+        
+        // Only refresh auth if we think we might be authenticated or we've explicitly set user to null
+        if (hasSessionInStorage || user === null) {
+          // Add a small delay to ensure any pending auth operations complete
+          setTimeout(() => {
+            refreshAuth();
+          }, 100);
+        }
+      };
+      
+      window.addEventListener('focus', handleFocus);
+      
+      return () => {
+        window.removeEventListener('focus', handleFocus);
+      };
+    }
+  }, [user]);
+
   // Periodically refresh token in the background
   useEffect(() => {
     console.log('AuthContext: Setting up refresh interval');
