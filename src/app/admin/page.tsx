@@ -257,31 +257,45 @@ export default function AdminDashboard() {
             headers: {
               'Cache-Control': 'no-cache, no-store, must-revalidate',
               'Pragma': 'no-cache',
-            }
+            },
+            cache: 'no-store',
           });
           
           if (!response.ok) {
-            throw new Error(`API error: ${response.status}`);
+            const errorData = await response.json().catch(() => ({}));
+            const errorMessage = errorData.error || `Server error (${response.status})`;
+            throw new Error(errorMessage);
           }
           
           const data = await response.json();
           console.log("AdminDashboard: Stats fetched successfully", data);
-          setStats(data);
+          
+          // Check if data is valid and not empty
+          if (data && typeof data === 'object') {
+            // If all values are 0, it might be a sign of database issues
+            const allZeros = Object.values(data).every(val => val === 0);
+            if (allZeros) {
+              console.warn("AdminDashboard: All stats are zero, may indicate an issue");
+            }
+            setStats(data);
+          } else {
+            throw new Error("Invalid data format received from server");
+          }
         } catch (error) {
           console.error("AdminDashboard: Error fetching stats:", error);
-          setFetchError("Failed to load dashboard data. Please try refreshing the page.");
+          setFetchError(
+            error instanceof Error 
+              ? `Failed to load dashboard data: ${error.message}` 
+              : "Failed to load dashboard data. Please try refreshing the page."
+          );
         } finally {
           setLoading(false);
         }
-      } else if (!loading && !fetchError && Object.values(stats).every(val => val === 0)) {
-        // If we're not loading but stats are all zeros, try fetching again
-        console.log("AdminDashboard: Stats appear empty, trying to fetch again");
-        setLoading(true); // Set loading back to true to trigger a re-fetch
       }
     };
     
     fetchStats();
-  }, [isReady, isAdmin, directVerified, bypassMode, loading, stats, fetchError]);
+  }, [isReady, isAdmin, directVerified, bypassMode, loading]);
 
   // Function to force page refresh
   const handleForceRefresh = () => {
@@ -300,7 +314,7 @@ export default function AdminDashboard() {
       description: "Manage team players, positions, and statistics",
       icon: Users,
       href: "/admin/players",
-      count: stats.players,
+      countKey: "players",
       color: "text-blue-500",
     },
     {
@@ -308,7 +322,7 @@ export default function AdminDashboard() {
       description: "Publish and manage news articles",
       icon: FileText,
       href: "/admin/articles",
-      count: stats.articles,
+      countKey: "articles",
       color: "text-green-500",
     },
     {
@@ -316,7 +330,7 @@ export default function AdminDashboard() {
       description: "Schedule and manage team matches",
       icon: Calendar,
       href: "/admin/matches",
-      count: stats.matches,
+      countKey: "matches",
       color: "text-orange-500",
     },
     {
@@ -324,23 +338,23 @@ export default function AdminDashboard() {
       description: "Manage team activities and events",
       icon: CalendarDays,
       href: "/admin/activities",
-      count: stats.activities,
+      countKey: "activities",
       color: "text-purple-500",
     },
     {
       title: "Training",
-      description: `Manage exercises (${stats.exercises}) and programs (${stats.training_programs})`,
+      description: `Manage exercises (${stats.exercises || 0}) and programs (${stats.training_programs || 0})`,
       icon: Dumbbell,
       href: "/admin/training",
-      count: stats.exercises + stats.training_programs,
+      countKey: "training_programs",
       color: "text-rose-500",
     },
     {
       title: "Tournaments",
-      description: `Championship (${stats.championship_teams}), Sevens (${stats.sevens_teams}), Cup (${stats.cup_teams})`,
+      description: `Championship (${stats.championship_teams || 0}), Sevens (${stats.sevens_teams || 0}), Cup (${stats.cup_teams || 0})`,
       icon: Trophy,
       href: "/admin/tournaments",
-      count: stats.tournaments,
+      countKey: "tournaments",
       color: "text-yellow-500",
     },
     {
@@ -348,7 +362,7 @@ export default function AdminDashboard() {
       description: "Manage photo galleries",
       icon: ImageIcon,
       href: "/admin/gallery",
-      count: 0,
+      countKey: "gallery",
       color: "text-cyan-500",
     },
     {
@@ -356,7 +370,7 @@ export default function AdminDashboard() {
       description: "Manage live streams and broadcasts",
       icon: Play,
       href: "/admin/live",
-      count: stats.live_streams,
+      countKey: "live_streams",
       color: "text-red-500",
     },
     {
@@ -364,7 +378,7 @@ export default function AdminDashboard() {
       description: "Manage user accounts and roles",
       icon: Users,
       href: "/admin/users",
-      count: stats.users,
+      countKey: "users",
       color: "text-indigo-500",
     },
   ];
@@ -442,15 +456,29 @@ export default function AdminDashboard() {
         <div className="text-center max-w-md p-6 bg-red-50 rounded-lg border border-red-100">
           <h2 className="text-xl font-semibold text-red-800 mb-2">Error Loading Dashboard</h2>
           <p className="text-red-600 mb-4">{fetchError}</p>
-          <button 
-            onClick={() => {
-              setFetchError(null);
-              setLoading(true); // This will trigger the stats fetch in the useEffect
-            }}
-            className="px-4 py-2 bg-rugby-teal text-white rounded-md hover:bg-rugby-teal/90 transition-colors"
+          <div className="flex gap-3 justify-center">
+            <button 
+              onClick={() => {
+                setFetchError(null);
+                setLoading(true); // This will trigger the stats fetch in the useEffect
+              }}
+              className="px-4 py-2 bg-rugby-teal text-white rounded-md hover:bg-rugby-teal/90 transition-colors"
+            >
+              Retry
+            </button>
+            <button 
+              onClick={handleForceRefresh}
+              className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors"
+            >
+              Reload Page
+            </button>
+          </div>
+          <a 
+            href="/admin?bypass=admin" 
+            className="text-sm text-blue-500 hover:underline block mt-4"
           >
-            Retry
-          </button>
+            Try Bypass Mode
+          </a>
         </div>
       </div>
     );
@@ -458,12 +486,36 @@ export default function AdminDashboard() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Admin Dashboard</h1>
-        <p className="text-muted-foreground">
-          Welcome to the admin dashboard. Manage your team, content, and users
-          from here.
-        </p>
+      <div className="mb-8 flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold mb-2">Admin Dashboard</h1>
+          <p className="text-muted-foreground">
+            Welcome to the admin dashboard. Manage your team, content, and users
+            from here.
+          </p>
+        </div>
+        <button
+          onClick={() => setLoading(true)}
+          className="px-4 py-2 bg-rugby-teal text-white rounded-md hover:bg-rugby-teal/90 transition-colors flex items-center gap-2"
+          disabled={loading}
+        >
+          {loading ? (
+            <>
+              <Loader2 className="animate-spin h-4 w-4" />
+              <span>Refreshing...</span>
+            </>
+          ) : (
+            <>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+                <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path>
+                <path d="M21 3v5h-5"></path>
+                <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path>
+                <path d="M3 21v-5h5"></path>
+              </svg>
+              <span>Refresh</span>
+            </>
+          )}
+        </button>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -477,7 +529,9 @@ export default function AdminDashboard() {
                 <section.icon className={`h-4 w-4 ${section.color}`} />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold mb-1">{section.count}</div>
+                <div className="text-2xl font-bold mb-1">
+                  {section.countKey in stats ? stats[section.countKey as keyof typeof stats] : 0}
+                </div>
                 <p className="text-xs text-muted-foreground">
                   {section.description}
                 </p>
